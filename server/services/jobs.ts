@@ -36,25 +36,6 @@ export function updateJobStatus({
 }) {
   const job = jobs.get(id);
 
-  if (job) {
-    job.status = status;
-    if (status === "running" && !job.startedAt) {
-      job.startedAt = Date.now();
-    } else if (
-      ["completed", "failed", "cancelled"].includes(status) &&
-      !job.completedAt
-    ) {
-      job.completedAt = Date.now();
-    }
-    if (status === "completed") {
-      job.result = data;
-      jobEvents.emit("complete", { jobId: id, data });
-    } else if (status === "failed") {
-      job.result = data;
-      jobEvents.emit("error", { jobId: id, data });
-    }
-  }
-
   if (status === "running" && process) {
     activeProcesses.set(id, process);
   }
@@ -71,11 +52,21 @@ export function updateJobStatus({
       activeProcesses.delete(id);
     }
   }
-  if (job && status === "cancelled") {
-    job.result = {
-      message: `Job ${id} has been cancelled`,
-    };
-    jobEvents.emit("error", { jobId: id, data: job.result });
+
+  if (!job) return;
+
+  job.status = status;
+  const finished = ["completed", "failed", "cancelled"];
+  if (status === "cancelled") {
+    data = { message: `Job ${id} has been cancelled` };
+  }
+  if (finished.includes(status)) {
+    job.completedAt = Date.now();
+    job.result = data;
+    const event = status === "completed" ? "complete" : "error";
+    if (jobEvents.listenerCount(event) > 0) {
+      jobEvents.emit(event, { jobId: id, data });
+    }
   }
 }
 
