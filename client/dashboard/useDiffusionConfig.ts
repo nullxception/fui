@@ -40,6 +40,6 @@ export function useDiffusionConfig() {
     unset: (key: keyof DiffusionParams) =>
       mutation.mutate({ ...params, [key]: undefined }),
     updateAll: (partial: Partial<DiffusionParams>) =>
-      mutation.mutate({ ...params, ...partial }),
+      mutation.mutateAsync({ ...params, ...partial }),
   };
 }
