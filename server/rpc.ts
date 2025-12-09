@@ -18,6 +18,7 @@ import { listImages, removeImages } from "./api/gallery";
 import system from "./api/system";
 import { stopJob } from "./services/jobs";
 import { diffusionParamsSchema } from "./types/diffusionparams";
+import { jobsTypeSchema } from "./types/jobs";
 import { convertParamsSchema } from "./types/quantization";
 import { triggerWordSchema } from "./types/triggerword";
 import { appSettingsSchema } from "./types/userconfig";
@@ -47,7 +48,9 @@ export const router = t.router({
   listImages: t.procedure
     .input(z.object({ limit: z.number(), cursor: z.number().optional() }))
     .query((opts) => listImages(opts.input.limit, opts.input.cursor)),
-  listJobs: t.procedure.query(diffusionJobs),
+  listJobs: t.procedure
+    .input(jobsTypeSchema)
+    .query((opts) => diffusionJobs(opts.input)),
   removeImage: t.procedure
     .input(z.array(z.string()))
     .mutation((opts) => removeImages(opts.input)),

@@ -20,7 +20,7 @@ const TextToImage = forwardRef<HTMLDivElement, HTMLMotionProps<"div">>(
     const store = useDiffusionConfig();
     const rpc = useTRPC();
     const { data: models } = useQuery(rpc.listModels.queryOptions());
-    const { data: jobs } = useQuery(rpc.listJobs.queryOptions());
+    const { data: jobs } = useQuery(rpc.listJobs.queryOptions("txt2img"));
     const diffusionStart = useMutation(
       rpc.startDiffusion.mutationOptions({
         onError() {

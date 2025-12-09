@@ -1,14 +1,16 @@
 import { randomUUIDv7, type Subprocess } from "bun";
 import { EventEmitter } from "events";
 import type { DiffusionResult, Job, JobStatus, LogData } from "server/types";
+import type { JobType } from "server/types/jobs";
 
 const jobEvents = new EventEmitter();
 const activeProcesses = new Map<string, Subprocess>();
 const jobs = new Map<string, Job>();
 
-export function createJob(id?: string) {
+export function createJob(type: JobType, id?: string) {
   const job: Job = {
     id: id ?? randomUUIDv7(),
+    type,
     status: "pending",
     createdAt: Date.now(),
     logs: [],
@@ -70,18 +72,18 @@ export function updateJobStatus({
   }
 }
 
-export function addJobLog(id: string, log: LogData) {
+export function addJobLog(id: string, type: JobType, log: LogData) {
   let job = jobs.get(id);
   if (!job) {
-    job = createJob(id);
+    job = createJob(type, id);
   }
 
   job?.logs.push(log);
   jobEvents.emit("log", { jobId: id, log });
 }
 
-export function getAllJobs(): Job[] {
-  return Array.from(jobs.values());
+export function getAllJobs(type: JobType): Job[] {
+  return Array.from(jobs.values().filter((job) => job.type === type));
 }
 
 export function deleteJobByResultFile(filename: string) {

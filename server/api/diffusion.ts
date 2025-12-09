@@ -20,6 +20,7 @@ import {
   withJobEvents,
 } from "server/services/jobs";
 import type { DiffusionParams, DiffusionResult, Models } from "server/types";
+import type { JobType } from "server/types/jobs";
 
 function putModelFiles(
   file: string,
@@ -85,7 +86,7 @@ export async function diffusionStart(params: DiffusionParams) {
       });
     }
 
-    const job = createJob();
+    const job = createJob("txt2img");
     startDiffusion(job.id, params);
     return { jobId: job.id };
   } catch (error) {
@@ -204,6 +205,6 @@ export const diffusionProgress: Bun.Serve.Handler<
   });
 };
 
-export async function diffusionJobs() {
-  return getAllJobs().map((job) => ({ ...job, logs: [], params: {} }));
+export async function diffusionJobs(input: JobType) {
+  return getAllJobs(input).map((job) => ({ ...job, logs: [], params: {} }));
 }

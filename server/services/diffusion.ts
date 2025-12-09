@@ -253,7 +253,7 @@ export async function startDiffusion(jobId: string, params: DiffusionParams) {
     } else {
       console.log(message);
     }
-    addJobLog(jobId, { type, message: message });
+    addJobLog(jobId, "txt2img", { type, message: message });
   };
   const exec = await resolveSD();
   sendLog(
