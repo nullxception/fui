@@ -21,7 +21,14 @@ import {
 } from "server/services/jobs";
 import type { DiffusionParams, DiffusionResult, Models } from "server/types";
 
-function putModelFiles(file: string, subdir: string, target: string[]) {
+function putModelFiles(
+  file: string,
+  subdir: string,
+  target: string[],
+  match?: RegExp,
+) {
+  const ext = match ? match : /.*\.(ckpt|safetensors|sft|pth|gguf)$/;
+  if (!ext.test(file)) return;
   if (file.startsWith(subdir + path.sep)) {
     target.push(path.relative(subdir, file));
   }
