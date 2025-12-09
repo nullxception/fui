@@ -23,6 +23,7 @@ import { useTRPC } from "client/query";
 import { motion, type HTMLMotionProps } from "framer-motion";
 import { AlertTriangleIcon } from "lucide-react";
 import { useState } from "react";
+import { GGML_WEIGHTS_TYPE } from "server/types";
 
 export default function Converter(props: HTMLMotionProps<"div">) {
   const rpc = useTRPC();
@@ -107,7 +108,7 @@ export default function Converter(props: HTMLMotionProps<"div">) {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  {["q8_0", "q5_1", "q5_0", "q4_1", "q4_0"].map((t) => (
+                  {GGML_WEIGHTS_TYPE.map((t) => (
                     <SelectItem key={t} value={t}>
                       {t}
                     </SelectItem>
