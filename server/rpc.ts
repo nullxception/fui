@@ -7,6 +7,7 @@ import {
   saveDiffusionParams,
   saveTriggerWords,
 } from "./api/config";
+import { convertWeights } from "./api/converter";
 import {
   diffusionJobs,
   diffusionStart,
@@ -15,7 +16,12 @@ import {
 import { listImages, removeImages } from "./api/gallery";
 import system from "./api/system";
 import { stopJob } from "./services/jobs";
-import type { AppSettings, DiffusionParams, TriggerWord } from "./types";
+import type {
+  AppSettings,
+  ConvertParams,
+  DiffusionParams,
+  TriggerWord,
+} from "./types";
 
 const t = initTRPC.create();
 
@@ -55,6 +61,9 @@ export const router = t.router({
   stopDiffusion: t.procedure
     .input((it) => it as string)
     .mutation((opts) => stopJob(opts.input)),
+  convertModel: t.procedure
+    .input((it) => it as ConvertParams)
+    .mutation((opts) => convertWeights(opts.input)),
 });
 
 export type AppRouter = typeof router;

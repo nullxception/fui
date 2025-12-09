@@ -33,6 +33,13 @@ export function Header() {
             >
               Gallery
             </Button>
+            <Button
+              variant={location.startsWith("/converter") ? "default" : "ghost"}
+              size="sm"
+              onClick={() => navigate("/converter")}
+            >
+              Converter
+            </Button>
           </div>
 
           <Button

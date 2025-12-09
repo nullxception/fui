@@ -81,7 +81,7 @@ const filterLogs = (message: string) => {
     .replaceAll(RegExp(r, "g"), "$1");
 };
 
-async function resolveSD() {
+export async function resolveSD() {
   // sd at project root (./bin/sd, or ./sd) or from $PATH
   const project_sd = [
     path.join(ROOT_DIR, "bin", "sd"),

@@ -20,6 +20,12 @@ export type {
   UserConfig,
 };
 
+export interface ConvertParams {
+  model: string;
+  output: string;
+  type: string;
+}
+
 export type JobStatus =
   | "pending"
   | "running"

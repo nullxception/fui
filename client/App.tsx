@@ -15,6 +15,7 @@ import { BackgroundLayer } from "./components/BackgroundLayer";
 import { Header } from "./components/Header";
 import { MobileNav } from "./components/MobileNav";
 import { ThemeProvider } from "./components/theme-provider";
+import Converter from "./converter/Converter";
 import TextToImage from "./dashboard";
 import Gallery from "./gallery";
 import "./index.css";
@@ -31,10 +32,12 @@ const AnimationSettings = {
 function Routes() {
   const [isSettings] = useRoute("/settings");
   const [isGallery] = useRoute("/gallery/*?");
+  const [isConverter] = useRoute("/converter");
   const [isIndex] = useRoute("/");
   return (
     <AnimatePresence>
       {isGallery && <Gallery {...AnimationSettings} />}
+      {isConverter && <Converter {...AnimationSettings} />}
       {isIndex && <TextToImage {...AnimationSettings} />}
       {isSettings && <Settings {...AnimationSettings} />}
     </AnimatePresence>
