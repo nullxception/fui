@@ -1,5 +1,6 @@
 import { initTRPC } from "@trpc/server";
 import { createBunHttpHandler } from "trpc-bun-adapter";
+import z from "zod";
 import { uploadBackground } from "./api/background";
 import {
   readConfig,
@@ -16,12 +17,10 @@ import {
 import { listImages, removeImages } from "./api/gallery";
 import system from "./api/system";
 import { stopJob } from "./services/jobs";
-import type {
-  AppSettings,
-  ConvertParams,
-  DiffusionParams,
-  TriggerWord,
-} from "./types";
+import { diffusionParamsSchema } from "./types/diffusionparams";
+import { convertParamsSchema } from "./types/quantization";
+import { triggerWordSchema } from "./types/triggerword";
+import { appSettingsSchema } from "./types/userconfig";
 
 const t = initTRPC.create();
 
@@ -33,36 +32,36 @@ export const router = t.router({
     async () => (await readConfig()).diffusion,
   ),
   saveDiffusionParams: t.procedure
-    .input((it) => it as DiffusionParams)
+    .input(diffusionParamsSchema)
     .mutation((opts) => saveDiffusionParams(opts.input)),
   settings: t.procedure.query(async () => (await readConfig()).settings),
   saveSettings: t.procedure
-    .input((it) => it as AppSettings)
+    .input(appSettingsSchema)
     .mutation((opts) => saveAppSettings(opts.input)),
   triggerWords: t.procedure.query(
     async () => (await readConfig()).triggerWords,
   ),
   saveTriggerWords: t.procedure
-    .input((it) => it as Array<TriggerWord>)
+    .input(z.array(triggerWordSchema))
     .mutation((opts) => saveTriggerWords(opts.input)),
   listImages: t.procedure
-    .input((it) => it as { limit: number; cursor?: number })
+    .input(z.object({ limit: z.number(), cursor: z.number().optional() }))
     .query((opts) => listImages(opts.input.limit, opts.input.cursor)),
   listJobs: t.procedure.query(diffusionJobs),
   removeImage: t.procedure
-    .input((it) => it as string[])
+    .input(z.array(z.string()))
     .mutation((opts) => removeImages(opts.input)),
   updateBackground: t.procedure
-    .input((it) => (it instanceof FormData && it) || undefined)
+    .input(z.instanceof(FormData).optional())
     .mutation((opts) => uploadBackground(opts.input)),
   startDiffusion: t.procedure
-    .input((it) => it as DiffusionParams)
+    .input(diffusionParamsSchema)
     .mutation((opts) => diffusionStart(opts.input)),
   stopDiffusion: t.procedure
-    .input((it) => it as string)
+    .input(z.string())
     .mutation((opts) => stopJob(opts.input)),
   convertModel: t.procedure
-    .input((it) => it as ConvertParams)
+    .input(convertParamsSchema)
     .mutation((opts) => convertWeights(opts.input)),
 });
 

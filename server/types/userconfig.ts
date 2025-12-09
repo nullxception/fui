@@ -1,53 +1,14 @@
-import type { GGMLWeightType } from "./ggml";
+import z from "zod";
+import type { DiffusionParams } from "./diffusionparams";
+import type { TriggerWord } from "./triggerword";
 
-export type DiffusionModelType = "full" | "standalone";
+export const appSettingsSchema = z.object({
+  background: z.string().optional(),
+  maxWidth: z.number(),
+  maxHeight: z.number(),
+});
 
-export interface DiffusionParams {
-  model: string;
-  modelType: DiffusionModelType;
-  quantizationType?: GGMLWeightType;
-  vae?: string;
-  upscaleModel?: string;
-  clipL?: string;
-  clipG?: string;
-  t5xxl?: string;
-  llm?: string;
-  prompt: string;
-  negativePrompt: string;
-  steps: number;
-  cfgScale: number;
-  seed: number;
-  width: number;
-  height: number;
-  clipSkip: number;
-  diffusionFa?: boolean;
-  samplingMethod?: string;
-  scheduler?: string;
-  rng?: string;
-  samplerRng?: string;
-  diffusionConvDirect?: boolean;
-  vaeConvDirect?: boolean;
-  threads: number;
-  offloadToCpu?: boolean;
-  forceSdxlVaeConvScale?: boolean;
-  verbose?: boolean;
-}
-
-export type ExtraDataType = "embedding" | "lora";
-
-export interface TriggerWord {
-  type: ExtraDataType;
-  target: string;
-  loraStrength?: number;
-  words: string[];
-}
-
-export interface AppSettings {
-  background?: string;
-  maxWidth: number;
-  maxHeight: number;
-}
-
+export type AppSettings = z.infer<typeof appSettingsSchema>;
 export interface UserConfig {
   diffusion: DiffusionParams;
   settings: AppSettings;

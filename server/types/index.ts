@@ -1,30 +1,21 @@
-import { GGML_WEIGHTS_TYPE, type GGMLWeightType } from "./ggml";
-import type {
-  AppSettings,
-  DiffusionModelType,
-  DiffusionParams,
-  ExtraDataType,
-  TriggerWord,
-  UserConfig,
-} from "./userconfig";
+import type { DiffusionModelType, DiffusionParams } from "./diffusionparams";
+import { GGML_WEIGHTS_TYPE, type Quantization } from "./ggml";
+import type { ConvertParams } from "./quantization";
+import type { ExtraDataType, TriggerWord } from "./triggerword";
+import type { AppSettings, UserConfig } from "./userconfig";
 
 export { GGML_WEIGHTS_TYPE };
 
 export type {
   AppSettings,
+  ConvertParams,
   DiffusionModelType,
   DiffusionParams,
   ExtraDataType,
-  GGMLWeightType,
+  Quantization,
   TriggerWord,
   UserConfig,
 };
-
-export interface ConvertParams {
-  model: string;
-  output: string;
-  type: string;
-}
 
 export type JobStatus =
   | "pending"

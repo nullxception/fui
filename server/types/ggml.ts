@@ -1,3 +1,5 @@
+import { z } from "zod";
+
 export const GGML_WEIGHTS_TYPE = [
   "bf16",
   "f16",
@@ -32,4 +34,5 @@ export const GGML_WEIGHTS_TYPE = [
   "tq2_0",
 ] as const;
 
-export type GGMLWeightType = (typeof GGML_WEIGHTS_TYPE)[number];
+export const quantizationSchema = z.enum(GGML_WEIGHTS_TYPE);
+export type Quantization = z.infer<typeof quantizationSchema>;
