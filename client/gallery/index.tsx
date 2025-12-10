@@ -297,8 +297,7 @@ export const Gallery = forwardRef<HTMLDivElement, HTMLMotionProps<"div">>(
           onClose={() => setShowDeleteDialog(false)}
         >
           <RemoveDialog
-            count={selectedImages.size}
-            images={images.filter((img) => selectedImages.has(img.name))}
+            images={images.filter((img) => selectedImages.has(img.url))}
             onRemove={confirmDelete}
             onCancel={() => setShowDeleteDialog(false)}
           />

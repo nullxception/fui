@@ -15,20 +15,31 @@ interface RemoveDialogProps {
 export function RemoveDialog({
   onCancel,
   onRemove,
-  count = 1,
   images = [],
 }: RemoveDialogProps) {
   return (
     <Card className="m-4 flex max-w-[90vh] flex-col justify-center overflow-clip shadow-background drop-shadow-lg">
       <CircleAlertIcon className="mt-5 h-10 w-10 self-center text-pink-500" />
       <p className="p-4 text-center">
-        Are you sure you want to remove {count > 1 ? `${count} images` : "it"}?
+        Are you sure you want to remove{" "}
+        {images.length > 1 ? `${images.length} images` : "it"}?
       </p>
-      {images.length > 0 && (
+      {images.length < 3 ? (
+        <div className="flex items-center justify-center gap-4">
+          {images.map((img) => (
+            <img
+              key={img.name}
+              src={`${img.url}?width=128`}
+              alt={img.name}
+              className="w-fit rounded-md object-contain"
+            />
+          ))}
+        </div>
+      ) : (
         <ResponsiveMasonry
           columnsCountBreakPoints={{ 350: 3 }}
           gutterBreakPoints={{ 350: "6px" }}
-          className="max-h-[80vh] overflow-y-auto p-4"
+          className="max-h-[80vh] overflow-y-auto p-4 text-center"
         >
           <Masonry>
             {images.map((img) => (
@@ -36,13 +47,13 @@ export function RemoveDialog({
                 key={img.name}
                 src={`${img.url}?width=128`}
                 alt={img.name}
-                className="w-full rounded-md object-contain"
+                className="w-fit rounded-md object-contain"
               />
             ))}
           </Masonry>
         </ResponsiveMasonry>
       )}
-      <div className="flex justify-center gap-2 bg-background/40 p-4">
+      <div className="mt-2 flex w-full justify-center gap-2 bg-background/40 p-4">
         <Button variant="outline" className="w-1/2" onClick={onCancel}>
           <ArrowLeftIcon />
           Go back
