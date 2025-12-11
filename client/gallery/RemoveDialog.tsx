@@ -1,3 +1,4 @@
+import { Thumbnail } from "client/components/Thumbnail";
 import { Button } from "client/components/ui/button";
 import { Card } from "client/components/ui/card";
 import { ArrowLeftIcon, CircleAlertIcon, Trash2Icon } from "lucide-react";
@@ -36,14 +37,9 @@ export function RemoveDialog({
         {images.length > 1 ? `${images.length} images` : "it"}?
       </p>
       {images.length < 3 ? (
-        <div className="flex items-center justify-center gap-4">
+        <div className="flex items-center justify-center gap-4 p-4">
           {images.map((img) => (
-            <img
-              key={img.name}
-              src={`${img.url}?width=128`}
-              alt={img.name}
-              className="w-fit rounded-md object-contain"
-            />
+            <Thumbnail image={img} key={img.name} />
           ))}
         </div>
       ) : (
@@ -54,12 +50,7 @@ export function RemoveDialog({
         >
           <Masonry>
             {images.map((img) => (
-              <img
-                key={img.name}
-                src={`${img.url}?width=128`}
-                alt={img.name}
-                className="w-fit rounded-md object-contain"
-              />
+              <Thumbnail image={img} key={img.name} />
             ))}
           </Masonry>
         </ResponsiveMasonry>

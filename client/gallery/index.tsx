@@ -1,94 +1,17 @@
 import { Footer } from "client/components/Footer";
 import { Logo } from "client/components/Header";
 import Modal from "client/components/Modal";
+import { Thumbnail } from "client/components/Thumbnail";
 import { Button } from "client/components/ui/button";
 import { ButtonGroup } from "client/components/ui/button-group";
-import { Skeleton } from "client/components/ui/skeleton";
 import { AnimatePresence, motion, type HTMLMotionProps } from "framer-motion";
 import { ImageIcon, Trash2Icon, XIcon } from "lucide-react";
 import { forwardRef, useEffect, useRef, useState } from "react";
 import Masonry, { ResponsiveMasonry } from "react-responsive-masonry";
-import type { Image } from "server/types";
 import { useLocation, useRoute } from "wouter";
 import ImageLightbox from "./ImageLightbox";
 import { RemoveDialog } from "./RemoveDialog";
 import { useImageQuery } from "./useImageQuery";
-
-function useElementWidth<T extends HTMLElement>() {
-  const ref = useRef<T | null>(null);
-  const [width, setWidth] = useState(0);
-
-  useEffect(() => {
-    if (!ref.current) return;
-
-    const observer = new ResizeObserver((entries) => {
-      const entry = entries[0];
-      if (entry === undefined) return;
-      setWidth(entry.contentRect.width);
-    });
-
-    observer.observe(ref.current);
-    return () => observer.disconnect();
-  }, []);
-
-  return [ref, width] as const;
-}
-
-interface GalleryItemProps {
-  image: Image;
-  selected?: boolean;
-  className: string;
-  isSelectionMode: boolean;
-  onClick: () => void;
-}
-
-function GalleryItem({
-  image,
-  selected,
-  className,
-  isSelectionMode,
-  onClick,
-}: GalleryItemProps) {
-  const [ref, width] = useElementWidth<HTMLDivElement>();
-  const [isLoaded, setIsLoaded] = useState(false);
-
-  // derive appropriate thumbnail size based on real width
-  const size = (() => {
-    if (width < 192) return 192;
-    if (width < 320) return 320;
-    if (width < 480) return 480;
-    return 512;
-  })();
-  const paddingTopPercentage = (image.height / image.width) * 100;
-
-  return (
-    <div
-      ref={ref}
-      onClick={onClick}
-      className={`group bg-surface relative w-full cursor-pointer break-inside-avoid overflow-hidden rounded-xl border transition-colors select-none ${className} ${selected ? "bg-pink-700 opacity-100" : "border-border"}`}
-    >
-      <div
-        className="block"
-        style={{ paddingTop: `${paddingTopPercentage}%` }}
-      />
-      <img
-        src={`${image.url}?width=${size}`}
-        alt=""
-        loading="lazy"
-        onLoad={() => setIsLoaded(true)}
-        className={`absolute inset-0 h-full w-full rounded-lg object-cover transition-transform duration-300 group-hover:scale-105 ${!isLoaded && "opacity-0"} ${isSelectionMode && selected && "opacity-100"} ${isSelectionMode && !selected && "opacity-70"} `}
-      />
-      {!isLoaded && <Skeleton className="absolute inset-0 rounded-lg" />}
-      {isSelectionMode && selected && (
-        <div className="absolute inset-0 flex items-center justify-center">
-          <div className="rounded-full bg-pink-700/50 p-2 text-primary-foreground">
-            <Trash2Icon className="h-6 w-6" />
-          </div>
-        </div>
-      )}
-    </div>
-  );
-}
 
 export const Gallery = forwardRef<HTMLDivElement, HTMLMotionProps<"div">>(
   (props, ref) => {
@@ -264,7 +187,7 @@ export const Gallery = forwardRef<HTMLDivElement, HTMLMotionProps<"div">>(
             <Masonry>
               {data?.pages.flatMap((group) =>
                 group.map((image, i) => (
-                  <GalleryItem
+                  <Thumbnail
                     key={i}
                     className="w-full"
                     image={image}
