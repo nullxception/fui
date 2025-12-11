@@ -54,7 +54,7 @@ export function Thumbnail({
     <div
       ref={ref}
       onClick={onClick}
-      className={`group bg-surface relative w-full cursor-pointer break-inside-avoid overflow-hidden rounded-xl border transition-colors select-none ${className} ${selected ? "bg-pink-700 opacity-100" : "border-border"}`}
+      className={`group relative w-full cursor-pointer break-inside-avoid overflow-hidden rounded-xl border bg-background transition-colors select-none ${className} ${selected ? "bg-pink-700 opacity-100" : "border-border"}`}
     >
       <AspectRatio ratio={image.width / image.height}>
         <img
@@ -62,7 +62,9 @@ export function Thumbnail({
           alt={image.name}
           loading="lazy"
           onLoad={() => setIsLoaded(true)}
-          className={`h-full w-full object-cover transition-transform duration-300 group-hover:scale-105 ${!isLoaded && "opacity-0"} ${isSelectionMode && selected && "opacity-100"} ${isSelectionMode && !selected && "opacity-70"} `}
+          className={`h-full w-full object-cover transition-transform duration-300 ${
+            typeof onClick === "function" && "group-hover:scale-105"
+          } ${!isLoaded && "opacity-0"} ${isSelectionMode && selected && "opacity-100"} ${isSelectionMode && !selected && "opacity-70"} `}
         />
       </AspectRatio>
       {!isLoaded && <Skeleton className="absolute inset-0" />}
