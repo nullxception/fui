@@ -29,6 +29,7 @@ export function ConsoleOutput({
     let lastProgressIndex = -1;
 
     logs?.forEach((log) => {
+      if (typeof log?.message !== "string") return;
       const message = log.message.trim();
       // Check if this is a progress bar line
       const isProgress = /\|=*.*\| \d+\/\d+/.test(message);
