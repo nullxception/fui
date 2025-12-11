@@ -10,6 +10,7 @@ import {
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { Image } from "server/types";
 import { useLocation, useRoute } from "wouter";
+import { DottedBackground } from "../components/DottedBackground";
 import ImageMetadata from "./ImageMetadata";
 import { RemoveDialog } from "./RemoveDialog";
 import { useImageQuery } from "./useImageQuery";
@@ -156,6 +157,7 @@ export default function ImageLightbox() {
           className="relative flex flex-1 items-stretch justify-center overflow-hidden"
           ref={ref}
         >
+          <DottedBackground />
           <AnimatePresence initial={false} custom={page}>
             {image && (
               <motion.img

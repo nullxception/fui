@@ -86,7 +86,7 @@ function ConverterPanel() {
   }, [checkJobs, process]);
 
   return (
-    <Card className="scrollbar-thin w-full flex-1 grow space-y-4 overflow-y-auto py-4 backdrop-blur-md scrollbar-thumb-secondary scrollbar-track-transparent lg:max-h-full lg:w-[40vw] lg:shrink-0">
+    <Card className="scrollbar-thin w-full flex-1 grow space-y-4 overflow-y-auto py-4 backdrop-blur-md scrollbar-thumb-secondary scrollbar-track-transparent lg:max-h-full lg:shrink-0">
       <CardHeader>
         <CardTitle>Model Weight Converter</CardTitle>
       </CardHeader>

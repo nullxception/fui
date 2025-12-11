@@ -10,7 +10,7 @@ export function BackgroundLayer() {
       style={hasBg ? { backgroundImage: `url(${bg})` } : {}}
     >
       <div
-        className="fixed top-0 left-0 -z-1 h-screen w-full bg-radial from-transparent from-50% to-background"
+        className="fixed top-0 left-0 -z-1 h-screen w-full bg-radial from-black/65 from-35% to-background"
         hidden={!hasBg}
       />
     </div>

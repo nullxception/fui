@@ -125,8 +125,8 @@ export const TextToImage = forwardRef<HTMLDivElement, HTMLMotionProps<"div">>(
         <div className="flex items-center p-4 md:hidden">
           <Logo />
         </div>
-        <div className="flex flex-col gap-4 p-2 lg:h-full lg:flex-row">
-          <div className="mb-4 flex min-h-0 flex-1 flex-col overflow-clip rounded-xl border border-border">
+        <div className="flex flex-col gap-2 p-2 lg:h-full lg:flex-row lg:items-stretch">
+          <div className="flex min-h-0 flex-col overflow-clip rounded-xl border border-border lg:w-1/2">
             <div className="flex min-h-[50vh] flex-1 flex-col overflow-hidden bg-background/20 backdrop-blur-sm">
               <OutputCard />
             </div>
@@ -134,7 +134,7 @@ export const TextToImage = forwardRef<HTMLDivElement, HTMLMotionProps<"div">>(
               <TextToImageAction />
             </div>
           </div>
-          <ControlPanel />
+          <ControlPanel className="lg:w-1/2" />
         </div>
       </motion.div>
     );
