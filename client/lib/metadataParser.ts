@@ -165,6 +165,84 @@ export function optimizePrompt(text?: string, models?: Models) {
     .replace(/>\s*,\s*/g, "> ");
 }
 
+function parsePairs(
+  data: ParsedMetadata,
+  models: Models | undefined,
+  image: Image,
+  otherParams: Record<string, string | number>,
+): (value: string, index: number, array: string[]) => void {
+  return (pair) => {
+    const [k, ...values] = pair.split(": ");
+    if (!k || values.length < 1) return;
+    let key = k.toLowerCase().replace(/ /g, "_").trim();
+    key = snakeToCamel(key);
+    const value = values.join(": ").trim();
+    switch (key) {
+      case "version":
+        data.version = value;
+        break;
+      case "model":
+      case "unet":
+        data.model =
+          models?.checkpoints.find((path) => path.endsWith(value)) ?? value;
+        break;
+      case "vae":
+        data.vae = models?.vaes.find((path) => path.endsWith(value)) ?? value;
+        break;
+      case "te":
+        if (data.textEncoders?.includes(value)) {
+          break;
+        } else {
+          const encoders = data.textEncoders
+            ? [...data.textEncoders, value]
+            : [value];
+          data.textEncoders = encoders.map(
+            (enc) => models?.vaes.find((path) => path.endsWith(enc)) ?? enc,
+          );
+        }
+        break;
+      case "cfgScale":
+        data.cfgScale = parseFloat(value);
+        break;
+      case "steps":
+        data.steps = parseInt(value);
+        break;
+      case "size": {
+        const [width, height] = value.split("x").map((d) => d.trim());
+
+        if (width && height) {
+          data.baseWidth = parseInt(width);
+          data.baseHeight = parseInt(height);
+        }
+        if (image.width > data.baseWidth || image.height > data.baseHeight) {
+          data.upscaled = true;
+        }
+        break;
+      }
+      case "sampler": {
+        const [method, sched] = value.split(" ").map((s) => s.trim());
+        if (method && sched) {
+          data.samplingMethod = method;
+          data.scheduler = sched;
+        }
+        break;
+      }
+      case "rng":
+        data.rng = value;
+        break;
+      case "seed":
+        data.seed = Number(value);
+        break;
+      case "guidance":
+      case "eta":
+        break; // Ignore for now
+      default:
+        otherParams[key] = value;
+        break;
+    }
+  };
+}
+
 export function parseDiffusionParams(image?: Image, models?: Models) {
   if (!image) return emptyMetadata;
   const data: ParsedMetadata = Object.create(emptyMetadata);
@@ -190,75 +268,7 @@ export function parseDiffusionParams(image?: Image, models?: Models) {
         isParams = true;
         isNegative = false; // End of negative prompt section
         const pairs = line.split(", ");
-        pairs.forEach((pair) => {
-          const [key, ...values] = pair.split(": ");
-          if (key && values.length > 0) {
-            let k = key.toLowerCase().replace(/ /g, "_").trim();
-            k = snakeToCamel(k);
-            const v = values.join(": ").trim();
-            switch (k) {
-              case "version":
-                data.version = v;
-                break;
-              case "model":
-              case "unet":
-                data.model = v;
-                break;
-              case "vae":
-                data.vae = v;
-                break;
-              case "te":
-                if (data.textEncoders?.includes(v)) {
-                  break;
-                }
-                data.textEncoders = data.textEncoders
-                  ? [...data.textEncoders, v]
-                  : [v];
-                break;
-              case "cfgScale":
-                data.cfgScale = parseFloat(v);
-                break;
-              case "steps":
-                data.steps = parseInt(v);
-                break;
-              case "size": {
-                const [width, height] = v.split("x").map((d) => d.trim());
-
-                if (width && height) {
-                  data.baseWidth = parseInt(width);
-                  data.baseHeight = parseInt(height);
-                }
-                if (
-                  image.width > data.baseWidth ||
-                  image.height > data.baseHeight
-                ) {
-                  data.upscaled = true;
-                }
-                break;
-              }
-              case "sampler": {
-                const [method, sched] = v.split(" ").map((s) => s.trim());
-                if (method && sched) {
-                  data.samplingMethod = method;
-                  data.scheduler = sched;
-                }
-                break;
-              }
-              case "rng":
-                data.rng = v;
-                break;
-              case "seed":
-                data.seed = Number(v);
-                break;
-              case "guidance":
-              case "eta":
-                break; // Ignore for now
-              default:
-                otherParams[k] = v;
-                break;
-            }
-          }
-        });
+        pairs.forEach(parsePairs(data, models, image, otherParams));
         continue;
       }
 
