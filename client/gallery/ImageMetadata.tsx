@@ -3,8 +3,7 @@ import { Button } from "client/components/ui/button";
 import { Label } from "client/components/ui/label";
 import { useDiffusionConfig } from "client/dashboard/useDiffusionConfig";
 import { useTRPC } from "client/query";
-import { useAppStore } from "client/stores/useAppStore";
-import { useJobs } from "client/stores/useJobs";
+import { usePreviewImage } from "client/stores/usePreviewImage";
 import {
   ChevronDownIcon,
   DownloadIcon,
@@ -104,12 +103,11 @@ export default function ImageMetadata({
   className = "",
 }: ImageMetadataProps) {
   const [, navigate] = useLocation();
-  const { setOutputTab } = useAppStore();
   const store = useDiffusionConfig();
-  const { setPreviewImage } = useJobs();
   const rpc = useTRPC();
   const { data } = useQuery(rpc.listModels.queryOptions());
   const metadata = parseDiffusionParams(image, data);
+  const { setPreviewImage } = usePreviewImage();
 
   const handleRemake = () => {
     if (!metadata) return;
@@ -130,7 +128,6 @@ export default function ImageMetadata({
 
     // Navigate back to generate tab
     setPreviewImage(image);
-    setOutputTab("image");
     navigate("~/");
     onClose();
   };

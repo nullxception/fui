@@ -59,9 +59,6 @@ export function updateJobStatus({
 
   job.status = status;
   const finished = ["completed", "failed", "cancelled"];
-  if (status === "cancelled") {
-    result = `Job ${id} has been cancelled`;
-  }
   if (finished.includes(status)) {
     job.completedAt = Date.now();
     job.result = result;
@@ -95,9 +92,13 @@ export function deleteJobByResultFile(filename: string) {
   }
 }
 
-export function stopJob(jobId?: string) {
-  if (jobId) {
-    updateJobStatus({ id: jobId, status: "cancelled" });
+export function stopJob(id?: string) {
+  if (id) {
+    updateJobStatus({
+      id,
+      status: "cancelled",
+      result: `Job ${id} has been cancelled`,
+    });
   }
 }
 

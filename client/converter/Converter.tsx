@@ -19,13 +19,25 @@ import {
   SelectValue,
 } from "client/components/ui/select";
 import { Switch } from "client/components/ui/switch";
+import { JobQueryContext, JobQueryProvider } from "client/hooks/useJobQuery";
 import { useTRPC } from "client/query";
 import { useAppStore } from "client/stores/useAppStore";
-import { useJobs } from "client/stores/useJobs";
 import { motion, type HTMLMotionProps } from "framer-motion";
 import { AlertTriangleIcon, CircleStopIcon, ZapIcon } from "lucide-react";
-import { forwardRef, useEffect, useState } from "react";
+import { forwardRef, useContext, useState } from "react";
 import { GGML_WEIGHTS_TYPE } from "server/types";
+
+function LogsPanel({ className }: { className?: string }) {
+  const { status: job, logs } = useContext(JobQueryContext);
+
+  return (
+    <div
+      className={`overflow-clip rounded-xl border border-border backdrop-blur-md lg:mb-4 ${className}`}
+    >
+      <ConsoleOutput logs={logs.filter((log) => log.jobId === job?.id)} />
+    </div>
+  );
+}
 
 function ConverterPanel() {
   const [model, setModel] = useState("");
@@ -34,17 +46,15 @@ function ConverterPanel() {
   const [type, setType] = useState("q8_0");
   const rpc = useTRPC();
   const { data: models } = useQuery(rpc.listModels.queryOptions());
-  const { data: process } = useQuery(rpc.listJobs.queryOptions("convert"));
-  const { jobStatus, checkJobs, connectToJob, setError } = useJobs();
+  const { status: job, connect, setError } = useContext(JobQueryContext);
   const isOutputExists = models?.checkpoints.includes(output);
-  const status = jobStatus("convert");
   const quantizationStart = useMutation(
     rpc.startQuantization.mutationOptions({
       onError(err) {
-        setError("convert", err.message);
+        setError(err.message);
       },
       onSuccess(data) {
-        connectToJob(data.jobId, "convert");
+        connect(data.jobId);
       },
     }),
   );
@@ -72,18 +82,12 @@ function ConverterPanel() {
   };
 
   const handleConvert = () => {
-    if (status?.isProcessing && status?.id) {
-      quantizationStop.mutate(status?.id);
+    if (job?.status === "running" && job?.id) {
+      quantizationStop.mutate(job?.id);
     } else {
       quantizationStart.mutate({ model, output, type });
     }
   };
-
-  useEffect(() => {
-    if (process) {
-      checkJobs(process);
-    }
-  }, [checkJobs, process]);
 
   return (
     <Card className="scrollbar-thin w-full flex-1 grow space-y-4 overflow-y-auto py-4 backdrop-blur-md scrollbar-thumb-secondary scrollbar-track-transparent lg:max-h-full lg:shrink-0">
@@ -157,10 +161,10 @@ function ConverterPanel() {
         )}
         <Button
           onClick={handleConvert}
-          variant={status?.isProcessing ? "destructive" : "default"}
+          variant={job?.status === "running" ? "destructive" : "default"}
           size="lg"
         >
-          {status?.isProcessing ? (
+          {job?.status === "running" ? (
             <>
               <CircleStopIcon className="animate-pulse" />
               Stop Quantization
@@ -179,9 +183,6 @@ function ConverterPanel() {
 
 export const Converter = forwardRef<HTMLDivElement, HTMLMotionProps<"div">>(
   (props, ref) => {
-    const { jobStatus, logs } = useJobs();
-    const jobState = jobStatus("convert");
-
     return (
       <motion.div
         ref={ref}
@@ -191,15 +192,14 @@ export const Converter = forwardRef<HTMLDivElement, HTMLMotionProps<"div">>(
         <div className="flex items-center p-4 md:hidden">
           <Logo />
         </div>
-        <div className="flex flex-auto flex-col gap-4 p-2 lg:h-full lg:flex-row">
-          <ConsoleOutput
-            logs={logs.filter((log) => log.jobId === jobState?.id)}
-            className="mb-4 rounded-xl border border-border"
-          />
-          <div className="w-full lg:max-h-screen lg:w-[40vw]">
-            <ConverterPanel />
-            <Footer className="col-span-full flex justify-center p-4" />
-          </div>
+        <div className="flex flex-auto flex-col gap-2 p-2 lg:h-full lg:flex-row">
+          <JobQueryProvider type="convert">
+            <LogsPanel className="lg:w-1/2" />
+            <div className="w-full lg:max-h-screen lg:w-1/2">
+              <ConverterPanel />
+              <Footer className="col-span-full flex justify-center p-4" />
+            </div>
+          </JobQueryProvider>
         </div>
       </motion.div>
     );

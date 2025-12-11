@@ -1,22 +1,24 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { Logo } from "client/components/Header";
 import { Button } from "client/components/ui/button";
+import { JobQueryContext, JobQueryProvider } from "client/hooks/useJobQuery";
 import { useTRPC } from "client/query";
 import { useAppStore } from "client/stores/useAppStore";
+import { usePreviewImage } from "client/stores/usePreviewImage";
 import { motion, type HTMLMotionProps } from "framer-motion";
 import { CircleStopIcon, ImageIcon, TerminalIcon, ZapIcon } from "lucide-react";
-import { forwardRef, useEffect } from "react";
+import { forwardRef, useContext } from "react";
 import { ConsoleOutput } from "../components/ConsoleOutput";
 import { optimizePrompt } from "../lib/metadataParser";
-import { useJobs } from "../stores/useJobs";
 import { ControlPanel } from "./ControlPanel";
 import { ImageDisplay } from "./ImageDisplay";
 import { useDiffusionConfig } from "./useDiffusionConfig";
 
 function OutputCard() {
+  const { status: job, logs } = useContext(JobQueryContext);
+  const isProcessing = job?.status === "running";
   const { outputTab, setOutputTab } = useAppStore();
-  const { jobStatus, logs } = useJobs();
-  const status = jobStatus("txt2img");
+  const { image } = usePreviewImage();
 
   return (
     <>
@@ -43,12 +45,9 @@ function OutputCard() {
 
       <div className="relative min-h-0 w-full flex-1">
         {outputTab === "image" ? (
-          <ImageDisplay
-            image={status?.image}
-            isProcessing={status?.isProcessing ?? false}
-          />
+          <ImageDisplay image={image} isProcessing={isProcessing ?? false} />
         ) : (
-          <ConsoleOutput logs={logs.filter((x) => x.jobId === status?.id)} />
+          <ConsoleOutput logs={logs.filter((x) => x.jobId === job?.id)} />
         )}
       </div>
     </>
@@ -56,33 +55,25 @@ function OutputCard() {
 }
 
 function TextToImageAction() {
-  const { jobStatus, checkJobs, connectToJob, setError } = useJobs();
+  const { status: job, connect, setError } = useContext(JobQueryContext);
   const store = useDiffusionConfig();
   const rpc = useTRPC();
   const { data: models } = useQuery(rpc.listModels.queryOptions());
-  const { data: process } = useQuery(rpc.listJobs.queryOptions("txt2img"));
-  const status = jobStatus("txt2img");
   const diffusionStart = useMutation(
     rpc.startDiffusion.mutationOptions({
       onError(error) {
-        setError("txt2img", error.message);
+        setError(error.message);
       },
       onSuccess(data) {
-        connectToJob(data.jobId, "txt2img");
+        connect(data.jobId);
       },
     }),
   );
   const diffusionStop = useMutation(rpc.stopDiffusion.mutationOptions());
 
-  useEffect(() => {
-    if (process) {
-      checkJobs(process);
-    }
-  }, [checkJobs, process]);
-
   const handleDiffusion = async () => {
-    if (status?.isProcessing && status?.id) {
-      diffusionStop.mutate(status?.id);
+    if (job?.status === "running" && job?.id) {
+      diffusionStop.mutate(job?.id);
     } else {
       await store.updateAll({
         prompt: optimizePrompt(store.params.prompt, models),
@@ -95,11 +86,11 @@ function TextToImageAction() {
   return (
     <Button
       onClick={handleDiffusion}
-      variant={status?.isProcessing ? "destructive" : "default"}
+      variant={job?.status === "running" ? "destructive" : "default"}
       size="lg"
       className="w-full rounded-xl"
     >
-      {status?.isProcessing ? (
+      {job?.status === "running" ? (
         <>
           <CircleStopIcon className="animate-pulse" />
           Stop Generation
@@ -127,12 +118,14 @@ export const TextToImage = forwardRef<HTMLDivElement, HTMLMotionProps<"div">>(
         </div>
         <div className="flex flex-col gap-2 p-2 lg:h-full lg:flex-row lg:items-stretch">
           <div className="flex min-h-0 flex-col overflow-clip rounded-xl border border-border lg:w-1/2">
-            <div className="flex min-h-[50vh] flex-1 flex-col overflow-hidden bg-background/20 backdrop-blur-sm">
-              <OutputCard />
-            </div>
-            <div className="rounded-xl border border-r-0 border-b-0 border-l-0 border-border bg-background/20 p-2 backdrop-blur-sm">
-              <TextToImageAction />
-            </div>
+            <JobQueryProvider type="txt2img">
+              <div className="flex min-h-[50vh] flex-1 flex-col overflow-hidden bg-background/20 backdrop-blur-sm">
+                <OutputCard />
+              </div>
+              <div className="rounded-xl border border-r-0 border-b-0 border-l-0 border-border bg-background/20 p-2 backdrop-blur-sm">
+                <TextToImageAction />
+              </div>
+            </JobQueryProvider>
           </div>
           <ControlPanel className="lg:w-1/2" />
         </div>
