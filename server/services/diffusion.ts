@@ -111,7 +111,9 @@ export async function startDiffusion(jobId: string, params: DiffusionParams) {
   const outputPath = path.join(OUTPUT_DIR, "txt2img", outputFilename);
   const modelPath = path.join(CHECKPOINT_DIR, params.model || "");
 
-  const allPrompts = params.prompt + params.negativePrompt;
+  const positivePrompt = params.prompt ?? "";
+  const negativePrompt = params.negativePrompt ?? "";
+  const allPrompts = positivePrompt + negativePrompt;
   const args: (string | number)[] = [];
 
   if (params.modelType === "standalone") {
@@ -162,12 +164,12 @@ export async function startDiffusion(jobId: string, params: DiffusionParams) {
     args.push("--llm", llmPath);
   }
 
-  if (hasValue(params.prompt)) {
-    args.push("-p", params.prompt);
+  if (hasValue(positivePrompt)) {
+    args.push("-p", positivePrompt);
   }
 
-  if (hasValue(params.negativePrompt)) {
-    args.push("-n", params.negativePrompt);
+  if (hasValue(negativePrompt)) {
+    args.push("-n", negativePrompt);
   }
 
   if (hasValue(params.samplingMethod)) {
