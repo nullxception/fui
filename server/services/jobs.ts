@@ -82,8 +82,8 @@ export function addJobLog(id: string, type: JobType, log: LogData) {
   jobEvents.emit("log", { jobId: id, log });
 }
 
-export function getAllJobs(type: JobType): Job[] {
-  return Array.from(jobs.values().filter((job) => job.type === type));
+export function getAllJobs() {
+  return jobs.values();
 }
 
 export function deleteJobByResultFile(filename: string) {

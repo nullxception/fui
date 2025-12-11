@@ -205,6 +205,10 @@ export const diffusionProgress: Bun.Serve.Handler<
   });
 };
 
-export async function diffusionJobs(input: JobType) {
-  return getAllJobs(input).map((job) => ({ ...job, logs: [], params: {} }));
+export async function diffusionJobs(type: JobType) {
+  return getAllJobs()
+    .filter((job) => job.type === type)
+    .map((job) => ({ ...job, logs: [], params: {} }))
+    .toArray()
+    .sort((a, b) => a.createdAt - b.createdAt);
 }
