@@ -2,8 +2,8 @@ import { Logo } from "client/components/Header";
 import { motion, type HTMLMotionProps } from "framer-motion";
 import { forwardRef } from "react";
 import BackgroundSetting from "./BackgroundSetting";
+import { PromptAttachmentEditor } from "./PromptAttachment";
 import SliderSettings from "./SliderSettings";
-import TriggerWordsEditor from "./TriggerWordsEditor";
 
 const Settings = forwardRef<HTMLDivElement, HTMLMotionProps<"div">>(
   (props, ref) => {
@@ -19,7 +19,7 @@ const Settings = forwardRef<HTMLDivElement, HTMLMotionProps<"div">>(
         <div className="grid grid-flow-row grid-cols-1 gap-2 p-4 md:grid-cols-2 md:flex-row">
           <BackgroundSetting />
           <SliderSettings />
-          <TriggerWordsEditor />
+          <PromptAttachmentEditor />
         </div>
       </motion.div>
     );

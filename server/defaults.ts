@@ -19,6 +19,6 @@ export function defaultUserConfig(): UserConfig {
       maxWidth: 2048,
       maxHeight: 2048,
     },
-    triggerWords: [],
+    promptAttachment: [],
   };
 }

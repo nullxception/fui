@@ -28,43 +28,46 @@ import {
 } from "lucide-react";
 import React, { useState } from "react";
 import { splitSmart } from "server/lib/metadataParser";
-import type { ExtraDataType, TriggerWord } from "server/types";
-import { useTriggerWords } from "./useTriggerWords";
+import type { PromptAttachment, PromptAttachmentType } from "server/types";
+import { promptAttachmentTypeSchema } from "server/types/promptAttachment";
+import { usePromptAttachment } from "./usePromptAttachment";
 
-interface TriggerWordFormProps {
+interface PromptAttachmentFormProps {
   isEditing?: boolean;
-  entry: TriggerWord;
-  onChange: (entry: TriggerWord) => void;
+  entry: PromptAttachment;
+  onChange: ({
+    entry,
+    save,
+  }: {
+    entry: PromptAttachment;
+    save?: boolean;
+  }) => void;
   availableTargets: string[];
   onSave: () => void;
   onCancel: () => void;
 }
 
-function TriggerWordForm({
+function PromptAttachmentForm({
   isEditing = false,
   entry,
   onChange,
   availableTargets,
   onSave,
   onCancel,
-}: TriggerWordFormProps) {
+}: PromptAttachmentFormProps) {
   const [wordInput, setWordInput] = useState("");
+  const newWords = splitSmart(wordInput);
 
   const handleAddWord = () => {
-    const newWords = splitSmart(wordInput);
     if (newWords.length > 0) {
-      onChange({
-        ...entry,
-        words: [...entry.words, ...newWords],
-      });
+      onChange({ entry: { ...entry, words: [...entry.words, ...newWords] } });
       setWordInput("");
     }
   };
 
   const handleRemoveWord = (index: number) => {
     onChange({
-      ...entry,
-      words: entry.words.filter((_, i) => i !== index),
+      entry: { ...entry, words: entry.words.filter((_, i) => i !== index) },
     });
   };
 
@@ -77,18 +80,15 @@ function TriggerWordForm({
 
   const handleStrengthChange = (value: number) => {
     if (value > 1) value = 1;
-    onChange({
-      ...entry,
-      loraStrength: value,
-    });
+    onChange({ entry: { ...entry, strength: value } });
   };
 
-  const loraStrength = entry.loraStrength ?? 1;
+  const loraStrength = entry.strength ?? 1;
   const typeLabel = entry.type === "lora" ? "LoRA" : "Embedding";
 
   const isSaveable = () => {
     if (!entry.target) return false;
-    const hasWords = entry.words.length > 0;
+    const hasWords = entry.words.length > 0 || newWords.length > 0;
     if (entry.type === "embedding" && !hasWords) return false;
     if (entry.type === "lora") {
       if (!hasWords && loraStrength >= 1) return false;
@@ -96,71 +96,79 @@ function TriggerWordForm({
     return true;
   };
 
+  const handleOnSave = () => {
+    if (newWords.length > 0) {
+      onChange({
+        entry: { ...entry, words: [...entry.words, ...newWords] },
+        save: true,
+      });
+    } else {
+      onSave();
+    }
+  };
+
   return (
     <div className="space-y-3">
-      <div className="flex flex-row gap-3">
-        <Select
-          value={entry.type}
-          disabled={isEditing}
-          onValueChange={(e) =>
-            onChange({
-              ...entry,
-              type: e as ExtraDataType,
-              target: "", // Reset target when type changes
-            })
-          }
-        >
-          <SelectTrigger className="shrink-0">
-            <SelectValue placeholder="Select type" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectGroup>
-              <SelectItem value="embedding">Embedding</SelectItem>
-              <SelectItem value="lora">LoRA</SelectItem>
-            </SelectGroup>
-          </SelectContent>
-        </Select>
-        <Select
-          value={entry.target}
-          disabled={isEditing}
-          onValueChange={(e) =>
-            onChange({
-              ...entry,
-              target: e,
-            })
-          }
-        >
-          <SelectTrigger className="grow overflow-hidden">
-            <SelectValue placeholder={`Select ${typeLabel}...`} />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectGroup>
-              <SelectLabel>Select {entry.type}</SelectLabel>
-              {availableTargets.map((target) => (
-                <SelectItem key={target} value={target}>
-                  {target}
-                </SelectItem>
-              ))}
-            </SelectGroup>
-          </SelectContent>
-        </Select>
-      </div>
+      {isEditing ? (
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <span
+              className={`rounded px-2 py-0.5 text-xs ${
+                entry.type === "embedding"
+                  ? "bg-blue-500/20 text-blue-300"
+                  : "bg-purple-500/20 text-purple-300"
+              }`}
+            >
+              {entry.type === "lora" ? "LoRA" : "Embedding"}
+            </span>
+            <span className="text-xs">{entry.target}</span>
+          </div>
+        </div>
+      ) : (
+        <div className="flex flex-row gap-3">
+          <Select
+            value={entry.type}
+            onValueChange={(e) =>
+              onChange({
+                entry: {
+                  ...entry,
+                  type: promptAttachmentTypeSchema.parse(e),
+                  target: "", // Reset target when type changes
+                },
+              })
+            }
+          >
+            <SelectTrigger className="shrink-0">
+              <SelectValue placeholder="Select type" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectGroup>
+                <SelectItem value="embedding">Embedding</SelectItem>
+                <SelectItem value="lora">LoRA</SelectItem>
+              </SelectGroup>
+            </SelectContent>
+          </Select>
+          <Select
+            value={entry.target}
+            onValueChange={(e) => onChange({ entry: { ...entry, target: e } })}
+          >
+            <SelectTrigger className="grow overflow-hidden">
+              <SelectValue placeholder={`Select ${typeLabel}...`} />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectGroup>
+                <SelectLabel>Select {entry.type}</SelectLabel>
+                {availableTargets.map((target) => (
+                  <SelectItem key={target} value={target}>
+                    {target}
+                  </SelectItem>
+                ))}
+              </SelectGroup>
+            </SelectContent>
+          </Select>
+        </div>
+      )}
 
-      <div className="mb-2 flex gap-2">
-        <InputGroup>
-          <InputGroupInput
-            name="wordListInsert"
-            value={wordInput}
-            onChange={(e) => setWordInput(e.target.value)}
-            onKeyPress={handleKeyPress}
-            placeholder="Add some word"
-            className="flex-1"
-          />
-          <InputGroupButton onClick={handleAddWord}>
-            <PlusIcon />
-          </InputGroupButton>
-        </InputGroup>
-      </div>
       <div className="flex flex-wrap gap-1">
         {entry.words.map((word, index) => (
           <span
@@ -177,7 +185,21 @@ function TriggerWordForm({
           </span>
         ))}
       </div>
-
+      <div className="mb-2 flex gap-2">
+        <InputGroup>
+          <InputGroupInput
+            name="wordListInsert"
+            value={wordInput}
+            onChange={(e) => setWordInput(e.target.value)}
+            onKeyPress={handleKeyPress}
+            placeholder="Add some word"
+            className="flex-1"
+          />
+          <InputGroupButton onClick={handleAddWord}>
+            <PlusIcon />
+          </InputGroupButton>
+        </InputGroup>
+      </div>
       {entry.type === "lora" && (
         <div className="flex justify-end gap-4 pt-2">
           <Label htmlFor="loraStrengthNumber">Strength</Label>
@@ -216,7 +238,7 @@ function TriggerWordForm({
           Cancel
         </Button>
         <Button
-          onClick={onSave}
+          onClick={handleOnSave}
           variant="default"
           size="sm"
           disabled={!isSaveable()}
@@ -228,12 +250,15 @@ function TriggerWordForm({
   );
 }
 
-function TriggerWordsEditor() {
-  const { triggerWords, addTW, updateTW, deleteTW } = useTriggerWords();
+export function PromptAttachmentEditor() {
+  const { promptAttachment, addTW, updateTW, deleteTW } = usePromptAttachment();
   const rpc = useTRPC();
   const { data } = useQuery(rpc.listModels.queryOptions());
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
-  const [newEntry, setNewEntry] = useState<TriggerWord | null>(null);
+  const [editingEntry, setEditingEntry] = useState<PromptAttachment | null>(
+    null,
+  );
+  const [newEntry, setNewEntry] = useState<PromptAttachment | null>(null);
   const [deleteConfirmIndex, setDeleteConfirmIndex] = useState<number | null>(
     null,
   );
@@ -252,21 +277,25 @@ function TriggerWordsEditor() {
     return Number(t);
   };
 
-  const handleSaveNew = () => {
-    if (!newEntry) return;
-    const loraStrength = newEntry.loraStrength ?? 1;
-    const isSaveable = newEntry.words.length > 0 || loraStrength < 1;
-    if (newEntry && newEntry.target && isSaveable) {
-      let tw = newEntry;
+  const saveNewEntry = (entry: PromptAttachment | null) => {
+    if (!entry) return;
+    const loraStrength = entry.strength ?? 1;
+    const isSaveable = entry.words.length > 0 || loraStrength < 1;
+    if (entry && entry.target && isSaveable) {
+      let tw = entry;
       if (loraStrength < 1) {
         tw = {
-          ...newEntry,
-          loraStrength: normalizeFP(newEntry.loraStrength),
+          ...entry,
+          strength: normalizeFP(entry.strength),
         };
       }
       addTW(tw);
       setNewEntry(null);
     }
+  };
+
+  const handleSaveNew = () => {
+    saveNewEntry(newEntry);
   };
 
   const handleCancelNew = () => {
@@ -289,28 +318,34 @@ function TriggerWordsEditor() {
   };
 
   const handleEdit = (index: number) => {
-    setEditingIndex(index);
+    const entry = promptAttachment?.[index];
+    if (entry) {
+      setEditingIndex(index);
+      setEditingEntry(entry);
+    }
   };
 
-  const handleSaveEdit = (index: number, updated: TriggerWord) => {
+  const handleSaveEdit = (index: number, updated: PromptAttachment) => {
     let tw = updated;
-    const loraStrength = updated.loraStrength ?? 1;
+    const loraStrength = updated.strength ?? 1;
 
     if (loraStrength < 1) {
       tw = {
         ...updated,
-        loraStrength: normalizeFP(updated.loraStrength),
+        strength: normalizeFP(updated.strength),
       };
     }
     updateTW(index, tw);
     setEditingIndex(null);
+    setEditingEntry(null);
   };
 
   const handleCancelEdit = () => {
     setEditingIndex(null);
+    setEditingEntry(null);
   };
 
-  const getAvailableTargets = (type: ExtraDataType) => {
+  const getAvailableTargets = (type: PromptAttachmentType) => {
     if (!data) return [];
 
     return type === "embedding" ? data.embeddings : data.loras;
@@ -319,7 +354,7 @@ function TriggerWordsEditor() {
   return (
     <>
       <Card className="col-span-1 row-span-1 flex flex-row items-center justify-between bg-background/60 p-4 backdrop-blur-sm md:col-span-2">
-        <h2>Trigger Words</h2>
+        <h2>Prompt Attachment</h2>
         <Button
           onClick={handleAdd}
           variant="outline"
@@ -334,9 +369,15 @@ function TriggerWordsEditor() {
       {/* New Entry Form */}
       {newEntry && (
         <Card className="col-span-1 border-primary bg-background/60 p-4 backdrop-blur-sm md:col-span-2">
-          <TriggerWordForm
+          <PromptAttachmentForm
             entry={newEntry}
-            onChange={setNewEntry}
+            onChange={(data) => {
+              if (data?.save) {
+                saveNewEntry(data.entry);
+              } else {
+                setNewEntry(data.entry);
+              }
+            }}
             availableTargets={getAvailableTargets(newEntry.type)}
             onSave={handleSaveNew}
             onCancel={handleCancelNew}
@@ -346,21 +387,20 @@ function TriggerWordsEditor() {
 
       {/* Existing Entries */}
       <>
-        {triggerWords.map((entry, index) => (
+        {promptAttachment?.map((entry, index) => (
           <div key={index}>
             <Card
               className={`bg-background/60 p-4 backdrop-blur-sm ${editingIndex === index ? "border-primary" : "border-border"}`}
             >
-              {editingIndex === index ? (
-                <TriggerWordForm
+              {editingIndex === index && editingEntry ? (
+                <PromptAttachmentForm
                   isEditing={true}
-                  entry={entry}
-                  onChange={(updated) => {
-                    // Update in place for editing
-                    updateTW(index, updated);
+                  entry={editingEntry}
+                  onChange={(data) => {
+                    setEditingEntry(data.entry);
                   }}
-                  availableTargets={getAvailableTargets(entry.type)}
-                  onSave={() => handleSaveEdit(index, entry)}
+                  availableTargets={getAvailableTargets(editingEntry.type)}
+                  onSave={() => handleSaveEdit(index, editingEntry)}
                   onCancel={handleCancelEdit}
                 />
               ) : (
@@ -390,10 +430,10 @@ function TriggerWordsEditor() {
                     ))}
                   </div>
                   <div className="flex items-center justify-end">
-                    {entry.loraStrength && entry.loraStrength < 1 && (
+                    {entry.strength && entry.strength < 1 && (
                       <div className="grow">
                         <span className="items-center rounded bg-purple-500/20 px-2 py-1 text-xs">
-                          strength:{entry.loraStrength}
+                          strength:{entry.strength}
                         </span>
                       </div>
                     )}
@@ -421,9 +461,9 @@ function TriggerWordsEditor() {
         ))}
       </>
 
-      {triggerWords.length === 0 && !newEntry && (
+      {promptAttachment?.length === 0 && !newEntry && (
         <div className="py-8 text-center text-sm text-muted-foreground">
-          No trigger words configured. Click "Add Entry" to create one.
+          No attachment configured. Click "Add Entry" to create one.
         </div>
       )}
       <Modal isOpen={deleteConfirmIndex !== null} onClose={cancelDelete}>
@@ -434,8 +474,8 @@ function TriggerWordsEditor() {
               <p className="text-sm text-muted-foreground">
                 Are you sure you want to delete the trigger word for{" "}
                 <span className="font-medium text-foreground">
-                  {deleteConfirmIndex &&
-                    triggerWords[deleteConfirmIndex]?.target}
+                  {deleteConfirmIndex !== null &&
+                    promptAttachment?.[deleteConfirmIndex]?.target}
                 </span>
                 ? This action cannot be undone.
               </p>
@@ -454,5 +494,3 @@ function TriggerWordsEditor() {
     </>
   );
 }
-
-export default TriggerWordsEditor;

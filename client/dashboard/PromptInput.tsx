@@ -9,9 +9,9 @@ import {
 } from "client/components/ui/select";
 import { Textarea } from "client/components/ui/textarea";
 import { useTRPC } from "client/query";
-import { useTriggerWords } from "client/settings/useTriggerWords";
+import { usePromptAttachment } from "client/settings/usePromptAttachment";
 import React, { useLayoutEffect, useRef, useState } from "react";
-import type { ExtraDataType } from "server/types";
+import type { PromptAttachmentType } from "server/types";
 import { usePromptState } from "./usePromptState";
 
 type PromptType = "prompt" | "negativePrompt";
@@ -19,7 +19,7 @@ type PromptType = "prompt" | "negativePrompt";
 const ExtraSelector: React.FC<{
   onAddExtra: (filename: string) => void;
   extras: string[];
-  type: ExtraDataType;
+  type: PromptAttachmentType;
 }> = ({ onAddExtra, extras, type }) => {
   const [value, setValue] = useState("");
   return (
@@ -61,10 +61,10 @@ function Prompt({ type }: { type: PromptType }) {
   const { data } = useQuery(rpc.listModels.queryOptions());
   const { value, changed, updatePrompt, forceSave } = usePromptState(type);
   const ref = useRef<HTMLTextAreaElement>(null);
-  const { buildPrompt } = useTriggerWords();
+  const { buildPrompt } = usePromptAttachment();
   const title = type === "prompt" ? "Prompt" : "Negative Prompt";
 
-  const addExtraData = (filename: string, type: ExtraDataType) => {
+  const addAttachment = (filename: string, type: PromptAttachmentType) => {
     updatePrompt(buildPrompt(value, filename, type));
   };
 
@@ -115,14 +115,14 @@ function Prompt({ type }: { type: PromptType }) {
         {data && (
           <ExtraSelector
             type="embedding"
-            onAddExtra={(file) => addExtraData(file, "embedding")}
+            onAddExtra={(file) => addAttachment(file, "embedding")}
             extras={data?.embeddings}
           />
         )}
         {data && (
           <ExtraSelector
             type="lora"
-            onAddExtra={(file) => addExtraData(file, "lora")}
+            onAddExtra={(file) => addAttachment(file, "lora")}
             extras={data?.loras}
           />
         )}

@@ -6,7 +6,7 @@ import {
   readConfig,
   saveAppSettings,
   saveDiffusionParams,
-  saveTriggerWords,
+  savePromptAttachment,
 } from "./api/config";
 import { quantizationStart } from "./api/converter";
 import { diffusionStart, listDiffusionModels } from "./api/diffusion";
@@ -15,8 +15,8 @@ import system from "./api/system";
 import { getJobs, stopJob } from "./services/jobs";
 import { diffusionParamsSchema } from "./types/diffusionparams";
 import { jobsTypeSchema } from "./types/jobs";
+import { promptAttachmentSchema } from "./types/promptAttachment";
 import { convertParamsSchema } from "./types/quantization";
-import { triggerWordSchema } from "./types/triggerword";
 import { appSettingsSchema } from "./types/userconfig";
 
 const t = initTRPC.create();
@@ -35,12 +35,12 @@ export const router = t.router({
   saveSettings: t.procedure
     .input(appSettingsSchema)
     .mutation((opts) => saveAppSettings(opts.input)),
-  triggerWords: t.procedure.query(
-    async () => (await readConfig()).triggerWords,
+  promptAttachment: t.procedure.query(
+    async () => (await readConfig()).promptAttachment,
   ),
-  saveTriggerWords: t.procedure
-    .input(z.array(triggerWordSchema))
-    .mutation((opts) => saveTriggerWords(opts.input)),
+  savePromptAttachment: t.procedure
+    .input(z.array(promptAttachmentSchema))
+    .mutation((opts) => savePromptAttachment(opts.input)),
   listImages: t.procedure
     .input(z.object({ limit: z.number(), cursor: z.number().optional() }))
     .query((opts) => listImages(opts.input.limit, opts.input.cursor)),

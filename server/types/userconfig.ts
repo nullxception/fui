@@ -1,6 +1,6 @@
 import z from "zod";
 import type { DiffusionParams } from "./diffusionparams";
-import type { TriggerWord } from "./triggerword";
+import type { PromptAttachment } from "./promptAttachment";
 
 export const appSettingsSchema = z.object({
   background: z.string().optional(),
@@ -12,5 +12,5 @@ export type AppSettings = z.infer<typeof appSettingsSchema>;
 export interface UserConfig {
   diffusion: DiffusionParams;
   settings: AppSettings;
-  triggerWords: TriggerWord[];
+  promptAttachment: PromptAttachment[];
 }

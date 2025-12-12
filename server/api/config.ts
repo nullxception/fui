@@ -5,7 +5,7 @@ import { CONFIG_PATH } from "server/dirs";
 import type {
   AppSettings,
   DiffusionParams,
-  TriggerWord,
+  PromptAttachment,
   UserConfig,
 } from "server/types";
 
@@ -40,7 +40,7 @@ export async function readConfig() {
       const conf = Bun.YAML.parse(file) as UserConfig;
       config.diffusion = conf.diffusion;
       config.settings = conf.settings;
-      config.triggerWords = conf.triggerWords;
+      config.promptAttachment = conf.promptAttachment;
       return conf as UserConfig;
     } else {
       return defaultUserConfig() as UserConfig;
@@ -78,8 +78,10 @@ export async function saveAppSettings(settings: AppSettings) {
   return await saveConfig(config);
 }
 
-export async function saveTriggerWords(triggerWords: TriggerWord[]) {
-  config.triggerWords = triggerWords;
+export async function savePromptAttachment(
+  promptAttachment: PromptAttachment[],
+) {
+  config.promptAttachment = promptAttachment;
   return await saveConfig(config);
 }
 
