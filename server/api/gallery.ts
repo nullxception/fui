@@ -3,19 +3,22 @@ import exifr from "exifr";
 import { promises as fs } from "fs";
 import path from "path";
 import { OUTPUT_DIR, THUMBS_DIR } from "server/dirs";
+import { parseDiffusionParams } from "server/lib/metadataParser";
 import { deleteJobByResultFile } from "server/services/jobs";
-import type { Image } from "server/types";
+import type { SDImage } from "server/types";
 import type { ExifImage } from "server/types/image";
+import { listDiffusionModels } from "./diffusion";
 
 export const IMAGE_EXT = [".png", ".jpg", ".jpeg", ".webp"];
 
-export async function getDataFromImage(filePath: string): Promise<Image> {
+export async function getDataFromImage(filePath: string): Promise<SDImage> {
   try {
+    const models = await listDiffusionModels();
     const stats = await fs.stat(filePath);
     const file = path.parse(filePath);
-    let metadata: ExifImage = {};
+    let exif: ExifImage = {};
     try {
-      metadata = await exifr.parse(filePath, {
+      exif = await exifr.parse(filePath, {
         userComment: true,
         xmp: true,
         icc: false,
@@ -28,9 +31,14 @@ export async function getDataFromImage(filePath: string): Promise<Image> {
       name: file.name,
       url: path.join("/output", path.relative(OUTPUT_DIR, filePath)),
       mtime: stats.mtime.getTime(),
-      width: metadata?.ImageWidth ?? 0,
-      height: metadata?.ImageHeight ?? 0,
-      metadata: metadata?.parameters ?? "",
+      width: exif?.ImageWidth ?? 0,
+      height: exif?.ImageHeight ?? 0,
+      metadata: parseDiffusionParams(
+        exif?.ImageWidth,
+        exif?.ImageHeight,
+        exif?.parameters,
+        models,
+      ),
     };
   } catch (error) {
     console.error(`Error reading ${filePath}`, error);
@@ -58,8 +66,9 @@ async function cleanupThumbnails(img: string) {
 export async function listImages(
   limit: number,
   offset?: number | null,
-): Promise<Image[]> {
+): Promise<SDImage[]> {
   try {
+    const models = await listDiffusionModels();
     const dir = path.join(OUTPUT_DIR, "txt2img");
     const files = await fs.readdir(dir);
 
@@ -87,9 +96,9 @@ export async function listImages(
     // Parse metadata only for the current page
     const images = await Promise.all(
       paginatedFiles.map(async ({ filename, mtime, filePath }) => {
-        let metadata: ExifImage = {};
+        let exif: ExifImage = {};
         try {
-          metadata = await exifr.parse(filePath, {
+          exif = await exifr.parse(filePath, {
             userComment: true,
             xmp: true,
             icc: false,
@@ -102,9 +111,14 @@ export async function listImages(
           name: path.parse(filename).name,
           url: path.join("/output", path.relative(OUTPUT_DIR, filePath)),
           mtime,
-          width: metadata?.ImageWidth ?? 0,
-          height: metadata?.ImageHeight ?? 0,
-          metadata: metadata?.parameters ?? "",
+          width: exif?.ImageWidth ?? 0,
+          height: exif?.ImageHeight ?? 0,
+          metadata: parseDiffusionParams(
+            exif?.ImageWidth,
+            exif?.ImageHeight,
+            exif?.parameters,
+            models,
+          ),
         };
       }),
     );

@@ -19,7 +19,7 @@ import {
   getJob,
   withJobEvents,
 } from "server/services/jobs";
-import type { DiffusionParams, Image, Models } from "server/types";
+import type { DiffusionParams, Models, SDImage } from "server/types";
 import type { JobType } from "server/types/jobs";
 
 function putModelFiles(
@@ -155,7 +155,7 @@ export const diffusionProgress: Bun.Serve.Handler<
         data,
       }: {
         jobId: string;
-        data: Image | string;
+        data: SDImage | string;
       }) => {
         if (id === jobId) {
           sendEvent("complete", data);

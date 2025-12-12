@@ -1,10 +1,10 @@
 import { DottedBackground } from "client/components/DottedBackground";
 import { ImageIcon } from "lucide-react";
-import type { Image } from "server/types";
+import type { SDImage } from "server/types";
 import { Link } from "wouter";
 
 interface ImageDisplayProps {
-  image?: Image;
+  image?: SDImage;
   isProcessing: boolean;
 }
 

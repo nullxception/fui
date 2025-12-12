@@ -1,5 +1,5 @@
 import z from "zod";
-import type { Image } from "./image";
+import type { SDImage } from "./image";
 
 export const jobsTypeSchema = z.literal(["txt2img", "convert"]);
 export type JobType = z.infer<typeof jobsTypeSchema>;
@@ -17,7 +17,7 @@ export interface Job {
   createdAt: number;
   startedAt?: number;
   completedAt?: number;
-  result?: Image | string;
+  result?: SDImage | string;
   logs: LogData[];
 }
 

@@ -8,7 +8,7 @@ import {
   XIcon,
 } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
-import type { Image } from "server/types";
+import type { SDImage } from "server/types";
 import { useLocation, useRoute } from "wouter";
 import { DottedBackground } from "../components/DottedBackground";
 import ImageMetadata from "./ImageMetadata";
@@ -18,7 +18,7 @@ import { useImageQuery } from "./useImageQuery";
 interface PageDirection {
   index: number;
   direction: "next" | "prev";
-  lastImage?: Image;
+  lastImage?: SDImage;
 }
 
 const variants = {

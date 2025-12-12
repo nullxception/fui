@@ -2,7 +2,7 @@ import { AspectRatio } from "client/components/ui/aspect-ratio";
 import { Skeleton } from "client/components/ui/skeleton";
 import { Trash2Icon } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
-import type { Image } from "server/types";
+import type { SDImage } from "server/types";
 
 function useElementWidth<T extends HTMLElement>() {
   const ref = useRef<T | null>(null);
@@ -25,7 +25,7 @@ function useElementWidth<T extends HTMLElement>() {
 }
 
 interface ThumbnailProps {
-  image: Image;
+  image: SDImage;
   className?: string;
   onClick?: () => void;
   isSelectionMode?: boolean;

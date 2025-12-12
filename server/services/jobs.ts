@@ -1,6 +1,6 @@
 import { randomUUIDv7, type Subprocess } from "bun";
 import { EventEmitter } from "events";
-import type { Image, Job, JobStatus, LogData } from "server/types";
+import type { Job, JobStatus, LogData, SDImage } from "server/types";
 import type { JobType } from "server/types/jobs";
 
 const jobEvents = new EventEmitter();
@@ -34,7 +34,7 @@ export function updateJobStatus({
   id: string;
   status: JobStatus;
   process?: Subprocess | null;
-  result?: Image | string;
+  result?: SDImage | string;
 }) {
   const job = jobs.get(id);
 

@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { optimizePrompt } from "client/lib/metadataParser";
 import { useTRPC } from "client/query";
+import { optimizePrompt } from "server/lib/metadataParser";
 import type { ExtraDataType, TriggerWord } from "server/types";
 
 export function useTriggerWords() {

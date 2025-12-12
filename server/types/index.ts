@@ -1,6 +1,6 @@
 import type { DiffusionModelType, DiffusionParams } from "./diffusionparams";
 import { GGML_WEIGHTS_TYPE, type Quantization } from "./ggml";
-import type { Image } from "./image";
+import type { SDImage } from "./image";
 import type { Job, JobStatus, LogData } from "./jobs";
 import type { Models } from "./models";
 import type { ConvertParams } from "./quantization";
@@ -15,12 +15,12 @@ export type {
   DiffusionModelType,
   DiffusionParams,
   ExtraDataType,
-  Image,
   Job,
   JobStatus,
   LogData,
   Models,
   Quantization,
+  SDImage,
   TriggerWord,
   UserConfig,
 };

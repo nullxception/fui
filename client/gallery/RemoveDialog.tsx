@@ -5,14 +5,14 @@ import { ArrowLeftIcon, CircleAlertIcon, Trash2Icon } from "lucide-react";
 import { useState } from "react";
 import Masonry, { ResponsiveMasonry } from "react-responsive-masonry";
 
-import type { Image } from "server/types";
+import type { SDImage } from "server/types";
 
 interface RemoveDialogProps {
   onCancel: () => void;
   onRemove: () => Promise<void>;
   onRemoved: () => void;
   count?: number;
-  images?: Image[];
+  images?: SDImage[];
 }
 
 export function RemoveDialog({

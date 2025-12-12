@@ -1,10 +1,10 @@
-import type { Image } from "server/types";
+import type { SDImage } from "server/types";
 import { create } from "zustand";
 import { useAppStore } from "./useAppStore";
 
 interface PreviewImageStore {
-  image?: Image;
-  setPreviewImage: (image?: Image) => void;
+  image?: SDImage;
+  setPreviewImage: (image?: SDImage) => void;
 }
 
 export const usePreviewImage = create<PreviewImageStore>((set) => ({

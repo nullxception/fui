@@ -27,8 +27,8 @@ import {
   XIcon,
 } from "lucide-react";
 import React, { useState } from "react";
+import { splitSmart } from "server/lib/metadataParser";
 import type { ExtraDataType, TriggerWord } from "server/types";
-import { splitSmart } from "../lib/metadataParser";
 import { useTriggerWords } from "./useTriggerWords";
 
 interface TriggerWordFormProps {

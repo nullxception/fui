@@ -1,8 +1,6 @@
-import { useQuery } from "@tanstack/react-query";
 import { Button } from "client/components/ui/button";
 import { Label } from "client/components/ui/label";
 import { useDiffusionConfig } from "client/dashboard/useDiffusionConfig";
-import { useTRPC } from "client/query";
 import { usePreviewImage } from "client/stores/usePreviewImage";
 import {
   ChevronDownIcon,
@@ -10,14 +8,11 @@ import {
   RefreshCcwIcon,
   TrashIcon,
 } from "lucide-react";
-import type { Image } from "server/types";
+import type { SDImage } from "server/types";
+import type { SDImageParams } from "server/types/image";
 import { useLocation } from "wouter";
-import {
-  parseDiffusionParams,
-  type ParsedMetadata,
-} from "../lib/metadataParser";
 
-async function saveImage(image: Image) {
+async function saveImage(image: SDImage) {
   try {
     const response = await fetch(image.url);
     const blob = await response.blob();
@@ -35,7 +30,7 @@ async function saveImage(image: Image) {
 }
 
 interface ImageMetadataProps {
-  image: Image;
+  image: SDImage;
   onRemove: () => void;
   onClose: () => void;
   className: string;
@@ -83,8 +78,8 @@ function MetadataChip({
   metakey,
   className = "",
 }: {
-  data: ParsedMetadata;
-  metakey: keyof ParsedMetadata;
+  data: SDImageParams;
+  metakey: keyof SDImageParams;
   className?: string;
 }) {
   return (
@@ -104,9 +99,7 @@ export default function ImageMetadata({
 }: ImageMetadataProps) {
   const [, navigate] = useLocation();
   const store = useDiffusionConfig();
-  const rpc = useTRPC();
-  const { data } = useQuery(rpc.listModels.queryOptions());
-  const metadata = parseDiffusionParams(image, data);
+  const metadata = image.metadata;
   const { setPreviewImage } = usePreviewImage();
 
   const handleRemake = () => {
