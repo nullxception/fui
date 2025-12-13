@@ -15,12 +15,11 @@ import {
 import { startDiffusion } from "server/services/diffusion";
 import {
   createJob,
-  getAllJobs,
   getJob,
+  getLogs,
   withJobEvents,
 } from "server/services/jobs";
-import type { DiffusionParams, Models, SDImage } from "server/types";
-import type { JobType } from "server/types/jobs";
+import type { DiffusionParams, LogEntry, Models } from "server/types";
 
 function putModelFiles(
   file: string,
@@ -120,10 +119,9 @@ export const diffusionProgress: Bun.Serve.Handler<
       const encoder = new TextEncoder();
       const sendEvent = (event: string, data: unknown) => {
         try {
+          data = typeof data === "string" ? data : JSON.stringify(data);
           controller.enqueue(
-            encoder.encode(
-              `event: ${event}\ndata: ${JSON.stringify(data)}\n\n`,
-            ),
+            encoder.encode(`event: ${event}\ndata: ${data}\n\n`),
           );
         } catch {
           // Controller might be closed
@@ -131,7 +129,7 @@ export const diffusionProgress: Bun.Serve.Handler<
       };
 
       // Send existing logs
-      job.logs.forEach((log) => {
+      getLogs(jobId)?.forEach((log) => {
         sendEvent("message", log);
       });
 
@@ -144,8 +142,8 @@ export const diffusionProgress: Bun.Serve.Handler<
       }
 
       // Subscribe to new logs
-      const onLog = ({ jobId: id, log }: { jobId: string; log: unknown }) => {
-        if (id === jobId) {
+      const onLog = (log: LogEntry) => {
+        if (log.jobId === jobId) {
           sendEvent("message", log);
         }
       };
@@ -155,7 +153,7 @@ export const diffusionProgress: Bun.Serve.Handler<
         data,
       }: {
         jobId: string;
-        data: SDImage | string;
+        data: string;
       }) => {
         if (id === jobId) {
           sendEvent("complete", data);
@@ -204,11 +202,3 @@ export const diffusionProgress: Bun.Serve.Handler<
     },
   });
 };
-
-export async function diffusionJobs(type: JobType) {
-  return getAllJobs()
-    .filter((job) => job.type === type)
-    .map((job) => ({ ...job, logs: [], params: {} }))
-    .toArray()
-    .sort((a, b) => a.createdAt - b.createdAt);
-}

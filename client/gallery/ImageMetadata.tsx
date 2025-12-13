@@ -136,7 +136,7 @@ export default function ImageMetadata({
     });
 
     // Navigate back to generate tab
-    setPreviewImage(image);
+    setPreviewImage(image.url);
     navigate("~/");
     onClose();
   };

@@ -1,11 +1,11 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useTRPC } from "client/query";
 import { usePreviewImage } from "client/stores/usePreviewImage";
-import type { LogEntry } from "client/types";
 import { createContext, useEffect, useRef, useState } from "react";
-import type { LogData } from "server/types";
-import type { JobStatus, JobType } from "server/types/jobs";
+import type { JobStatus, JobType, LogEntry } from "server/types";
+import { logEntrySchema } from "server/types/jobs";
 import { useLocation } from "wouter";
+import z from "zod";
 import { useAppStore } from "../stores/useAppStore";
 
 interface UIJobStatus {
@@ -27,6 +27,7 @@ export const useJobQuery = (type: JobType) => {
   const { setOutputTab } = useAppStore();
   const { setPreviewImage } = usePreviewImage();
   const closingRef = useRef<Timeout | null>(null);
+  const queryClient = useQueryClient();
 
   function addLog(log: LogEntry) {
     setLogs((prev) => [...prev, { ...log, timestamp: Date.now() }]);
@@ -40,10 +41,10 @@ export const useJobQuery = (type: JobType) => {
       return;
     }
     const hasJobs = listJobs && listJobs.length > 0;
-    const lastJob = hasJobs && listJobs[listJobs.length - 1];
-    if (!status && lastJob && lastJob.status === "running") {
+    const recentJob = hasJobs && listJobs[0];
+    if (!status && recentJob && recentJob.status === "running") {
       setTimeout(() => {
-        setStatus({ id: lastJob.id, status: "pending" });
+        setStatus({ id: recentJob.id, status: "pending" });
       }, 60);
     }
   }, [listJobs, type, location, status]);
@@ -73,35 +74,33 @@ export const useJobQuery = (type: JobType) => {
 
     es.addEventListener("message", (event) => {
       try {
-        const log: LogData = JSON.parse(event.data);
-        addLog({ jobId: id, message: log.message, type: log.type });
+        addLog(logEntrySchema.parse(JSON.parse(event.data)));
       } catch (e) {
         console.error(e);
       }
     });
 
-    es.addEventListener("complete", (event) => {
+    es.addEventListener("complete", async (event) => {
       try {
-        const result = JSON.parse(event.data);
+        const images = rpc.listImages.infiniteQueryKey();
+        await queryClient.invalidateQueries({ queryKey: images });
+
         setStatus({ id: id, status: "completed" });
-        if (typeof result === "object") {
-          setPreviewImage(result);
-        }
+        setPreviewImage(z.string().parse(event.data));
         close("completed");
       } catch (e) {
         console.error(e);
       }
     });
 
-    es.addEventListener("error", (event) => {
+    es.addEventListener("error", (event: MessageEvent) => {
       try {
-        const ev = event as MessageEvent;
-        if (ev.data) {
-          const message = JSON.parse(ev.data);
-          if (message) {
-            addLog({ jobId: id, type: "stderr", message });
-          }
-        }
+        addLog({
+          jobId: id,
+          type: "stderr",
+          message: z.string().parse(event.data),
+          timestamp: Date.now(),
+        });
       } catch (e) {
         console.error(e);
       }
@@ -112,7 +111,7 @@ export const useJobQuery = (type: JobType) => {
         }, 500);
       }
     });
-  }, [setOutputTab, setPreviewImage, status]);
+  }, [queryClient, rpc.listImages, setOutputTab, setPreviewImage, status]);
 
   useEffect(() => {
     return () => {
@@ -136,7 +135,12 @@ export const useJobQuery = (type: JobType) => {
     },
     setError(message: string) {
       setStatus((prev) => {
-        addLog({ type: "stderr", message, jobId: prev?.id ?? "" });
+        addLog({
+          type: "stderr",
+          message,
+          jobId: prev?.id ?? "",
+          timestamp: Date.now(),
+        });
 
         return { ...prev, id: prev?.id ?? "", status: "failed" };
       });

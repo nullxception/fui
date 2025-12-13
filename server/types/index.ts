@@ -1,7 +1,7 @@
 import type { DiffusionModelType, DiffusionParams } from "./diffusionparams";
 import { GGML_WEIGHTS_TYPE, type Quantization } from "./ggml";
 import type { SDImage } from "./image";
-import type { Job, JobStatus, LogData } from "./jobs";
+import type { Job, JobStatus, JobType, LogEntry, LogType } from "./jobs";
 import type { Models } from "./models";
 import type { ConvertParams } from "./quantization";
 import type { ExtraDataType, TriggerWord } from "./triggerword";
@@ -17,7 +17,9 @@ export type {
   ExtraDataType,
   Job,
   JobStatus,
-  LogData,
+  JobType,
+  LogEntry,
+  LogType,
   Models,
   Quantization,
   SDImage,

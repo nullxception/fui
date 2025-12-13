@@ -9,7 +9,7 @@ import {
   getJob,
   updateJobStatus,
 } from "server/services/jobs";
-import type { ConvertParams } from "server/types";
+import type { ConvertParams, LogType } from "server/types";
 
 export async function quantizationStart(params: ConvertParams) {
   if (!params.model) {
@@ -61,13 +61,13 @@ export async function startQuantization(jobId: string, params: ConvertParams) {
     "--verbose",
   ];
 
-  const sendLog = (type: "stdout" | "stderr", message: string) => {
+  const sendLog = (type: LogType, message: string) => {
     if (type === "stderr") {
       console.error(message);
     } else {
       console.log(message);
     }
-    addJobLog(jobId, "txt2img", { type, message: message });
+    addJobLog("txt2img", { type, message, jobId, timestamp: Date.now() });
   };
 
   const exec = await resolveSD();

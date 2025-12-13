@@ -4,51 +4,12 @@ import { promises as fs } from "fs";
 import path from "path";
 import { OUTPUT_DIR, THUMBS_DIR } from "server/dirs";
 import { parseDiffusionParams } from "server/lib/metadataParser";
-import { deleteJobByResultFile } from "server/services/jobs";
+import { removeJob } from "server/services/jobs";
 import type { SDImage } from "server/types";
 import type { ExifImage } from "server/types/image";
 import { listDiffusionModels } from "./diffusion";
 
 export const IMAGE_EXT = [".png", ".jpg", ".jpeg", ".webp"];
-
-export async function getDataFromImage(filePath: string): Promise<SDImage> {
-  try {
-    const models = await listDiffusionModels();
-    const stats = await fs.stat(filePath);
-    const file = path.parse(filePath);
-    let exif: ExifImage = {};
-    try {
-      exif = await exifr.parse(filePath, {
-        userComment: true,
-        xmp: true,
-        icc: false,
-      });
-    } catch (e) {
-      console.warn(`Failed to parse metadata for ${file.name}`, e);
-    }
-
-    return {
-      name: file.name,
-      url: path.join("/output", path.relative(OUTPUT_DIR, filePath)),
-      mtime: stats.mtime.getTime(),
-      width: exif?.ImageWidth ?? 0,
-      height: exif?.ImageHeight ?? 0,
-      metadata: parseDiffusionParams(
-        exif?.ImageWidth,
-        exif?.ImageHeight,
-        exif?.parameters,
-        models,
-      ),
-    };
-  } catch (error) {
-    console.error(`Error reading ${filePath}`, error);
-    throw new TRPCError({
-      code: "INTERNAL_SERVER_ERROR",
-      message: `Failed to read ${filePath} metadata`,
-      cause: error,
-    });
-  }
-}
 
 async function cleanupThumbnails(img: string) {
   const filename = path.basename(img);
@@ -145,7 +106,7 @@ export async function removeImages(images: string[]) {
       console.log(`removing ${img}`);
       await Bun.file(img).delete();
       cleanupThumbnails(img);
-      deleteJobByResultFile(image);
+      removeJob("txt2img", image);
     }
 
     return { message: "Image(s) removed" };

@@ -1,11 +1,36 @@
 import { randomUUIDv7, type Subprocess } from "bun";
 import { EventEmitter } from "events";
-import type { Job, JobStatus, LogData, SDImage } from "server/types";
-import type { JobType } from "server/types/jobs";
+import type { Job, JobStatus, LogEntry } from "server/types";
+import { jobSchema, type JobType } from "server/types/jobs";
+import db from "../db";
 
 const jobEvents = new EventEmitter();
 const activeProcesses = new Map<string, Subprocess>();
-const jobs = new Map<string, Job>();
+
+const insertJob = db.prepare(`
+  INSERT INTO jobs (id, type, status, createdAt)
+  VALUES ($id, $type, $status, $createdAt)
+`);
+
+const selectJob = db.prepare(`SELECT * FROM jobs WHERE id = $id`);
+const selectJobsByType = db.prepare(
+  `SELECT * FROM jobs WHERE type = $type ORDER BY createdAt DESC`,
+);
+const updateStatus = db.prepare(`
+  UPDATE jobs 
+  SET status = $status, startedAt = $startedAt, completedAt = $completedAt, result = $result
+  WHERE id = $id
+`);
+
+const deleteJobByResult = db.prepare(
+  `DELETE FROM jobs WHERE type = $type and result LIKE $pattern`,
+);
+
+const deleteOldJobs = db.prepare(
+  `DELETE FROM jobs WHERE completedAt < $cutoff`,
+);
+
+const logs = new Map<string, LogEntry[]>();
 
 export function createJob(type: JobType, id?: string) {
   const job: Job = {
@@ -13,14 +38,21 @@ export function createJob(type: JobType, id?: string) {
     type,
     status: "pending",
     createdAt: Date.now(),
-    logs: [],
   };
 
-  jobs.set(job.id, job);
+  insertJob.run({
+    $id: job.id,
+    $type: job.type,
+    $status: job.status,
+    $createdAt: job.createdAt,
+  });
+
   return job;
 }
 
-export const getJob = (id: string) => jobs.get(id);
+export const getJob = (id: string) => {
+  return jobSchema.safeParse(selectJob.get({ $id: id })).data;
+};
 
 export const withJobEvents = (predicate: (events: EventEmitter) => void) =>
   predicate(jobEvents);
@@ -34,62 +66,74 @@ export function updateJobStatus({
   id: string;
   status: JobStatus;
   process?: Subprocess | null;
-  result?: SDImage | string;
+  result?: string;
 }) {
-  const job = jobs.get(id);
-
   if (status === "running" && process) {
     activeProcesses.set(id, process);
   }
 
   if (["completed", "failed", "cancelled"].includes(status)) {
-    const process = activeProcesses.get(id);
-    if (process) {
-      if (!process.killed) {
+    const proc = activeProcesses.get(id);
+    if (proc) {
+      if (!proc.killed) {
         console.log(`closing job ${id}`);
-        process.kill();
-        process.kill("SIGTERM");
-        process.kill("SIGKILL");
+        proc.kill();
       }
       activeProcesses.delete(id);
     }
   }
 
+  const job = getJob(id);
   if (!job) return;
 
-  job.status = status;
   const finished = ["completed", "failed", "cancelled"];
+  let completedAt: number | null = null;
+  let startedAt: number | null = job.startedAt || null;
+
+  if (status === "running" && !startedAt) {
+    startedAt = Date.now();
+  }
+
   if (finished.includes(status)) {
-    job.completedAt = Date.now();
-    job.result = result;
+    completedAt = Date.now();
     const event = status === "completed" ? "complete" : "error";
     if (jobEvents.listenerCount(event) > 0) {
       jobEvents.emit(event, { jobId: id, data: result });
     }
   }
+
+  updateStatus.run({
+    $id: id,
+    $status: status,
+    $startedAt: startedAt,
+    $completedAt: completedAt,
+    $result: result ? result : null,
+  });
 }
 
-export function addJobLog(id: string, type: JobType, log: LogData) {
-  let job = jobs.get(id);
+export function addJobLog(type: JobType, log: LogEntry) {
+  const job = getJob(log.jobId);
   if (!job) {
-    job = createJob(type, id);
+    createJob(type, log.jobId);
   }
 
-  job?.logs.push(log);
-  jobEvents.emit("log", { jobId: id, log });
+  logs.set(log.jobId, [...(logs.get(log.jobId) ?? []), log]);
+  jobEvents.emit("log", log);
 }
 
-export function getAllJobs() {
-  return jobs.values();
+export function getJobs(type: JobType) {
+  return selectJobsByType.all({ $type: type }).reduce((result: Job[], job) => {
+    const parsed = jobSchema.safeParse(job).data;
+    return parsed ? [...result, parsed] : result;
+  }, new Array<Job>());
 }
 
-export function deleteJobByResultFile(filename: string) {
-  for (const [id, job] of jobs.entries()) {
-    const result = job.result;
-    if (typeof result !== "string" && result?.url === filename) {
-      jobs.delete(id);
-    }
-  }
+export function getLogs(id: string) {
+  return logs.get(id);
+}
+
+export function removeJob(type: JobType, resultPart: string) {
+  deleteJobByResult.run({ $type: type, $pattern: `%${resultPart}%` });
 }
 
 export function stopJob(id?: string) {
@@ -107,11 +151,8 @@ export function stopJobs() {
     stopJob(id);
   }
 }
+
 export function cleanupOldJobs(maxAge: number = 24 * 60 * 60 * 1000) {
-  const now = Date.now();
-  for (const [id, job] of jobs.entries()) {
-    if (job.completedAt && now - job.completedAt > maxAge) {
-      jobs.delete(id);
-    }
-  }
+  const cutoff = Date.now() - maxAge;
+  deleteOldJobs.run({ $cutoff: cutoff });
 }

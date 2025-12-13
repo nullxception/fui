@@ -40,3 +40,6 @@ sd
 lib*.so
 ggml.txt
 *.cpp.txt
+
+# Database
+*.sqlite

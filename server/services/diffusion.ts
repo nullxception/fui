@@ -1,7 +1,6 @@
 import { file, spawn } from "bun";
 import { promises as fs } from "fs";
 import path from "path";
-import { getDataFromImage as getImageData } from "server/api/gallery";
 import {
   CHECKPOINT_DIR,
   EMBEDDING_DIR,
@@ -14,7 +13,7 @@ import {
   UPSCALER_DIR,
   VAE_DIR,
 } from "server/dirs";
-import type { DiffusionParams } from "server/types";
+import type { DiffusionParams, LogType } from "server/types";
 import { addJobLog, getJob, updateJobStatus } from "./jobs";
 
 function printableArgs(args: (string | number)[]) {
@@ -249,13 +248,13 @@ export async function startDiffusion(jobId: string, params: DiffusionParams) {
     args.push("--verbose");
   }
 
-  const sendLog = (type: "stdout" | "stderr", message: string) => {
+  const sendLog = (type: LogType, message: string) => {
     if (type === "stderr") {
       console.error(message);
     } else {
       console.log(message);
     }
-    addJobLog(jobId, "txt2img", { type, message: message });
+    addJobLog("txt2img", { type, message, jobId, timestamp: Date.now() });
   };
   const exec = await resolveSD();
   sendLog(
@@ -331,7 +330,7 @@ export async function startDiffusion(jobId: string, params: DiffusionParams) {
       updateJobStatus({
         id: jobId,
         status: "completed",
-        result: await getImageData(outputPath),
+        result: path.join("/output", path.relative(OUTPUT_DIR, outputPath)),
       });
     } else if (job?.status !== "cancelled") {
       updateJobStatus({

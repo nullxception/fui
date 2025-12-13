@@ -1,6 +1,7 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { Logo } from "client/components/Header";
 import { Button } from "client/components/ui/button";
+import { useImageQuery } from "client/gallery/useImageQuery";
 import { JobQueryContext, JobQueryProvider } from "client/hooks/useJobQuery";
 import { useTRPC } from "client/query";
 import { useAppStore } from "client/stores/useAppStore";
@@ -18,7 +19,9 @@ function OutputCard() {
   const { status: job, logs } = useContext(JobQueryContext);
   const isProcessing = job?.status === "running";
   const { outputTab, setOutputTab } = useAppStore();
-  const { image } = usePreviewImage();
+  const { url } = usePreviewImage();
+  const { images } = useImageQuery();
+  const image = images.find((it) => it.url === url);
 
   return (
     <>

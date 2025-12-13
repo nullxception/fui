@@ -3,7 +3,7 @@ import { z } from "zod";
 export const SDImageMetadataSchema = z.object({
   prompt: z.string(),
   negativePrompt: z.string(),
-  upscaled: z.boolean(),
+  upscaled: z.boolean().default(false),
   baseWidth: z.number(),
   baseHeight: z.number(),
   model: z.string(),

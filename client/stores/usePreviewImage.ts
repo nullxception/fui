@@ -1,15 +1,14 @@
-import type { SDImage } from "server/types";
 import { create } from "zustand";
 import { useAppStore } from "./useAppStore";
 
 interface PreviewImageStore {
-  image?: SDImage;
-  setPreviewImage: (image?: SDImage) => void;
+  url?: string;
+  setPreviewImage: (url?: string) => void;
 }
 
 export const usePreviewImage = create<PreviewImageStore>((set) => ({
-  setPreviewImage(image) {
-    set({ image });
+  setPreviewImage(url) {
+    set({ url });
     useAppStore.getState().setOutputTab("image");
   },
 }));

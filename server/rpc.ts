@@ -9,14 +9,10 @@ import {
   saveTriggerWords,
 } from "./api/config";
 import { quantizationStart } from "./api/converter";
-import {
-  diffusionJobs,
-  diffusionStart,
-  listDiffusionModels,
-} from "./api/diffusion";
+import { diffusionStart, listDiffusionModels } from "./api/diffusion";
 import { listImages, removeImages } from "./api/gallery";
 import system from "./api/system";
-import { stopJob } from "./services/jobs";
+import { getJobs, stopJob } from "./services/jobs";
 import { diffusionParamsSchema } from "./types/diffusionparams";
 import { jobsTypeSchema } from "./types/jobs";
 import { convertParamsSchema } from "./types/quantization";
@@ -50,7 +46,7 @@ export const router = t.router({
     .query((opts) => listImages(opts.input.limit, opts.input.cursor)),
   listJobs: t.procedure
     .input(jobsTypeSchema)
-    .query((opts) => diffusionJobs(opts.input)),
+    .query((opts) => getJobs(opts.input)),
   removeImage: t.procedure
     .input(z.array(z.string()))
     .mutation((opts) => removeImages(opts.input)),

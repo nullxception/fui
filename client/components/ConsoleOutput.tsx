@@ -1,5 +1,5 @@
-import type { LogEntry } from "client/types";
 import { useEffect, useMemo, useRef } from "react";
+import type { LogEntry } from "server/types";
 
 function formatTime(timestamp: number) {
   return new Date(timestamp).toLocaleTimeString();
