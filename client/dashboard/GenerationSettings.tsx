@@ -60,7 +60,10 @@ export function GenerationSettings() {
   ];
 
   const rngOptions = ["std_default", "cuda", "cpu"];
-
+  const enabledUpscaler = z
+    .string()
+    .min(1)
+    .safeParse(store.params.upscaleModel).success;
   return (
     <>
       <div className="grid gap-4 px-4 sm:grid-cols-1 md:grid-cols-2">
@@ -309,10 +312,39 @@ export function GenerationSettings() {
           step={1}
           value={store.params.upscaleRepeats ?? 2}
           onChange={(e) => store.update("upscaleRepeats", e)}
-          disabled={
-            !z.string().min(1).safeParse(store.params.upscaleModel).success
-          }
+          disabled={!enabledUpscaler}
         />
+
+        {enabledUpscaler && (
+          <>
+            <div className="flex items-center justify-between py-2">
+              <Label htmlFor="upscaleTileSizeSwitch">
+                Override upscaler tile size
+              </Label>
+              <Switch
+                id="upscaleTileSizeSwitch"
+                checked={store.params.upscaleTileSize !== undefined}
+                onCheckedChange={(e) =>
+                  e
+                    ? store.update("upscaleTileSize", 128)
+                    : store.unset("upscaleTileSize")
+                }
+                disabled={!enabledUpscaler}
+              />
+            </div>
+
+            <SliderInput
+              label={`Upscaler Tile Size`}
+              min={64}
+              max={1024}
+              step={64}
+              value={store.params.upscaleTileSize ?? 128}
+              onChange={(e) => store.update("upscaleTileSize", e)}
+              disabled={store.params.upscaleTileSize === undefined}
+            />
+          </>
+        )}
+
         <div className="flex items-center justify-between py-2">
           <Label htmlFor="diffusionFaSwitch" className="cursor-pointer">
             Flash Attention

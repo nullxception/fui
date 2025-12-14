@@ -35,6 +35,7 @@ export const diffusionParamsSchema = z.object({
   forceSdxlVaeConvScale: z.boolean().optional(),
   upscaleModel: z.string().optional(),
   upscaleRepeats: z.number().optional(),
+  upscaleTileSize: z.number().optional(),
   batchMode: z.boolean().optional(),
   batchCount: z.number().optional(),
   verbose: z.boolean().optional(),

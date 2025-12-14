@@ -146,6 +146,13 @@ export async function startDiffusion(jobId: string, params: DiffusionParams) {
     if (hasUpscaleRepeats) {
       args.push("--upscale-repeats", upscaleRepeats);
     }
+    const [hasUpscaleTileSize, upscaleTileSize] = hasValidNum(
+      params.upscaleTileSize,
+      { min: 0 },
+    );
+    if (hasUpscaleTileSize) {
+      args.push("--upscale-tile-size", upscaleTileSize);
+    }
   }
 
   if (hasValue(params.clipL)) {
