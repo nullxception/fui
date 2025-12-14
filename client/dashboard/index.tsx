@@ -19,9 +19,9 @@ function OutputCard() {
   const { status: job, logs } = useContext(JobQueryContext);
   const isProcessing = job?.status === "running";
   const { outputTab, setOutputTab } = useAppStore();
-  const { url } = usePreviewImage();
+  const { urls } = usePreviewImage();
   const { images } = useImageQuery();
-  const image = images.find((it) => it.url === url);
+  const resultImages = images.filter((it) => urls?.includes(it.url));
 
   return (
     <>
@@ -48,7 +48,10 @@ function OutputCard() {
 
       <div className="relative min-h-0 w-full flex-1">
         {outputTab === "image" ? (
-          <ImageDisplay image={image} isProcessing={isProcessing ?? false} />
+          <ImageDisplay
+            images={resultImages}
+            isProcessing={isProcessing ?? false}
+          />
         ) : (
           <ConsoleOutput logs={logs.filter((x) => x.jobId === job?.id)} />
         )}
@@ -96,12 +99,13 @@ function TextToImageAction() {
       {job?.status === "running" ? (
         <>
           <CircleStopIcon className="animate-pulse" />
-          Stop Generation
+          Stop
         </>
       ) : (
         <>
           <ZapIcon />
           Generate
+          {store.params.batchMode && `${store.params.batchCount} images`}
         </>
       )}
     </Button>

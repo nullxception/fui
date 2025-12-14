@@ -1,6 +1,6 @@
 import { initTRPC } from "@trpc/server";
 import { createBunHttpHandler } from "trpc-bun-adapter";
-import z from "zod";
+import z, { ZodError } from "zod";
 import { uploadBackground } from "./api/background";
 import {
   readConfig,
@@ -19,7 +19,21 @@ import { promptAttachmentSchema } from "./types/promptAttachment";
 import { convertParamsSchema } from "./types/quantization";
 import { appSettingsSchema } from "./types/userconfig";
 
-const t = initTRPC.create();
+const t = initTRPC.create({
+  errorFormatter(opts) {
+    const { shape, error } = opts;
+    return {
+      ...shape,
+      data: {
+        ...shape.data,
+        zodError:
+          error.code === "BAD_REQUEST" && error.cause instanceof ZodError
+            ? z.treeifyError(error.cause)
+            : null,
+      },
+    };
+  },
+});
 
 export const router = t.router({
   sysInfo: t.procedure.query(system.info),

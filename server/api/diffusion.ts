@@ -136,7 +136,7 @@ export const diffusionProgress: Bun.Serve.Handler<
       // Send current result/error if job is done
       if (job.result) {
         sendEvent(
-          Object.keys(job.result).includes("success") ? "completed" : "error",
+          job.status === "completed" ? "complete" : "error",
           job.result,
         );
       }

@@ -43,7 +43,7 @@ export function RemoveDialog({
       >
         <Masonry>
           {images.map((img) => (
-            <Thumbnail image={img} key={img.name} />
+            <Thumbnail image={img} key={img.name} className="rounded-xl" />
           ))}
         </Masonry>
       </ResponsiveMasonry>

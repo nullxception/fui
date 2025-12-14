@@ -25,7 +25,7 @@ export const useJobQuery = (type: JobType) => {
     rpc.listJobs.queryOptions(type, { staleTime: 0 }),
   );
   const { setOutputTab } = useAppStore();
-  const { setPreviewImage } = usePreviewImage();
+  const { setPreviewImages } = usePreviewImage();
   const closingRef = useRef<Timeout | null>(null);
   const queryClient = useQueryClient();
 
@@ -86,7 +86,7 @@ export const useJobQuery = (type: JobType) => {
         await queryClient.invalidateQueries({ queryKey: images });
 
         setStatus({ id: id, status: "completed" });
-        setPreviewImage(z.string().parse(event.data));
+        setPreviewImages(z.string().parse(event.data).split(","));
         close("completed");
       } catch (e) {
         console.error(e);
@@ -111,7 +111,7 @@ export const useJobQuery = (type: JobType) => {
         }, 500);
       }
     });
-  }, [queryClient, rpc.listImages, setOutputTab, setPreviewImage, status]);
+  }, [queryClient, rpc.listImages, setOutputTab, setPreviewImages, status]);
 
   useEffect(() => {
     return () => {

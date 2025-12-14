@@ -189,7 +189,7 @@ export const Gallery = forwardRef<HTMLDivElement, HTMLMotionProps<"div">>(
                 group.map((image, i) => (
                   <Thumbnail
                     key={i}
-                    className="w-full"
+                    className="w-full rounded-xl"
                     image={image}
                     isSelectionMode={isSelectionMode}
                     selected={selectedImages.has(image.url)}

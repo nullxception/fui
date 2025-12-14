@@ -11,7 +11,6 @@ export const diffusionParamsSchema = z.object({
   modelType: diffusionModelTypeSchema,
   quantizationType: quantizationSchema.optional(),
   vae: z.string().optional(),
-  upscaleModel: z.string().optional(),
   clipL: z.string().optional(),
   clipG: z.string().optional(),
   t5xxl: z.string().optional(),
@@ -34,6 +33,10 @@ export const diffusionParamsSchema = z.object({
   threads: z.number(),
   offloadToCpu: z.boolean().optional(),
   forceSdxlVaeConvScale: z.boolean().optional(),
+  upscaleModel: z.string().optional(),
+  upscaleRepeats: z.number().optional(),
+  batchMode: z.boolean().optional(),
+  batchCount: z.number().optional(),
   verbose: z.boolean().optional(),
 });
 

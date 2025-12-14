@@ -19,7 +19,7 @@ export function ModelSelector() {
 
   return (
     <div className="grid grid-cols-2 gap-2 px-4 md:grid-cols-3">
-      <div className="space-y-2 pt-2">
+      <div className="col-span-2 space-y-2 pt-2">
         <Label htmlFor="modelSelect">Model</Label>
         <Select
           value={store.params.model}
@@ -199,35 +199,6 @@ export function ModelSelector() {
               <SelectItem value="unset">unset</SelectItem>
               {data &&
                 data.llms.map((model) => (
-                  <SelectItem key={model} value={model}>
-                    {model}
-                  </SelectItem>
-                ))}
-            </SelectGroup>
-          </SelectContent>
-        </Select>
-      </div>
-
-      <div className="space-y-2 pt-2">
-        <Label htmlFor="upscaleModelSelect">Upscaler</Label>
-        <Select
-          value={store.params.upscaleModel ?? ""}
-          onValueChange={(e) => {
-            if (e === "unset") {
-              store.unset("upscaleModel");
-              return;
-            }
-            store.update("upscaleModel", e);
-          }}
-        >
-          <SelectTrigger id="upscaleModelSelect" className="w-full">
-            <SelectValue placeholder="Select Upscaler" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectGroup>
-              <SelectItem value="unset">unset</SelectItem>
-              {data &&
-                data.upscalers.map((model) => (
                   <SelectItem key={model} value={model}>
                     {model}
                   </SelectItem>

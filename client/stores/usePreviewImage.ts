@@ -2,13 +2,13 @@ import { create } from "zustand";
 import { useAppStore } from "./useAppStore";
 
 interface PreviewImageStore {
-  url?: string;
-  setPreviewImage: (url?: string) => void;
+  urls?: string[];
+  setPreviewImages: (urls?: string[]) => void;
 }
 
 export const usePreviewImage = create<PreviewImageStore>((set) => ({
-  setPreviewImage(url) {
-    set({ url });
+  setPreviewImages(urls) {
+    set({ urls });
     useAppStore.getState().setOutputTab("image");
   },
 }));

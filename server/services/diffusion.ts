@@ -106,8 +106,6 @@ export async function resolveSD() {
  */
 export async function startDiffusion(jobId: string, params: DiffusionParams) {
   const timestamp = Date.now();
-  const outputFilename = `${filename(timestamp)}.png`;
-  const outputPath = path.join(OUTPUT_DIR, "txt2img", outputFilename);
   const modelPath = path.join(CHECKPOINT_DIR, params.model || "");
 
   const positivePrompt = params.prompt ?? "";
@@ -141,6 +139,13 @@ export async function startDiffusion(jobId: string, params: DiffusionParams) {
   if (hasValue(params.upscaleModel)) {
     const upscaleModelPath = path.join(UPSCALER_DIR, params.upscaleModel || "");
     args.push("--upscale-model", upscaleModelPath);
+    const [hasUpscaleRepeats, upscaleRepeats] = hasValidNum(
+      params.upscaleRepeats,
+      { min: 1 },
+    );
+    if (hasUpscaleRepeats) {
+      args.push("--upscale-repeats", upscaleRepeats);
+    }
   }
 
   if (hasValue(params.clipL)) {
@@ -242,7 +247,14 @@ export async function startDiffusion(jobId: string, params: DiffusionParams) {
     args.push("--force-sdxl-vae-conv-scale");
   }
 
+  const outputName = filename(timestamp);
+  const outputPath = path.join(OUTPUT_DIR, "txt2img", `${outputName}.png`);
   args.push("-o", outputPath);
+
+  const [hasBatchMode, batchCount] = hasValidNum(params.batchCount, { min: 2 });
+  if (params.batchMode && hasBatchMode) {
+    args.push("--batch-count", batchCount);
+  }
 
   if (params.verbose) {
     args.push("--verbose");
@@ -327,10 +339,29 @@ export async function startDiffusion(jobId: string, params: DiffusionParams) {
     await Promise.allSettled([stdoutPromise, stderrPromise]);
     const job = getJob(jobId);
     if (code === 0) {
+      let result = path.join("/output", path.relative(OUTPUT_DIR, outputPath));
+
+      if (hasBatchMode) {
+        const resultFiles = [outputName];
+        for (let i = 2; i <= batchCount; i++) {
+          resultFiles.push(`${outputName}_${i}`);
+        }
+        result = resultFiles
+          .map((f) =>
+            path.join(
+              "/output",
+              path.relative(
+                OUTPUT_DIR,
+                path.join(OUTPUT_DIR, "txt2img", `${f}.png`),
+              ),
+            ),
+          )
+          .join(",");
+      }
       updateJobStatus({
         id: jobId,
         status: "completed",
-        result: path.join("/output", path.relative(OUTPUT_DIR, outputPath)),
+        result,
       });
     } else if (job?.status !== "cancelled") {
       updateJobStatus({

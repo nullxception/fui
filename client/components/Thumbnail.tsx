@@ -54,7 +54,7 @@ export function Thumbnail({
     <div
       ref={ref}
       onClick={onClick}
-      className={`group relative w-full cursor-pointer break-inside-avoid overflow-hidden rounded-xl border bg-background transition-colors select-none ${className} ${selected ? "bg-pink-700 opacity-100" : "border-border"}`}
+      className={`group relative w-full cursor-pointer break-inside-avoid overflow-hidden border bg-background transition-colors select-none ${className} ${selected ? "bg-pink-700 opacity-100" : "border-border"}`}
     >
       <AspectRatio ratio={image.width / image.height}>
         <img

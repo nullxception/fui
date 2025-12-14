@@ -10,7 +10,7 @@ import {
 import { Textarea } from "client/components/ui/textarea";
 import { useTRPC } from "client/query";
 import { usePromptAttachment } from "client/settings/usePromptAttachment";
-import React, { useLayoutEffect, useRef, useState } from "react";
+import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
 import type { PromptAttachmentType } from "server/types";
 import { usePromptState } from "./usePromptState";
 
@@ -63,6 +63,7 @@ function Prompt({ type }: { type: PromptType }) {
   const ref = useRef<HTMLTextAreaElement>(null);
   const { buildPrompt } = usePromptAttachment();
   const title = type === "prompt" ? "Prompt" : "Negative Prompt";
+  const boxRef = useRef<HTMLDivElement>(null);
 
   const addAttachment = (filename: string, type: PromptAttachmentType) => {
     updatePrompt(buildPrompt(value, filename, type));
@@ -74,22 +75,35 @@ function Prompt({ type }: { type: PromptType }) {
     }
   }, [value]);
 
+  useEffect(() => {
+    if (!ref.current) return;
+
+    const observer = new ResizeObserver((entries) => {
+      const entry = entries[0];
+      if (entry === undefined) return;
+      if (ref.current) {
+        autoResize(ref.current);
+      }
+    });
+
+    observer.observe(ref.current);
+    return () => observer.disconnect();
+  }, []);
+
   return (
-    <div className="space-y-2 px-4">
+    <div ref={boxRef} className="space-y-2 px-4">
       <div className="flex items-center justify-between">
         <Label
           htmlFor={`${type}Text`}
-          className={`${type === "prompt" ? "text-blue-500" : "text-pink-500"}`}
+          className={`${type === "prompt" ? "text-blue-500" : "text-pink-500"} py-1`}
         >
           {title}
         </Label>
-        <div className="flex items-center gap-2 text-xs">
-          {changed && (
-            <span className="flex items-center gap-1 text-foreground/90">
-              <span className="h-2 w-2 animate-pulse rounded-full bg-foreground"></span>
-              Saving...
-            </span>
-          )}
+        <div
+          className={`flex animate-pulse items-center gap-1 px-2 text-xs text-foreground/90 transition-all duration-150 ${changed ? "scale-90" : "scale-0"}`}
+        >
+          <span className="h-2 w-2 animate-pulse rounded-full bg-foreground"></span>
+          Saving...
         </div>
       </div>
       <Textarea

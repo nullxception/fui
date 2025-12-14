@@ -34,19 +34,33 @@ function Routes() {
   const [isGallery] = useRoute("/gallery/*?");
   const [isConverter] = useRoute("/converter");
   const [isIndex] = useRoute("/");
-  const location = useLocation();
-  const containerRef = useRef<HTMLDivElement>(null);
+  const [location] = useLocation();
+  const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    containerRef.current?.scrollTo(0, 0);
+    ref.current?.scrollTo(0, 0);
   }, [location]);
+  const [containerTop, setContainerTop] = useState(0);
+
+  const handleScroll = () => {
+    setContainerTop(ref?.current?.scrollTop ?? 0);
+  };
+
+  useEffect(() => {
+    const container = ref?.current;
+    container?.addEventListener("scroll", handleScroll);
+
+    return () => {
+      container?.removeEventListener("scroll", handleScroll);
+    };
+  }, []);
 
   return (
     <div
-      ref={containerRef}
+      ref={ref}
       className="scrollbar-thin flex h-screen w-full flex-1 flex-col overflow-y-scroll pb-18 font-sans text-foreground scrollbar-thumb-accent scrollbar-track-transparent selection:bg-primary selection:text-primary-foreground md:pb-0"
     >
-      <Header />
+      <Header containerTop={containerTop} />
       <AnimatePresence>
         {isGallery && <Gallery {...AnimationSettings} />}
         {isConverter && <Converter {...AnimationSettings} />}

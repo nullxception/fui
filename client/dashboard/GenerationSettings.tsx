@@ -19,6 +19,7 @@ import { useTRPC } from "client/query";
 import { useSettings } from "client/settings/useSettings";
 import { DicesIcon, RotateCcwIcon } from "lucide-react";
 import { defaultUserConfig } from "server/defaults";
+import z from "zod";
 import { useDiffusionConfig } from "./useDiffusionConfig";
 
 export function GenerationSettings() {
@@ -26,8 +27,8 @@ export function GenerationSettings() {
   const { settings } = useSettings();
   const defs = defaultUserConfig().settings;
   const rpc = useTRPC();
-  const { data } = useQuery(rpc.sysInfo.queryOptions());
-
+  const { data: sysinfo } = useQuery(rpc.sysInfo.queryOptions());
+  const { data: models } = useQuery(rpc.listModels.queryOptions());
   const maxSliderWidth = settings.maxWidth || defs.maxWidth;
   const maxSliderHeight = settings.maxHeight || defs.maxHeight;
 
@@ -60,8 +61,8 @@ export function GenerationSettings() {
   const rngOptions = ["std_default", "cuda", "cpu"];
 
   return (
-    <div className="px-4">
-      <div className="grid gap-4 sm:grid-cols-1 md:grid-cols-2">
+    <>
+      <div className="grid gap-4 px-4 sm:grid-cols-1 md:grid-cols-2">
         <SliderInput
           label="Steps"
           valueDisplay={store.params.steps}
@@ -208,11 +209,11 @@ export function GenerationSettings() {
           onChange={(e) => store.update("clipSkip", e)}
         />
 
-        {data && (
+        {sysinfo && (
           <SliderInput
             label={`Threads ${store.params.threads < 1 ? ": Auto" : ""}`}
             min={0}
-            max={data.cpuCount}
+            max={sysinfo.cpuCount}
             value={store.params.threads}
             onChange={(e) => store.update("threads", e)}
           />
@@ -248,16 +249,69 @@ export function GenerationSettings() {
             </InputGroupButton>
           </InputGroup>
         </div>
+      </div>
+
+      <div className="grid gap-4 px-4 sm:grid-cols-1 md:grid-cols-2">
         <div className="flex items-center justify-between py-2">
-          <Label htmlFor="verboseSwitch" className="cursor-pointer">
-            Verbose console output
+          <Label htmlFor="batchModeSwitch" className="cursor-pointer">
+            Batch generation
           </Label>
           <Switch
-            id="verboseSwitch"
-            checked={store.params.verbose ?? false}
-            onCheckedChange={(e) => store.update("verbose", e)}
+            id="batchModeSwitch"
+            checked={store.params.batchMode ?? false}
+            onCheckedChange={(e) => store.update("batchMode", e)}
           />
         </div>
+        <SliderInput
+          label="Batch size"
+          valueDisplay={store.params.batchCount}
+          min={2}
+          max={100}
+          value={store.params.batchCount ?? 2}
+          onChange={(e) => store.update("batchCount", e)}
+          disabled={!store.params.batchMode}
+        />
+      </div>
+
+      <div className="grid gap-4 px-4 sm:grid-cols-1 md:grid-cols-2">
+        <div className="space-y-2 pt-2">
+          <Label htmlFor="upscaleModelSelect">Upscaler</Label>
+          <Select
+            value={store.params.upscaleModel ?? ""}
+            onValueChange={(e) => {
+              if (e === "unset") {
+                store.unset("upscaleModel");
+                return;
+              }
+              store.update("upscaleModel", e);
+            }}
+          >
+            <SelectTrigger id="upscaleModelSelect" className="w-full">
+              <SelectValue placeholder="Select Upscaler" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectGroup>
+                <SelectItem value="unset">unset</SelectItem>
+                {models?.upscalers.map((model) => (
+                  <SelectItem key={model} value={model}>
+                    {model}
+                  </SelectItem>
+                ))}
+              </SelectGroup>
+            </SelectContent>
+          </Select>
+        </div>
+        <SliderInput
+          label={`Upscale iteration`}
+          min={1}
+          max={5}
+          step={1}
+          value={store.params.upscaleRepeats ?? 2}
+          onChange={(e) => store.update("upscaleRepeats", e)}
+          disabled={
+            !z.string().min(1).safeParse(store.params.upscaleModel).success
+          }
+        />
         <div className="flex items-center justify-between py-2">
           <Label htmlFor="diffusionFaSwitch" className="cursor-pointer">
             Flash Attention
@@ -315,7 +369,18 @@ export function GenerationSettings() {
             onCheckedChange={(e) => store.update("vaeConvDirect", e)}
           />
         </div>
+
+        <div className="flex items-center justify-between py-2">
+          <Label htmlFor="verboseSwitch" className="cursor-pointer">
+            Verbose console output
+          </Label>
+          <Switch
+            id="verboseSwitch"
+            checked={store.params.verbose ?? false}
+            onCheckedChange={(e) => store.update("verbose", e)}
+          />
+        </div>
       </div>
-    </div>
+    </>
   );
 }
