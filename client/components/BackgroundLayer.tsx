@@ -6,7 +6,7 @@ export function BackgroundLayer() {
   const hasBg = bg && bg.length > 0;
   return (
     <div
-      className="fixed top-1/2 left-1/2 -z-2 h-screen w-full -translate-1/2 bg-radial-[at_50%_0%] from-purple-950/50 to-background bg-cover bg-center bg-no-repeat"
+      className="fixed top-1/2 left-1/2 -z-2 h-screen w-full -translate-1/2 bg-cover bg-center bg-no-repeat"
       style={hasBg ? { backgroundImage: `url(${bg})` } : {}}
     >
       <div
