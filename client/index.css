@@ -17,10 +17,11 @@
 
 .dark {
   --background: black;
-  --card: oklch(15% 0 271.152 / 0.75);
-  --primary: oklch(52.008% 0.2474 292.867 / 0.8);
+  --card: rgba(0, 0, 0, 0.75);
+  --primary: var(--color-purple-800);
   --primary-foreground: oklch(100% 0.00011 271.152);
   --destructive: var(--color-pink-500);
+  --input: oklch(1 0 0 / 9%);
 }
 
 @keyframes slide {

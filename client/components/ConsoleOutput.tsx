@@ -1,9 +1,17 @@
+import { motion } from "framer-motion";
 import { useEffect, useMemo, useRef } from "react";
 import type { LogEntry } from "server/types";
 
 function formatTime(timestamp: number) {
   return new Date(timestamp).toLocaleTimeString();
 }
+
+const AnimationSettings = {
+  transition: { duration: 0.3 },
+  initial: { opacity: 0, x: -100 },
+  animate: { opacity: 1, x: 0 },
+  exit: { opacity: 0, x: -100 },
+};
 
 export function ConsoleOutput({
   logs,
@@ -59,12 +67,15 @@ export function ConsoleOutput({
       ref={consoleRef}
     >
       {processedLogs.length === 0 ? (
-        <div className="text-muted-foreground italic">
+        <motion.div
+          {...AnimationSettings}
+          className="text-muted-foreground italic"
+        >
           Waiting for process output...
-        </div>
+        </motion.div>
       ) : (
         processedLogs.map((log, index) => (
-          <div key={index}>
+          <motion.div key={index} {...AnimationSettings}>
             <span className="mr-2 text-muted-foreground select-none">
               {log.timestamp && `[${formatTime(log.timestamp)}]`}
             </span>
@@ -75,7 +86,7 @@ export function ConsoleOutput({
             >
               {log.message}
             </span>
-          </div>
+          </motion.div>
         ))
       )}
     </div>
