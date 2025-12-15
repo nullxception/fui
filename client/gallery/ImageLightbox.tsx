@@ -104,7 +104,9 @@ export default function ImageLightbox() {
         showMetadata(false);
       }
     }, 300);
-    if (hasPrev) {
+    if (hasNext) {
+      goto("next");
+    } else if (hasPrev) {
       goto("prev");
     } else {
       close();
