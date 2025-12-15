@@ -84,9 +84,12 @@ export const useJobQuery = (type: JobType) => {
       try {
         const images = rpc.listImages.infiniteQueryKey();
         await queryClient.invalidateQueries({ queryKey: images });
+        await queryClient.invalidateQueries({
+          queryKey: rpc.listJobs.queryKey("txt2img"),
+        });
 
-        setStatus({ id: id, status: "completed" });
-        setPreviewImages(z.string().parse(event.data).split(","));
+        setStatus({ id, status: "completed" });
+        setPreviewImages("txt2img", z.string().parse(event.data).split(","));
         close("completed");
       } catch (e) {
         console.error(e);
@@ -111,7 +114,14 @@ export const useJobQuery = (type: JobType) => {
         }, 500);
       }
     });
-  }, [queryClient, rpc.listImages, setOutputTab, setPreviewImages, status]);
+  }, [
+    queryClient,
+    rpc.listImages,
+    rpc.listJobs,
+    setOutputTab,
+    setPreviewImages,
+    status,
+  ]);
 
   useEffect(() => {
     return () => {
@@ -126,6 +136,7 @@ export const useJobQuery = (type: JobType) => {
   return {
     status,
     logs,
+    listJobs,
     addLog,
     connect(id: string) {
       if (status?.id === id && status.status === "pending") return;
@@ -151,6 +162,7 @@ export const useJobQuery = (type: JobType) => {
 export const JobQueryContext = createContext<ReturnType<typeof useJobQuery>>({
   status: null,
   logs: [],
+  listJobs: [],
   setError: () => {},
   addLog: () => {},
   connect: () => {},

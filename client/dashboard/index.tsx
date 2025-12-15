@@ -8,9 +8,16 @@ import { JobQueryContext, JobQueryProvider } from "client/hooks/useJobQuery";
 import { useTRPC } from "client/query";
 import { useAppStore } from "client/stores/useAppStore";
 import { usePreviewImage } from "client/stores/usePreviewImage";
+import { differenceInSeconds } from "date-fns";
 import { AnimatePresence, motion, type HTMLMotionProps } from "framer-motion";
-import { CircleStopIcon, ImageIcon, TerminalIcon, ZapIcon } from "lucide-react";
-import { forwardRef, useContext } from "react";
+import {
+  CircleStopIcon,
+  ClockIcon,
+  ImageIcon,
+  TerminalIcon,
+  ZapIcon,
+} from "lucide-react";
+import { forwardRef, useContext, useEffect, useState } from "react";
 import { optimizePrompt } from "server/lib/metadataParser";
 import { ConsoleOutput } from "../components/ConsoleOutput";
 import { ControlPanel } from "./ControlPanel";
@@ -25,12 +32,35 @@ const tabItems: Array<NavEntry<TabType>> = [
 ];
 
 function OutputCard() {
-  const { status: job, logs } = useContext(JobQueryContext);
+  const { status: job, logs, listJobs } = useContext(JobQueryContext);
   const isProcessing = job?.status === "running";
   const { outputTab, setOutputTab } = useAppStore();
-  const { urls } = usePreviewImage();
+  const { urls, from } = usePreviewImage();
   const { images } = useImageQuery();
   const resultImages = images.filter((it) => urls?.includes(it.url));
+  const [showCompletionTime, setShowCompletionTime] = useState<boolean | null>(
+    null,
+  );
+
+  const last =
+    from === "txt2img" && job?.status === "completed" && listJobs?.[0];
+  const completionTime =
+    last &&
+    urls &&
+    urls[0] &&
+    last.result?.includes(urls[0]) &&
+    last.createdAt &&
+    last.completedAt &&
+    differenceInSeconds(new Date(last.completedAt), new Date(last.createdAt));
+
+  useEffect(() => {
+    if (!completionTime || showCompletionTime !== null) return;
+    setTimeout(() => {
+      if (showCompletionTime === null) {
+        setShowCompletionTime(false);
+      }
+    }, 2000);
+  }, [from, completionTime, showCompletionTime]);
 
   return (
     <>
@@ -59,6 +89,34 @@ function OutputCard() {
           />
         ) : (
           <ConsoleOutput logs={logs.filter((x) => x.jobId === job?.id)} />
+        )}
+        {completionTime && (
+          <div
+            onClick={() =>
+              setShowCompletionTime(
+                showCompletionTime === null ? false : !showCompletionTime,
+              )
+            }
+            className={`absolute right-2 bottom-2 z-2 flex cursor-pointer flex-row items-center justify-center gap-2 rounded-xl border border-primary bg-primary/50 px-1.5 py-0.5 text-xs font-semibold backdrop-blur-md select-none ${
+              showCompletionTime !== false
+                ? "opacity-100"
+                : "opacity-50 hover:opacity-100"
+            } transition-opacity duration-300`}
+          >
+            <AnimatePresence>
+              {showCompletionTime !== false && (
+                <motion.div
+                  initial={{ opacity: 0, width: 0 }}
+                  animate={{ opacity: 1, width: "auto" }}
+                  exit={{ opacity: 0, width: 0 }}
+                  className="overflow-clip text-nowrap"
+                >
+                  Completed in {completionTime}s
+                </motion.div>
+              )}
+            </AnimatePresence>
+            <ClockIcon className="w-4" />
+          </div>
         )}
       </div>
     </>
