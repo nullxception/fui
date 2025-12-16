@@ -6,6 +6,7 @@ import { Button } from "client/components/ui/button";
 import {
   Card,
   CardContent,
+  CardFooter,
   CardHeader,
   CardTitle,
 } from "client/components/ui/card";
@@ -90,7 +91,7 @@ function ConverterPanel() {
   };
 
   return (
-    <Card className="scrollbar-thin w-full flex-1 grow space-y-4 overflow-y-auto py-4 backdrop-blur-md scrollbar-thumb-secondary scrollbar-track-transparent lg:max-h-full lg:shrink-0">
+    <Card className="scrollbar-thin w-full flex-1 grow gap-0 space-y-4 overflow-y-auto py-4 backdrop-blur-md scrollbar-thumb-secondary scrollbar-track-transparent lg:max-h-full lg:shrink-0">
       <CardHeader>
         <CardTitle>Model Weight Converter</CardTitle>
       </CardHeader>
@@ -159,6 +160,8 @@ function ConverterPanel() {
             </span>
           </div>
         )}
+      </CardContent>
+      <CardFooter className="flex w-full flex-col items-stretch bg-card p-4">
         <Button
           onClick={handleConvert}
           variant={job?.status === "running" ? "destructive" : "default"}
@@ -176,7 +179,7 @@ function ConverterPanel() {
             </>
           )}
         </Button>
-      </CardContent>
+      </CardFooter>
     </Card>
   );
 }

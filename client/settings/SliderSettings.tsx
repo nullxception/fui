@@ -9,7 +9,7 @@ function SliderSettings() {
   const defs = defaultUserConfig().settings;
 
   return (
-    <Card className="space-y-4 space-x-4 bg-background/60 p-4 backdrop-blur-sm">
+    <Card className="gap-0 space-y-4 space-x-4 bg-background/60 p-4 backdrop-blur-sm">
       <div className="flex w-full flex-col justify-between space-y-2">
         <Label htmlFor="maxWidthSliderSetting">Max width slider</Label>
         <Input

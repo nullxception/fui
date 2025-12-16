@@ -353,7 +353,7 @@ export function PromptAttachmentEditor() {
 
   return (
     <>
-      <Card className="col-span-1 row-span-1 flex flex-row items-center justify-between bg-background/60 p-4 backdrop-blur-sm md:col-span-2">
+      <Card className="col-span-1 row-span-1 flex flex-row items-center justify-between bg-background/60 px-4 py-2 backdrop-blur-sm md:col-span-2">
         <h2>Prompt Attachment</h2>
         <Button
           onClick={handleAdd}
@@ -368,7 +368,7 @@ export function PromptAttachmentEditor() {
 
       {/* New Entry Form */}
       {newEntry && (
-        <Card className="col-span-1 border-primary bg-background/60 p-4 backdrop-blur-sm md:col-span-2">
+        <Card className="col-span-1 border border-primary bg-background/60 p-4 backdrop-blur-sm md:col-span-2">
           <PromptAttachmentForm
             entry={newEntry}
             onChange={(data) => {
@@ -390,7 +390,7 @@ export function PromptAttachmentEditor() {
         {promptAttachment?.map((entry, index) => (
           <div key={index}>
             <Card
-              className={`bg-background/60 p-4 backdrop-blur-sm ${editingIndex === index ? "border-primary" : "border-border"}`}
+              className={`border bg-background/60 p-4 backdrop-blur-sm ${editingIndex === index ? "border-primary" : "border-border"}`}
             >
               {editingIndex === index && editingEntry ? (
                 <PromptAttachmentForm

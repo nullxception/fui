@@ -11,7 +11,7 @@ import { UpscalerSetting } from "./UpscalerSetting";
 export function ControlPanel({ className }: { className?: string }) {
   return (
     <div className={`flex flex-col items-stretch lg:max-h-screen ${className}`}>
-      <Card className="scrollbar-thin flex-1 space-y-4 overflow-y-auto py-4 backdrop-blur-md scrollbar-thumb-secondary scrollbar-track-transparent lg:max-h-full lg:shrink-0">
+      <Card className="scrollbar-thin flex-1 gap-0 space-y-4 overflow-y-auto py-4 backdrop-blur-md scrollbar-thumb-secondary scrollbar-track-transparent lg:max-h-full lg:shrink-0">
         <ModelSelector />
         <PromptInput />
         <div className="grid gap-4 px-4 sm:grid-cols-1 md:grid-cols-2">

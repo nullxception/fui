@@ -1,6 +1,6 @@
 import { Thumbnail } from "client/components/Thumbnail";
 import { Button } from "client/components/ui/button";
-import { Card } from "client/components/ui/card";
+import { Card, CardFooter } from "client/components/ui/card";
 import { ArrowLeftIcon, CircleAlertIcon, Trash2Icon } from "lucide-react";
 import { useState } from "react";
 import Masonry, { ResponsiveMasonry } from "react-responsive-masonry";
@@ -31,13 +31,15 @@ export function RemoveDialog({
 
   return (
     <Card className="m-4 flex max-w-[90vh] flex-col justify-center overflow-clip shadow-background drop-shadow-lg">
-      <CircleAlertIcon className="mt-5 h-10 w-10 self-center text-pink-500" />
-      <p className="px-4 py-2 text-center">
+      <CircleAlertIcon className="mt-2 h-8 w-8 self-center text-pink-500" />
+      <p className="px-4 py-0 text-center">
         Are you sure you want to remove{" "}
         {images.length > 1 ? `${images.length} images` : "it"}?
       </p>
       <ResponsiveMasonry
-        columnsCountBreakPoints={{ 350: images.length > 2 ? 3 : images.length }}
+        columnsCountBreakPoints={{
+          350: images.length > 2 ? 3 : images.length,
+        }}
         gutterBreakPoints={{ 350: "6px" }}
         className="max-h-[80vh] overflow-y-auto px-4 py-2 text-center"
       >
@@ -47,7 +49,8 @@ export function RemoveDialog({
           ))}
         </Masonry>
       </ResponsiveMasonry>
-      <div className="mt-2 flex w-full justify-center gap-2 bg-background/40 p-4">
+
+      <CardFooter className="mt-2 flex w-full justify-center gap-2 bg-background/40 p-4">
         {!isRemoving && (
           <Button variant="outline" className="w-1/2" onClick={onCancel}>
             <ArrowLeftIcon />
@@ -63,7 +66,7 @@ export function RemoveDialog({
           <Trash2Icon />
           {isRemoving ? "Removing..." : "Remove"}
         </Button>
-      </div>
+      </CardFooter>
     </Card>
   );
 }

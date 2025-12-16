@@ -57,7 +57,7 @@ function BackgroundSetting() {
   };
 
   return (
-    <Card className="row-span-3 flex w-full flex-col space-y-4 bg-background/60 p-4 backdrop-blur-sm">
+    <Card className="row-span-3 flex w-full flex-col gap-0 space-y-4 bg-background/60 p-4 backdrop-blur-sm">
       <h2 className="text-xs font-semibold uppercase">Background</h2>
 
       {/* Upload Section */}
