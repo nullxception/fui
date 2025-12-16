@@ -20,9 +20,7 @@ export const useJobQuery = (type: JobType) => {
   const esRef = useRef<EventSource | null>(null);
   const [location] = useLocation();
   const rpc = useTRPC();
-  const { data: listJobs } = useQuery(
-    rpc.listJobs.queryOptions(type, { staleTime: 0 }),
-  );
+  const { data: recentJob } = useQuery(rpc.recentJob.queryOptions(type));
   const closingRef = useRef<Timeout | null>(null);
   const queryClient = useQueryClient();
 
@@ -37,8 +35,7 @@ export const useJobQuery = (type: JobType) => {
     ) {
       return;
     }
-    const hasJobs = listJobs && listJobs.length > 0;
-    const recentJob = hasJobs && listJobs[0];
+
     let active = status;
     if (!active && recentJob && recentJob.status === "running") {
       active = { id: recentJob.id, status: "pending" };
@@ -82,7 +79,7 @@ export const useJobQuery = (type: JobType) => {
         const images = rpc.listImages.infiniteQueryKey();
         await queryClient.invalidateQueries({ queryKey: images });
         await queryClient.invalidateQueries({
-          queryKey: rpc.listJobs.queryKey("txt2img"),
+          queryKey: rpc.recentJob.queryKey("txt2img"),
         });
 
         setStatus({ id, status: "completed" });
@@ -113,7 +110,7 @@ export const useJobQuery = (type: JobType) => {
         }, 500);
       }
     });
-  }, [listJobs, queryClient, rpc.listImages, rpc.listJobs, status]);
+  }, [recentJob, queryClient, rpc.listImages, rpc.recentJob, status]);
 
   useEffect(() => {
     return () => {
@@ -128,7 +125,7 @@ export const useJobQuery = (type: JobType) => {
   return {
     status,
     logs,
-    listJobs,
+    recentJob,
     addLog,
     connect(id: string) {
       if (status?.id === id && status.status === "pending") return;
@@ -154,7 +151,7 @@ export const useJobQuery = (type: JobType) => {
 export const JobQueryContext = createContext<ReturnType<typeof useJobQuery>>({
   status: null,
   logs: [],
-  listJobs: [],
+  recentJob: undefined,
   setError: () => {},
   addLog: () => {},
   connect: () => {},

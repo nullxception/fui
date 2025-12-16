@@ -53,7 +53,7 @@ function getCompletionTime(job: Job) {
 }
 
 function OutputCard() {
-  const { status: job, logs, listJobs } = useContext(JobQueryContext);
+  const { status: job, logs, recentJob } = useContext(JobQueryContext);
   const isProcessing = job?.status === "running";
   const outputTab = useAppStore((s) => s.outputTab);
   const { urls, from } = usePreviewImage(
@@ -67,7 +67,7 @@ function OutputCard() {
   const compTimeRef = useRef<Timeout | null>(null);
 
   const last =
-    from === "txt2img" && job?.status === "completed" ? listJobs?.[0] : null;
+    from === "txt2img" && job?.status === "completed" ? recentJob : null;
   const completionTime =
     urls?.[0] && last?.result?.includes(urls?.[0]) && getCompletionTime(last);
 

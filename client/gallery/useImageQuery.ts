@@ -35,10 +35,10 @@ export function useImageQuery() {
   const mutation = useMutation(
     rpc.removeImage.mutationOptions({
       onSuccess: async () => {
-        const jobs = rpc.listJobs.queryKey("txt2img");
+        const job = rpc.recentJob.queryKey("txt2img");
         const images = rpc.listImages.infiniteQueryKey();
         await queryClient.invalidateQueries({ queryKey: images });
-        await queryClient.invalidateQueries({ queryKey: jobs });
+        await queryClient.invalidateQueries({ queryKey: job });
       },
     }),
   );

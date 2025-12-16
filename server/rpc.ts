@@ -12,7 +12,7 @@ import { quantizationStart } from "./api/converter";
 import { diffusionStart, listDiffusionModels } from "./api/diffusion";
 import { listImages, removeImages } from "./api/gallery";
 import system from "./api/system";
-import { getJobs, stopJob } from "./services/jobs";
+import { getJobs, getRecentJob, stopJob } from "./services/jobs";
 import { diffusionParamsSchema } from "./types/diffusionparams";
 import { jobsTypeSchema } from "./types/jobs";
 import { promptAttachmentSchema } from "./types/promptAttachment";
@@ -58,6 +58,9 @@ export const router = t.router({
   listImages: t.procedure
     .input(z.object({ limit: z.number(), cursor: z.number().optional() }))
     .query((opts) => listImages(opts.input.limit, opts.input.cursor)),
+  recentJob: t.procedure
+    .input(jobsTypeSchema)
+    .query((opts) => getRecentJob(opts.input)),
   listJobs: t.procedure
     .input(jobsTypeSchema)
     .query((opts) => getJobs(opts.input)),

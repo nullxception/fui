@@ -16,6 +16,9 @@ const selectJob = db.query(`SELECT * FROM jobs WHERE id = $id`);
 const selectJobsByType = db.query(
   `SELECT * FROM jobs WHERE type = $type ORDER BY createdAt DESC`,
 );
+const selectRecentJobByType = db.query(
+  `SELECT * FROM jobs WHERE type = $type ORDER BY createdAt DESC LIMIT 1`,
+);
 const updateStatus = db.query(`
   UPDATE jobs 
   SET status = $status, startedAt = $startedAt, completedAt = $completedAt, result = $result
@@ -124,6 +127,10 @@ export function getJobs(type: JobType) {
     const parsed = jobSchema.safeParse(job).data;
     return parsed ? [...result, parsed] : result;
   }, new Array<Job>());
+}
+
+export function getRecentJob(type: JobType) {
+  return jobSchema.safeParse(selectRecentJobByType.get({ type }))?.data;
 }
 
 export function getLogs(id: string) {
