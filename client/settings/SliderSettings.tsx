@@ -1,5 +1,5 @@
+import { NumberInput } from "client/components/NumberInput";
 import { Card } from "client/components/ui/card";
-import { Input } from "client/components/ui/input";
 import { Label } from "client/components/ui/label";
 import { defaultUserConfig } from "server/defaults";
 import { useSettings } from "./useSettings";
@@ -12,26 +12,26 @@ function SliderSettings() {
     <Card className="gap-0 space-y-4 space-x-4 bg-background/60 p-4 backdrop-blur-sm">
       <div className="flex w-full flex-col justify-between space-y-2">
         <Label htmlFor="maxWidthSliderSetting">Max width slider</Label>
-        <Input
+        <NumberInput
           id="maxWidthSliderSetting"
-          type="number"
           placeholder={`default: ${defs.maxWidth}`}
           min={64}
           step={64}
           value={settings.maxWidth}
-          onChange={(e) => update("maxWidth", parseInt(e.target.value))}
+          onChange={(e) => update("maxWidth", e)}
+          className="w-full"
         />
       </div>
       <div className="flex w-full flex-col justify-between space-y-2">
         <Label htmlFor="maxHeightSliderSetting">Max height slider</Label>
-        <Input
+        <NumberInput
           id="maxHeightSliderSetting"
-          type="number"
           placeholder={`default: ${defs.maxHeight}`}
           min={64}
           step={64}
           value={settings.maxHeight}
-          onChange={(e) => update("maxHeight", parseInt(e.target.value))}
+          onChange={(e) => update("maxHeight", e)}
+          className="w-full"
         />
       </div>
     </Card>
