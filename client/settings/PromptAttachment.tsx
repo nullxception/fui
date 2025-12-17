@@ -1,7 +1,13 @@
 import Modal from "@/components/Modal";
+import { NumberInput } from "@/components/NumberInput";
 import { Button } from "@/components/ui/button";
 import { ButtonGroup } from "@/components/ui/button-group";
-import { Card } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+} from "@/components/ui/card";
 import {
   InputGroup,
   InputGroupButton,
@@ -20,13 +26,15 @@ import {
 import { useTRPC } from "@/query";
 import { useQuery } from "@tanstack/react-query";
 import {
-  MinusIcon,
+  ArrowLeftIcon,
   PencilIcon,
   PlusIcon,
   TrashIcon,
   XIcon,
 } from "lucide-react";
+import { motion } from "motion/react";
 import React, { useState } from "react";
+import Masonry, { ResponsiveMasonry } from "react-responsive-masonry";
 import { splitSmart } from "server/lib/metadataParser";
 import type { PromptAttachment, PromptAttachmentType } from "server/types";
 import { promptAttachmentTypeSchema } from "server/types/promptAttachment";
@@ -46,6 +54,11 @@ interface PromptAttachmentFormProps {
   onSave: () => void;
   onCancel: () => void;
 }
+const normalizeFP = (num?: number) => {
+  let t = num?.toString() || "1";
+  t = t.indexOf(".") >= 0 ? t.slice(0, t.indexOf(".") + 3) : t;
+  return Number(t);
+};
 
 function PromptAttachmentForm({
   isEditing = false,
@@ -80,7 +93,7 @@ function PromptAttachmentForm({
 
   const handleStrengthChange = (value: number) => {
     if (value > 1) value = 1;
-    onChange({ entry: { ...entry, strength: value } });
+    onChange({ entry: { ...entry, strength: normalizeFP(value) } });
   };
 
   const loraStrength = entry.strength ?? 1;
@@ -108,10 +121,14 @@ function PromptAttachmentForm({
   };
 
   return (
-    <div className="space-y-3">
-      {isEditing ? (
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
+    <Card className="lg:min-w[30vw] max-w-[95vw] gap-0 space-y-2 md:min-w-[40vw]">
+      <motion.div
+        layout
+        layoutId={`attachmentTitle--${entry.target}`}
+        className="flex flex-row gap-2 px-4"
+      >
+        {isEditing ? (
+          <>
             <span
               className={`rounded px-2 py-0.5 text-xs ${
                 entry.type === "embedding"
@@ -122,54 +139,59 @@ function PromptAttachmentForm({
               {entry.type === "lora" ? "LoRA" : "Embedding"}
             </span>
             <span className="text-xs">{entry.target}</span>
+          </>
+        ) : (
+          <div className="flex w-full flex-row gap-3">
+            <Select
+              value={entry.type}
+              onValueChange={(e) =>
+                onChange({
+                  entry: {
+                    ...entry,
+                    type: promptAttachmentTypeSchema.parse(e),
+                    target: "", // Reset target when type changes
+                  },
+                })
+              }
+            >
+              <SelectTrigger className="shrink-0">
+                <SelectValue placeholder="Select type" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectGroup>
+                  <SelectItem value="embedding">Embedding</SelectItem>
+                  <SelectItem value="lora">LoRA</SelectItem>
+                </SelectGroup>
+              </SelectContent>
+            </Select>
+            <Select
+              value={entry.target}
+              onValueChange={(e) =>
+                onChange({ entry: { ...entry, target: e } })
+              }
+            >
+              <SelectTrigger className="grow overflow-hidden">
+                <SelectValue placeholder={`Select ${typeLabel}...`} />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectGroup>
+                  <SelectLabel>Select {entry.type}</SelectLabel>
+                  {availableTargets.map((target) => (
+                    <SelectItem key={target} value={target}>
+                      {target}
+                    </SelectItem>
+                  ))}
+                </SelectGroup>
+              </SelectContent>
+            </Select>
           </div>
-        </div>
-      ) : (
-        <div className="flex flex-row gap-3">
-          <Select
-            value={entry.type}
-            onValueChange={(e) =>
-              onChange({
-                entry: {
-                  ...entry,
-                  type: promptAttachmentTypeSchema.parse(e),
-                  target: "", // Reset target when type changes
-                },
-              })
-            }
-          >
-            <SelectTrigger className="shrink-0">
-              <SelectValue placeholder="Select type" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectGroup>
-                <SelectItem value="embedding">Embedding</SelectItem>
-                <SelectItem value="lora">LoRA</SelectItem>
-              </SelectGroup>
-            </SelectContent>
-          </Select>
-          <Select
-            value={entry.target}
-            onValueChange={(e) => onChange({ entry: { ...entry, target: e } })}
-          >
-            <SelectTrigger className="grow overflow-hidden">
-              <SelectValue placeholder={`Select ${typeLabel}...`} />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectGroup>
-                <SelectLabel>Select {entry.type}</SelectLabel>
-                {availableTargets.map((target) => (
-                  <SelectItem key={target} value={target}>
-                    {target}
-                  </SelectItem>
-                ))}
-              </SelectGroup>
-            </SelectContent>
-          </Select>
-        </div>
-      )}
-
-      <div className="flex flex-wrap gap-1">
+        )}
+      </motion.div>
+      <motion.div
+        layout
+        layoutId={`attachmentWords--${entry.target}`}
+        className="flex flex-wrap gap-1 px-4"
+      >
         {entry.words.map((word, index) => (
           <span
             key={index}
@@ -184,8 +206,8 @@ function PromptAttachmentForm({
             </button>
           </span>
         ))}
-      </div>
-      <div className="mb-2 flex gap-2">
+      </motion.div>
+      <div className="flex gap-2 px-4 pb-2">
         <InputGroup>
           <InputGroupInput
             name="wordListInsert"
@@ -201,52 +223,38 @@ function PromptAttachmentForm({
         </InputGroup>
       </div>
       {entry.type === "lora" && (
-        <div className="flex justify-end gap-4 pt-2">
+        <div className="flex justify-end gap-4 px-4 pb-2">
           <Label htmlFor="loraStrengthNumber">Strength</Label>
-          <InputGroup className="w-30">
-            <InputGroupButton
-              onClick={() => handleStrengthChange(loraStrength - 0.1)}
-            >
-              <MinusIcon />
-            </InputGroupButton>
-            <InputGroupInput
-              id="loraStrengthNumber"
-              type="number"
-              min={0}
-              max={1}
-              inputMode="numeric"
-              pattern="[0-9+-.]+"
-              step={0.01}
-              value={loraStrength}
-              onChange={(e) => {
-                handleStrengthChange(e.target.valueAsNumber);
-              }}
-              placeholder="1"
-              className="w-15 text-center"
-            />
-            <InputGroupButton
-              onClick={() => handleStrengthChange(loraStrength + 0.1)}
-            >
-              <PlusIcon />
-            </InputGroupButton>
-          </InputGroup>
+          <NumberInput
+            id="loraStrengthNumber"
+            min={0}
+            max={1}
+            step={0.01}
+            value={loraStrength}
+            onChange={(e) => {
+              handleStrengthChange(e);
+            }}
+            placeholder="1"
+            className="w-30 text-center"
+          />
         </div>
       )}
-
-      <div className="flex justify-end gap-2 pt-2">
-        <Button onClick={onCancel} variant="outline" size="sm">
-          Cancel
-        </Button>
-        <Button
-          onClick={handleOnSave}
-          variant="default"
-          size="sm"
-          disabled={!isSaveable()}
-        >
-          Save
-        </Button>
-      </div>
-    </div>
+      <motion.div layout layoutId={`attachmentAction--${entry.target}`}>
+        <CardFooter className="flex flex-row items-stretch justify-stretch justify-items-stretch gap-2 bg-background/60">
+          <Button onClick={onCancel} variant="outline" className="grow">
+            Cancel
+          </Button>
+          <Button
+            onClick={handleOnSave}
+            variant="default"
+            className="grow"
+            disabled={!isSaveable()}
+          >
+            Save
+          </Button>
+        </CardFooter>
+      </motion.div>
+    </Card>
   );
 }
 
@@ -271,12 +279,6 @@ export function PromptAttachmentEditor() {
     });
   };
 
-  const normalizeFP = (num?: number) => {
-    let t = num?.toString() || "1";
-    t = t.indexOf(".") >= 0 ? t.slice(0, t.indexOf(".") + 3) : t;
-    return Number(t);
-  };
-
   const saveNewEntry = (entry: PromptAttachment | null) => {
     if (!entry) return;
     const loraStrength = entry.strength ?? 1;
@@ -286,7 +288,7 @@ export function PromptAttachmentEditor() {
       if (loraStrength < 1) {
         tw = {
           ...entry,
-          strength: normalizeFP(entry.strength),
+          strength: 7,
         };
       }
       addTW(tw);
@@ -353,7 +355,7 @@ export function PromptAttachmentEditor() {
 
   return (
     <>
-      <Card className="col-span-1 row-span-1 flex flex-row items-center justify-between bg-background/60 px-4 py-2 backdrop-blur-sm md:col-span-2">
+      <div className="col-span-1 row-span-1 flex flex-row items-center justify-between bg-background/60 px-2 py-2 backdrop-blur-sm md:col-span-2">
         <h2>Prompt Attachment</h2>
         <Button
           onClick={handleAdd}
@@ -364,13 +366,12 @@ export function PromptAttachmentEditor() {
           <PlusIcon />
           Add Entry
         </Button>
-      </Card>
+      </div>
 
-      {/* New Entry Form */}
-      {newEntry && (
-        <Card className="col-span-1 border border-primary bg-background/60 p-4 backdrop-blur-sm md:col-span-2">
+      <Modal isOpen={newEntry !== null} onClose={handleCancelNew}>
+        {newEntry && (
           <PromptAttachmentForm
-            entry={newEntry}
+            entry={newEntry!}
             onChange={(data) => {
               if (data?.save) {
                 saveNewEntry(data.entry);
@@ -378,88 +379,108 @@ export function PromptAttachmentEditor() {
                 setNewEntry(data.entry);
               }
             }}
-            availableTargets={getAvailableTargets(newEntry.type)}
+            availableTargets={getAvailableTargets(newEntry!.type)}
             onSave={handleSaveNew}
             onCancel={handleCancelNew}
           />
-        </Card>
-      )}
-
+        )}
+      </Modal>
       {/* Existing Entries */}
-      <>
-        {promptAttachment?.map((entry, index) => (
-          <div key={index}>
-            <Card
-              className={`border bg-background/60 p-4 backdrop-blur-sm ${editingIndex === index ? "border-primary" : "border-border"}`}
+      <ResponsiveMasonry
+        columnsCountBreakPoints={{ 128: 1, 768: 2, 1366: 3 }}
+        gutterBreakPoints={{ 512: "6px" }}
+        className="col-span-1 w-full md:col-span-2"
+      >
+        <Masonry>
+          {promptAttachment?.map((entry, index) => (
+            <motion.div
+              layout
+              className="w-full rounded-none border-2 border-dashed bg-background/60 p-4 backdrop-blur-sm"
             >
-              {editingIndex === index && editingEntry ? (
-                <PromptAttachmentForm
-                  isEditing={true}
-                  entry={editingEntry}
-                  onChange={(data) => {
-                    setEditingEntry(data.entry);
-                  }}
-                  availableTargets={getAvailableTargets(editingEntry.type)}
-                  onSave={() => handleSaveEdit(index, editingEntry)}
-                  onCancel={handleCancelEdit}
-                />
-              ) : (
-                <div className="flex flex-col items-stretch justify-center space-y-2">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <span
-                        className={`rounded px-2 py-0.5 text-xs ${
-                          entry.type === "embedding"
-                            ? "bg-blue-500/20 text-blue-300"
-                            : "bg-purple-500/20 text-purple-300"
-                        }`}
-                      >
-                        {entry.type === "lora" ? "LoRA" : "Embedding"}
+              <Modal
+                isOpen={editingIndex === index && editingEntry !== null}
+                onClose={handleCancelEdit}
+              >
+                {editingIndex === index && editingEntry && (
+                  <PromptAttachmentForm
+                    isEditing={true}
+                    entry={editingEntry}
+                    onChange={(data) => {
+                      setEditingEntry(data.entry);
+                    }}
+                    availableTargets={getAvailableTargets(editingEntry.type)}
+                    onSave={() => handleSaveEdit(index, editingEntry)}
+                    onCancel={handleCancelEdit}
+                  />
+                )}
+              </Modal>
+              <div className="flex flex-col items-stretch justify-center space-y-2">
+                <motion.div
+                  layout
+                  className="flex items-center gap-2"
+                  layoutId={`attachmentTitle--${entry.target}`}
+                >
+                  <span
+                    className={`rounded px-2 py-0.5 text-xs ${
+                      entry.type === "embedding"
+                        ? "bg-blue-500/20 text-blue-300"
+                        : "bg-purple-500/20 text-purple-300"
+                    }`}
+                  >
+                    {entry.type === "lora" ? "LoRA" : "Embedding"}
+                  </span>
+                  <span className="text-xs">{entry.target}</span>
+                </motion.div>
+                <motion.div
+                  layout
+                  layoutId={`attachmentWords--${entry.target}`}
+                  className="flex flex-wrap gap-1"
+                >
+                  {entry.words.map((word, wordIndex) => (
+                    <span
+                      key={wordIndex}
+                      className="bg-surface-hover rounded border border-border px-2 py-1 text-xs"
+                    >
+                      {word}
+                    </span>
+                  ))}
+                </motion.div>
+                <div className="flex items-center justify-end">
+                  {entry.strength && entry.strength < 1 && (
+                    <div className="grow">
+                      <span className="items-center rounded bg-purple-500/20 px-2 py-1 text-xs">
+                        strength:{entry.strength}
                       </span>
-                      <span className="text-xs">{entry.target}</span>
                     </div>
-                  </div>
-                  <div className="flex flex-wrap items-center gap-1">
-                    {entry.words.map((word, wordIndex) => (
-                      <span
-                        key={wordIndex}
-                        className="bg-surface-hover rounded border border-border px-2 py-1 text-xs"
-                      >
-                        {word}
-                      </span>
-                    ))}
-                  </div>
-                  <div className="flex items-center justify-end">
-                    {entry.strength && entry.strength < 1 && (
-                      <div className="grow">
-                        <span className="items-center rounded bg-purple-500/20 px-2 py-1 text-xs">
-                          strength:{entry.strength}
-                        </span>
-                      </div>
-                    )}
-                    <ButtonGroup>
-                      <Button
-                        onClick={() => handleEdit(index)}
-                        variant="outline"
-                        className="h-8 w-10"
-                      >
-                        <PencilIcon />
-                      </Button>
-                      <Button
-                        onClick={() => handleDelete(index)}
-                        variant="destructive"
-                        className="h-8 w-10"
-                      >
-                        <TrashIcon />
-                      </Button>
-                    </ButtonGroup>
-                  </div>
+                  )}
                 </div>
-              )}
-            </Card>
-          </div>
-        ))}
-      </>
+                <motion.div
+                  layout
+                  layoutId={`attachmentAction--${entry.target}`}
+                  className="flex items-center justify-end"
+                >
+                  <ButtonGroup>
+                    <Button
+                      onClick={() => handleEdit(index)}
+                      variant="outline"
+                      className="h-8 w-10"
+                    >
+                      <PencilIcon />
+                    </Button>
+                    <Button
+                      onClick={() => handleDelete(index)}
+                      variant="destructive"
+                      className="h-8 w-10"
+                    >
+                      <TrashIcon />
+                    </Button>
+                  </ButtonGroup>
+                </motion.div>
+              </div>
+            </motion.div>
+          ))}
+        </Masonry>
+      </ResponsiveMasonry>
 
       {promptAttachment?.length === 0 && !newEntry && (
         <div className="py-8 text-center text-sm text-muted-foreground">
@@ -467,28 +488,33 @@ export function PromptAttachmentEditor() {
         </div>
       )}
       <Modal isOpen={deleteConfirmIndex !== null} onClose={cancelDelete}>
-        <Card className="mx-4 w-full max-w-sm border-border bg-background/90 shadow-2xl">
-          <div className="space-y-4 p-4">
-            <div className="space-y-2">
-              <h3 className="text-lg font-semibold">Delete Trigger Word?</h3>
-              <p className="text-sm text-muted-foreground">
-                Are you sure you want to delete the trigger word for{" "}
-                <span className="font-medium text-foreground">
-                  {deleteConfirmIndex !== null &&
-                    promptAttachment?.[deleteConfirmIndex]?.target}
-                </span>
-                ? This action cannot be undone.
-              </p>
-            </div>
-            <div className="flex justify-end gap-2">
-              <Button onClick={cancelDelete} variant="ghost" size="sm">
-                Cancel
-              </Button>
-              <Button onClick={confirmDelete} variant="destructive" size="sm">
-                Delete
-              </Button>
-            </div>
-          </div>
+        <Card className="mx-4 w-full max-w-sm gap-0 border-border bg-background/90 shadow-2xl">
+          <CardHeader className="text-lg font-semibold">
+            Remove Prompt Attachment
+          </CardHeader>
+          <CardContent className="py-4 text-sm text-muted-foreground">
+            Are you sure you want to remove Prompt Attachment for{" "}
+            <span className="font-medium text-foreground">
+              {deleteConfirmIndex !== null &&
+                promptAttachment?.[deleteConfirmIndex]?.target}
+            </span>
+            ? <br />
+            This action cannot be undone.
+          </CardContent>
+          <CardFooter className="flex justify-center gap-2 bg-background/70">
+            <Button onClick={cancelDelete} variant="outline" className="w-1/2">
+              <ArrowLeftIcon />
+              Cancel
+            </Button>
+            <Button
+              onClick={confirmDelete}
+              variant="destructive"
+              className="w-1/2"
+            >
+              <TrashIcon />
+              Remove
+            </Button>
+          </CardFooter>
         </Card>
       </Modal>
     </>
