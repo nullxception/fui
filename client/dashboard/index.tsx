@@ -98,8 +98,11 @@ function OutputCard() {
 
       <div className="relative min-h-0 w-full flex-1">
         <DottedBackground />
-        {outputTab === "image" && urls ? (
-          <ImageDisplay imageUrls={urls} isProcessing={isProcessing ?? false} />
+        {outputTab === "image" ? (
+          <ImageDisplay
+            imageUrls={urls ?? []}
+            isProcessing={isProcessing ?? false}
+          />
         ) : (
           <ConsoleOutput logs={logs.filter((x) => x.jobId === job?.id)} />
         )}
