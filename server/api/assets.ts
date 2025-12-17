@@ -1,4 +1,3 @@
-import { promises as fs } from "fs";
 import path from "path";
 import { OUTPUT_DIR, PUBLIC_DIR, THUMBS_DIR } from "server/dirs";
 import sharp from "sharp";
@@ -6,24 +5,31 @@ import sharp from "sharp";
 const assetsCacheControl = "public, max-age=31536000, immutable";
 
 async function serveThumbnail(filepath: string, size: number) {
-  let thumb = path.parse(filepath).name;
-  thumb = `${thumb}--${size}.jpg`;
-  thumb = path.join(THUMBS_DIR, thumb);
+  const thumb = path.join(
+    THUMBS_DIR,
+    `${path.parse(filepath).name}--${size}.jpg`,
+  );
 
-  if (await fs.exists(thumb)) {
+  try {
+    const file = await Bun.file(thumb).bytes();
+    return new Response(file, {
+      headers: { "Cache-Control": assetsCacheControl },
+    });
+  } catch {
+    let img = sharp(filepath);
+
+    // only resize if it's a thumbnail request
+    // otherwise just compress it to progressive jpeg
+    if (size > 0) {
+      img = img.resize(size, null, { fit: "inside" });
+    } else {
+      img = img.withMetadata();
+    }
+    await img.jpeg({ quality: 80, progressive: true }).toFile(thumb);
     return new Response(Bun.file(thumb), {
       headers: { "Cache-Control": assetsCacheControl },
     });
   }
-
-  await sharp(filepath)
-    .resize(size, null, { fit: "inside" })
-    .jpeg({ quality: 80, progressive: true })
-    .toFile(thumb);
-
-  return new Response(Bun.file(thumb), {
-    headers: { "Cache-Control": assetsCacheControl },
-  });
 }
 
 async function serveStatic(req: Request) {
@@ -45,6 +51,9 @@ async function serveStatic(req: Request) {
     if (width > 0) {
       // looks like we're getting thumbnail request
       return await serveThumbnail(filepath, width);
+    }
+    if (url.searchParams.has("preview")) {
+      return await serveThumbnail(filepath, 0);
     }
 
     return new Response(Bun.file(filepath), {

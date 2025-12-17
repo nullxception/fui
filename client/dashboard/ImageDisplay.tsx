@@ -40,7 +40,7 @@ export function ImageDisplay({ imageUrls, isProcessing }: ImageDisplayProps) {
       {images && images.length === 1 && (
         <motion.img
           {...AnimationSettings}
-          src={images?.[0]?.url}
+          src={`${images?.[0]?.url}?preview`}
           alt="Generated output"
           className="z-1 h-full w-full object-contain"
           onClick={() => navigate(`~/result/${images?.[0]?.name}`)}

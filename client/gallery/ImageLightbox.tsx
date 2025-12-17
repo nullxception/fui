@@ -162,7 +162,7 @@ export default function ImageLightbox() {
               <motion.img
                 key={image?.name}
                 className="absolute h-full w-full object-contain"
-                src={image.url}
+                src={`${image.url}?preview`}
                 alt="preview"
                 custom={page}
                 variants={variants}
