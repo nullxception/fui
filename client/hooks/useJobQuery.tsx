@@ -77,12 +77,14 @@ export const useJobQuery = (type: JobType) => {
 
     es.addEventListener("error", (event: MessageEvent) => {
       try {
-        addLog({
-          jobId: job?.id,
-          type: "stderr",
-          message: z.string().parse(event.data),
-          timestamp: Date.now(),
-        });
+        if (event.data) {
+          addLog({
+            jobId: job?.id,
+            type: "stderr",
+            message: z.string().parse(event.data),
+            timestamp: Date.now(),
+          });
+        }
       } catch (e) {
         console.error(e);
       }
