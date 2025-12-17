@@ -1,6 +1,5 @@
-import { useQuery } from "@tanstack/react-query";
-import { SliderInput } from "client/components/SliderInput";
-import { Label } from "client/components/ui/label";
+import { SliderInput } from "@/components/SliderInput";
+import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
@@ -8,9 +7,10 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "client/components/ui/select";
-import { Switch } from "client/components/ui/switch";
-import { useTRPC } from "client/query";
+} from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
+import { useTRPC } from "@/query";
+import { useQuery } from "@tanstack/react-query";
 import z from "zod";
 import { useDiffusionConfig } from "./useDiffusionConfig";
 

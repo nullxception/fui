@@ -1,6 +1,6 @@
-import { Thumbnail } from "client/components/Thumbnail";
-import { Button } from "client/components/ui/button";
-import { Card, CardFooter } from "client/components/ui/card";
+import { Thumbnail } from "@/components/Thumbnail";
+import { Button } from "@/components/ui/button";
+import { Card, CardFooter } from "@/components/ui/card";
 import { ArrowLeftIcon, CircleAlertIcon, Trash2Icon } from "lucide-react";
 import { useState } from "react";
 import Masonry, { ResponsiveMasonry } from "react-responsive-masonry";

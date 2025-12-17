@@ -1,4 +1,4 @@
-import { cn } from "client/lib/utils";
+import { cn } from "@/lib/utils";
 import { Slider as SliderPrimitive } from "radix-ui";
 import * as React from "react";
 import { Badge } from "./badge";

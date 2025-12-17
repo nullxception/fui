@@ -1,5 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
-import { Label } from "client/components/ui/label";
+import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
@@ -7,8 +6,9 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "client/components/ui/select";
-import { useTRPC } from "client/query";
+} from "@/components/ui/select";
+import { useTRPC } from "@/query";
+import { useQuery } from "@tanstack/react-query";
 import { GGML_WEIGHTS_TYPE } from "server/types";
 import { useDiffusionConfig } from "./useDiffusionConfig";
 

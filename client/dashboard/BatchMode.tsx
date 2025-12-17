@@ -1,6 +1,6 @@
-import { NumberInput } from "client/components/NumberInput";
-import { Label } from "client/components/ui/label";
-import { Switch } from "client/components/ui/switch";
+import { NumberInput } from "@/components/NumberInput";
+import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
 import { useDiffusionConfig } from "./useDiffusionConfig";
 
 export function BatchModeSetting() {

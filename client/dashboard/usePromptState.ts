@@ -1,4 +1,4 @@
-import type { Timeout } from "client/types";
+import type { Timeout } from "@/types";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useDiffusionConfig } from "./useDiffusionConfig";
 

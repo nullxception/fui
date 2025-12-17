@@ -1,14 +1,14 @@
+import { DottedBackground } from "@/components/DottedBackground";
+import { Logo } from "@/components/Header";
+import { NavItem, type NavEntry } from "@/components/NavItems";
+import { Button } from "@/components/ui/button";
+import { useImageQuery } from "@/gallery/useImageQuery";
+import { JobQueryContext, JobQueryProvider } from "@/hooks/useJobQuery";
+import { useTRPC } from "@/query";
+import { useAppStore } from "@/stores/useAppStore";
+import { usePreviewImage } from "@/stores/usePreviewImage";
+import type { Timeout } from "@/types";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { DottedBackground } from "client/components/DottedBackground";
-import { Logo } from "client/components/Header";
-import { NavItem, type NavEntry } from "client/components/NavItems";
-import { Button } from "client/components/ui/button";
-import { useImageQuery } from "client/gallery/useImageQuery";
-import { JobQueryContext, JobQueryProvider } from "client/hooks/useJobQuery";
-import { useTRPC } from "client/query";
-import { useAppStore } from "client/stores/useAppStore";
-import { usePreviewImage } from "client/stores/usePreviewImage";
-import type { Timeout } from "client/types";
 import { formatDuration, intervalToDuration } from "date-fns";
 import { AnimatePresence, motion, type HTMLMotionProps } from "framer-motion";
 import {

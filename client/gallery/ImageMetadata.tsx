@@ -1,7 +1,7 @@
-import { Button } from "client/components/ui/button";
-import { Label } from "client/components/ui/label";
-import { useDiffusionConfig } from "client/dashboard/useDiffusionConfig";
-import { usePreviewImage } from "client/stores/usePreviewImage";
+import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
+import { useDiffusionConfig } from "@/dashboard/useDiffusionConfig";
+import { usePreviewImage } from "@/stores/usePreviewImage";
 import { motion } from "framer-motion";
 import {
   ChevronDownIcon,
@@ -160,7 +160,7 @@ export default function ImageMetadata({
         <ChevronDownIcon className="text-foreground" />
       </Button>
       <div
-        className={`bg-surface/95 scrollbar-thin flex h-[65vh] w-full flex-col gap-2 overflow-y-auto rounded-t-lg border-border bg-clip-border px-4 backdrop-blur-sm scrollbar-thumb-secondary scrollbar-track-transparent md:h-full md:w-[400px] md:rounded-none md:border-l ${className}`}
+        className={`bg-surface/95 scrollbar-thin flex h-[65vh] w-full flex-col gap-2 overflow-y-auto rounded-t-lg border-border bg-clip-border px-4 backdrop-blur-sm scrollbar-thumb-secondary scrollbar-track-transparent md:h-full md:w-100 md:rounded-none md:border-l ${className}`}
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between py-2 pt-4">

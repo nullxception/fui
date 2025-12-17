@@ -1,10 +1,10 @@
+import { Button } from "@/components/ui/button";
+import { ButtonGroup } from "@/components/ui/button-group";
+import { Card } from "@/components/ui/card";
+import { InputGroup, InputGroupInput } from "@/components/ui/input-group";
+import { Label } from "@/components/ui/label";
+import { useTRPC } from "@/query";
 import { useMutation } from "@tanstack/react-query";
-import { Button } from "client/components/ui/button";
-import { ButtonGroup } from "client/components/ui/button-group";
-import { Card } from "client/components/ui/card";
-import { InputGroup, InputGroupInput } from "client/components/ui/input-group";
-import { Label } from "client/components/ui/label";
-import { useTRPC } from "client/query";
 import { CloudUploadIcon } from "lucide-react";
 import React, { useState } from "react";
 import { useSettings } from "./useSettings";

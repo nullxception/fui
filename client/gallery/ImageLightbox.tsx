@@ -1,5 +1,5 @@
-import Modal from "client/components/Modal";
-import { Button } from "client/components/ui/button";
+import Modal from "@/components/Modal";
+import { Button } from "@/components/ui/button";
 import { AnimatePresence, motion } from "framer-motion";
 import {
   ChevronLeftIcon,

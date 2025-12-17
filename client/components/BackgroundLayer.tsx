@@ -1,4 +1,4 @@
-import { useSettings } from "client/settings/useSettings";
+import { useSettings } from "@/settings/useSettings";
 
 export function BackgroundLayer() {
   const { settings } = useSettings();

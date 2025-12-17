@@ -1,7 +1,7 @@
+import { useTRPC } from "@/query";
+import { usePreviewImage } from "@/stores/usePreviewImage";
+import type { Timeout } from "@/types";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useTRPC } from "client/query";
-import { usePreviewImage } from "client/stores/usePreviewImage";
-import type { Timeout } from "client/types";
 import { createContext, useEffect, useRef, useState } from "react";
 import type { JobType, LogEntry } from "server/types";
 import { logEntrySchema } from "server/types/jobs";

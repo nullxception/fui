@@ -1,9 +1,9 @@
-import { Footer } from "client/components/Footer";
-import { Logo } from "client/components/Header";
-import Modal from "client/components/Modal";
-import { Thumbnail } from "client/components/Thumbnail";
-import { Button } from "client/components/ui/button";
-import { ButtonGroup } from "client/components/ui/button-group";
+import { Footer } from "@/components/Footer";
+import { Logo } from "@/components/Header";
+import Modal from "@/components/Modal";
+import { Thumbnail } from "@/components/Thumbnail";
+import { Button } from "@/components/ui/button";
+import { ButtonGroup } from "@/components/ui/button-group";
 import { motion, type HTMLMotionProps } from "framer-motion";
 import { ImageIcon, Trash2Icon, XIcon } from "lucide-react";
 import { forwardRef, useEffect, useRef, useState } from "react";

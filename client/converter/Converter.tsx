@@ -1,28 +1,28 @@
-import { useMutation, useQuery } from "@tanstack/react-query";
-import { ConsoleOutput } from "client/components/ConsoleOutput";
-import { Footer } from "client/components/Footer";
-import { Logo } from "client/components/Header";
-import { Button } from "client/components/ui/button";
+import { ConsoleOutput } from "@/components/ConsoleOutput";
+import { Footer } from "@/components/Footer";
+import { Logo } from "@/components/Header";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
   CardFooter,
   CardHeader,
   CardTitle,
-} from "client/components/ui/card";
-import { InputGroup, InputGroupInput } from "client/components/ui/input-group";
-import { Label } from "client/components/ui/label";
+} from "@/components/ui/card";
+import { InputGroup, InputGroupInput } from "@/components/ui/input-group";
+import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "client/components/ui/select";
-import { Switch } from "client/components/ui/switch";
-import { JobQueryContext, JobQueryProvider } from "client/hooks/useJobQuery";
-import { useTRPC } from "client/query";
-import { useAppStore } from "client/stores/useAppStore";
+} from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
+import { JobQueryContext, JobQueryProvider } from "@/hooks/useJobQuery";
+import { useTRPC } from "@/query";
+import { useAppStore } from "@/stores/useAppStore";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { motion, type HTMLMotionProps } from "framer-motion";
 import { AlertTriangleIcon, CircleStopIcon, ZapIcon } from "lucide-react";
 import { forwardRef, useContext, useState } from "react";

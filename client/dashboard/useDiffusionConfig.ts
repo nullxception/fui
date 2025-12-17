@@ -1,5 +1,5 @@
+import { useTRPC } from "@/query";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useTRPC } from "client/query";
 import { defaultUserConfig } from "server/defaults";
 import type { DiffusionParams } from "server/types";
 

@@ -1,5 +1,5 @@
-import { Footer } from "client/components/Footer";
-import { Card } from "client/components/ui/card";
+import { Footer } from "@/components/Footer";
+import { Card } from "@/components/ui/card";
 import { BatchModeSetting } from "./BatchMode";
 import { GenerationSettings } from "./GenerationSettings";
 import { ModelSelector } from "./ModelSelector";

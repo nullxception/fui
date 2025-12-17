@@ -1,9 +1,9 @@
+import { useTRPC } from "@/query";
 import {
   useInfiniteQuery,
   useMutation,
   useQueryClient,
 } from "@tanstack/react-query";
-import { useTRPC } from "client/query";
 import { useMemo } from "react";
 
 const limit = 20;

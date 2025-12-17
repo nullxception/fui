@@ -1,5 +1,5 @@
+import { useTRPC } from "@/query";
 import { useQuery } from "@tanstack/react-query";
-import { useTRPC } from "client/query";
 import React from "react";
 
 export function Footer({

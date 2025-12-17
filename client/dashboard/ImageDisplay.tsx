@@ -1,4 +1,4 @@
-import { Thumbnail } from "client/components/Thumbnail";
+import { Thumbnail } from "@/components/Thumbnail";
 import { motion } from "framer-motion";
 import { ImageIcon } from "lucide-react";
 import Masonry, { ResponsiveMasonry } from "react-responsive-masonry";
@@ -68,7 +68,7 @@ export function ImageDisplay({ images, isProcessing }: ImageDisplayProps) {
       )}
       {!isProcessing && (!images || images.length === 0) && (
         <motion.div {...AnimationSettings} className="p-8 text-center">
-          <div className="mx-auto mb-4 flex h-24 w-24 items-center justify-center rounded-full bg-background text-foreground">
+          <div className="mx-auto mb-4 flex h-24 w-24 items-center justify-center rounded-full border border-border bg-background text-foreground backdrop-blur-sm">
             <ImageIcon className="h-12 w-12" />
           </div>
           <p className="mb-2 text-xl font-medium text-foreground">

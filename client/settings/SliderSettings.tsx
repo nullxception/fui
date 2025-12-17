@@ -1,6 +1,6 @@
-import { NumberInput } from "client/components/NumberInput";
-import { Card } from "client/components/ui/card";
-import { Label } from "client/components/ui/label";
+import { NumberInput } from "@/components/NumberInput";
+import { Card } from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
 import { defaultUserConfig } from "server/defaults";
 import { useSettings } from "./useSettings";
 

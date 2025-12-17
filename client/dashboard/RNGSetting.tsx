@@ -2,8 +2,8 @@ import {
   InputGroup,
   InputGroupButton,
   InputGroupInput,
-} from "client/components/ui/input-group";
-import { Label } from "client/components/ui/label";
+} from "@/components/ui/input-group";
+import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
@@ -11,7 +11,7 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "client/components/ui/select";
+} from "@/components/ui/select";
 import { DicesIcon, RotateCcwIcon } from "lucide-react";
 import { useDiffusionConfig } from "./useDiffusionConfig";
 

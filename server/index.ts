@@ -1,4 +1,4 @@
-import client from "client/index.html";
+import client from "@/index.html";
 import serveStatic from "./api/assets";
 import { readConfig } from "./api/config";
 import { diffusionProgress } from "./api/diffusion";

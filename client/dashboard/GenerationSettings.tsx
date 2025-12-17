@@ -1,5 +1,5 @@
-import { SliderInput } from "client/components/SliderInput";
-import { Label } from "client/components/ui/label";
+import { SliderInput } from "@/components/SliderInput";
+import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
@@ -7,8 +7,8 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "client/components/ui/select";
-import { useSettings } from "client/settings/useSettings";
+} from "@/components/ui/select";
+import { useSettings } from "@/settings/useSettings";
 import { defaultUserConfig } from "server/defaults";
 import { useDiffusionConfig } from "./useDiffusionConfig";
 

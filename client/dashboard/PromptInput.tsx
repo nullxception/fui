@@ -1,15 +1,15 @@
-import { useQuery } from "@tanstack/react-query";
-import { Label } from "client/components/ui/label";
+import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "client/components/ui/select";
-import { Textarea } from "client/components/ui/textarea";
-import { useTRPC } from "client/query";
-import { usePromptAttachment } from "client/settings/usePromptAttachment";
+} from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
+import { useTRPC } from "@/query";
+import { usePromptAttachment } from "@/settings/usePromptAttachment";
+import { useQuery } from "@tanstack/react-query";
 import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
 import type { PromptAttachmentType } from "server/types";
 import { usePromptState } from "./usePromptState";

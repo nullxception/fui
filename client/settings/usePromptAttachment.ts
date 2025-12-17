@@ -1,5 +1,5 @@
+import { useTRPC } from "@/query";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useTRPC } from "client/query";
 import { optimizePrompt } from "server/lib/metadataParser";
 import type { PromptAttachment, PromptAttachmentType } from "server/types";
 

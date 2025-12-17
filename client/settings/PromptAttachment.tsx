@@ -1,14 +1,13 @@
-import { useQuery } from "@tanstack/react-query";
-import Modal from "client/components/Modal";
-import { Button } from "client/components/ui/button";
-import { ButtonGroup } from "client/components/ui/button-group";
-import { Card } from "client/components/ui/card";
+import Modal from "@/components/Modal";
+import { Button } from "@/components/ui/button";
+import { ButtonGroup } from "@/components/ui/button-group";
+import { Card } from "@/components/ui/card";
 import {
   InputGroup,
   InputGroupButton,
   InputGroupInput,
-} from "client/components/ui/input-group";
-import { Label } from "client/components/ui/label";
+} from "@/components/ui/input-group";
+import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
@@ -17,8 +16,9 @@ import {
   SelectLabel,
   SelectTrigger,
   SelectValue,
-} from "client/components/ui/select";
-import { useTRPC } from "client/query";
+} from "@/components/ui/select";
+import { useTRPC } from "@/query";
+import { useQuery } from "@tanstack/react-query";
 import {
   MinusIcon,
   PencilIcon,

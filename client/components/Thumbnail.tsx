@@ -1,5 +1,5 @@
-import { AspectRatio } from "client/components/ui/aspect-ratio";
-import { Skeleton } from "client/components/ui/skeleton";
+import { AspectRatio } from "@/components/ui/aspect-ratio";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Trash2Icon } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import type { SDImage } from "server/types";
