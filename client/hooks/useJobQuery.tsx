@@ -36,13 +36,6 @@ export const useJobQuery = (type: JobType) => {
     const es = new EventSource(`/api/jobs/${job?.id}`);
     esRef.current = es;
 
-    const close = () => {
-      es.close();
-      queryClient.invalidateQueries({
-        queryKey: rpc.recentJob.queryKey(type),
-      });
-    };
-
     es.addEventListener("open", () => {
       setLogs([]);
       useAppStore.getState().setOutputTab("console");
@@ -58,19 +51,28 @@ export const useJobQuery = (type: JobType) => {
 
     es.addEventListener("complete", async (event) => {
       try {
-        const images = rpc.listImages.infiniteQueryKey();
-        await queryClient.invalidateQueries({ queryKey: images });
         await queryClient.invalidateQueries({
-          queryKey: rpc.recentJob.queryKey("txt2img"),
+          queryKey: rpc.recentJob.queryKey(type),
         });
-
-        usePreviewImage
-          .getState()
-          .setPreviewImages("txt2img", z.string().parse(event.data).split(","));
-        close();
+        if (type === "convert") {
+          await queryClient.invalidateQueries({
+            queryKey: rpc.listModels.queryKey(),
+          });
+        } else {
+          await queryClient.invalidateQueries({
+            queryKey: rpc.listImages.infiniteQueryKey(),
+          });
+          usePreviewImage
+            .getState()
+            .setPreviewImages(
+              "txt2img",
+              z.string().parse(event.data).split(","),
+            );
+        }
       } catch (e) {
         console.error(e);
       }
+      es.close();
     });
 
     es.addEventListener("error", (event: MessageEvent) => {
@@ -86,7 +88,7 @@ export const useJobQuery = (type: JobType) => {
       }
       if (!closingRef.current) {
         closingRef.current = setTimeout(() => {
-          close();
+          es.close();
           closingRef.current = null;
         }, 500);
       }
@@ -98,7 +100,15 @@ export const useJobQuery = (type: JobType) => {
         esRef.current = null;
       }
     };
-  }, [job, hasLogs, queryClient, rpc.listImages, rpc.recentJob, type]);
+  }, [
+    job,
+    hasLogs,
+    type,
+    queryClient,
+    rpc.listModels,
+    rpc.listImages,
+    rpc.recentJob,
+  ]);
 
   return {
     job,
