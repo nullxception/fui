@@ -29,6 +29,12 @@ const deleteOldJobs = db.query(`DELETE FROM jobs WHERE completedAt < $cutoff`);
 
 const logs = new Map<string, LogEntry[]>();
 
+function cleanupFailedJobs() {
+  db.query(
+    `DELETE FROM jobs WHERE status = "cancelled" OR status = "failed"`,
+  ).run();
+}
+
 export function createJob(type: JobType, id?: string) {
   const job: Job = {
     id: id ?? randomUUIDv7(),
@@ -36,6 +42,8 @@ export function createJob(type: JobType, id?: string) {
     status: "pending",
     createdAt: Date.now(),
   };
+
+  cleanupFailedJobs();
 
   insertJob.run({
     id: job.id,
