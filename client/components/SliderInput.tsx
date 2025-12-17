@@ -47,7 +47,6 @@ export function SliderInput({
             disabled={disabled}
             onChange={(e) => handleSliderChange(e)}
             className="mt-1 w-30"
-            inputClassName="bg-surface/70 flex h-7 w-16 border border-border px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50"
           />
         </div>
       )}

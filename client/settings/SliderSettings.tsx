@@ -10,7 +10,7 @@ function SliderSettings() {
 
   return (
     <Card className="gap-0 space-y-4 space-x-4 bg-background/60 p-4 backdrop-blur-sm">
-      <div className="flex w-full flex-col justify-between space-y-2">
+      <div className="flex w-full flex-row items-center justify-between space-y-2">
         <Label htmlFor="maxWidthSliderSetting">Max width slider</Label>
         <NumberInput
           id="maxWidthSliderSetting"
@@ -19,10 +19,10 @@ function SliderSettings() {
           step={64}
           value={settings.maxWidth}
           onChange={(e) => update("maxWidth", e)}
-          className="w-full"
+          className="w-40"
         />
       </div>
-      <div className="flex w-full flex-col justify-between space-y-2">
+      <div className="flex w-full flex-row items-center justify-between space-y-2">
         <Label htmlFor="maxHeightSliderSetting">Max height slider</Label>
         <NumberInput
           id="maxHeightSliderSetting"
@@ -31,7 +31,7 @@ function SliderSettings() {
           step={64}
           value={settings.maxHeight}
           onChange={(e) => update("maxHeight", e)}
-          className="w-full"
+          className="w-40"
         />
       </div>
     </Card>

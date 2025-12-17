@@ -28,7 +28,7 @@ export function NumberInput({
   return (
     <ButtonGroup className={className}>
       <ButtonGroupText
-        className="bg-input/50"
+        className={`bg-input/50 ${disabled && "opacity-50"}`}
         asChild
         onClick={() => !disabled && onChange(Math.max(min, value - step))}
       >
@@ -42,12 +42,12 @@ export function NumberInput({
         step={step}
         max={max}
         value={value}
-        className={`bg-surface/70 flex h-7 w-16 border border-border px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50 ${inputClassName}`}
+        className={`bg-surface/70 flex h-7 w-16 border-y border-border px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus-visible:border-primary/50 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50 ${disabled && "select-none"} ${inputClassName}`}
         disabled={disabled}
         onChange={(e) => onChange(e.target.valueAsNumber)}
       />
       <ButtonGroupText
-        className="bg-input/50"
+        className={`bg-input/50 ${disabled && "opacity-50"}`}
         asChild
         onClick={() => !disabled && onChange(value + step)}
       >
