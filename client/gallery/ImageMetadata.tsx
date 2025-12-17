@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
+import { CopyButton } from "@/components/ui/shadcn-io/copy-button";
 import { useDiffusionConfig } from "@/dashboard/useDiffusionConfig";
 import { usePreviewImage } from "@/stores/usePreviewImage";
 import {
@@ -54,13 +55,29 @@ function BaseMetadataChip({
   )
     return null;
 
+  const copiedContent = () => {
+    if (Array.isArray(value)) {
+      return value.join("\n");
+    }
+
+    return value.toString().trim();
+  };
+
   return (
-    <div className="rounded border border-border/50 bg-background/50 p-2">
-      <Label
-        className={`mb-1 block text-[10px] tracking-wider text-gray-300 uppercase ${className}`}
-      >
-        {title}
-      </Label>
+    <div className="group rounded border border-border/50 bg-background/50 p-2">
+      <div className="flex flex-row items-center justify-between">
+        <Label
+          className={`mb-1 block text-[10px] tracking-wider text-gray-300 uppercase ${className}`}
+        >
+          {title}
+        </Label>
+        <CopyButton
+          variant="ghost"
+          size="sm"
+          content={copiedContent()}
+          className="opacity-0 group-hover:opacity-100"
+        />
+      </div>
       <p className="text-gray truncate font-mono text-xs whitespace-pre-wrap">
         {Array.isArray(value)
           ? value.map((v, i) => (
