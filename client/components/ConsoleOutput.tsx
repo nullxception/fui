@@ -110,19 +110,23 @@ export function ConsoleOutput({
         </motion.div>
       ) : (
         processedLogs.map((log, index) => (
-          <motion.div key={index} {...AnimationSettings}>
+          <motion.div
+            key={index}
+            transition={{ duration: 0.2 }}
+            initial={{ opacity: 0, filter: "blur(3px)" }}
+            animate={{ opacity: 1, filter: "blur(0px)" }}
+            className="py-px"
+          >
             <span
               className={`mr-2 text-muted-foreground select-none ${!showLogTime && "hidden"}`}
             >
               {log.timestamp && `[${formatTime(log.timestamp)}]`}
             </span>
-            <span
-              className={
-                log.type === "stderr" ? "text-red-400" : "text-gray-300"
-              }
-            >
-              {log.message}
-            </span>
+            {log.type === "stderr" ? (
+              <span className="text-destructive">{log.message}</span>
+            ) : (
+              log.message
+            )}
           </motion.div>
         ))
       )}
