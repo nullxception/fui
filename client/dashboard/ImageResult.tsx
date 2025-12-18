@@ -10,9 +10,16 @@ import {
   ContextMenuTrigger,
 } from "@/components/ui/context-menu";
 import { useImageQuery } from "@/gallery/useImageQuery";
+import { saveImage } from "@/lib/image";
 import { useTRPC } from "@/query";
 import { useQuery } from "@tanstack/react-query";
-import { ImageIcon, ImagesIcon, Trash2Icon, XIcon } from "lucide-react";
+import {
+  DownloadIcon,
+  ImageIcon,
+  ImagesIcon,
+  Trash2Icon,
+  XIcon,
+} from "lucide-react";
 import { motion } from "motion/react";
 import { useState } from "react";
 import Masonry, { ResponsiveMasonry } from "react-responsive-masonry";
@@ -115,6 +122,9 @@ export function ImageResult({ urls, isProcessing }: ImageResultProps) {
                     />
                   </ContextMenuTrigger>
                   <ContextMenuContent>
+                    <ContextMenuItem onClick={() => saveImage(img)}>
+                      <DownloadIcon /> Download
+                    </ContextMenuItem>
                     <ContextMenuItem onClick={() => setTrashQueue([img.url])}>
                       <Trash2Icon />
                       Remove

@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { CopyButton } from "@/components/ui/shadcn-io/copy-button";
 import { useDiffusionConfig } from "@/dashboard/useDiffusionConfig";
+import { saveImage } from "@/lib/image";
 import { usePreviewImage } from "@/stores/usePreviewImage";
 import {
   ChevronDownIcon,
@@ -13,23 +14,6 @@ import { motion } from "motion/react";
 import type { SDImage } from "server/types";
 import type { SDImageParams } from "server/types/image";
 import { useLocation } from "wouter";
-
-async function saveImage(image: SDImage) {
-  try {
-    const response = await fetch(image.url);
-    const blob = await response.blob();
-    const blobUrl = URL.createObjectURL(blob);
-    const url = response.url;
-    const link = document.createElement("a");
-    link.href = blobUrl;
-    link.download = url.substring(url.lastIndexOf("/") + 1);
-    link.click();
-
-    URL.revokeObjectURL(blobUrl);
-  } catch (error) {
-    console.error("Error downloading the image:", error);
-  }
-}
 
 interface ImageMetadataProps {
   image: SDImage;

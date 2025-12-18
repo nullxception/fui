@@ -10,7 +10,14 @@ import {
   ContextMenuItem,
   ContextMenuTrigger,
 } from "@/components/ui/context-menu";
-import { ImageIcon, ImagesIcon, Trash2Icon, XIcon } from "lucide-react";
+import { saveImage } from "@/lib/image";
+import {
+  DownloadIcon,
+  ImageIcon,
+  ImagesIcon,
+  Trash2Icon,
+  XIcon,
+} from "lucide-react";
 import { motion, type HTMLMotionProps } from "motion/react";
 import { forwardRef, useEffect, useRef, useState } from "react";
 import Masonry, { ResponsiveMasonry } from "react-responsive-masonry";
@@ -131,6 +138,9 @@ export const Gallery = forwardRef<HTMLDivElement, HTMLMotionProps<"div">>(
                       />
                     </ContextMenuTrigger>
                     <ContextMenuContent className="bg-background/80 backdrop-blur-xs">
+                      <ContextMenuItem onClick={() => saveImage(img)}>
+                        <DownloadIcon /> Download
+                      </ContextMenuItem>
                       <ContextMenuItem onClick={() => setTrashQueue([img.url])}>
                         <Trash2Icon />
                         Remove
