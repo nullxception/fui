@@ -1,0 +1,7 @@
+# project files
+bun.lock
+
+# user files
+models
+output
+public/upload
