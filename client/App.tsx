@@ -59,7 +59,7 @@ function Routes() {
   );
 }
 
-function AppLayout() {
+function MainScaffold() {
   const ref = useRef<HTMLDivElement>(null);
   const { scrollY } = useScroll({ container: ref });
   const [coversContent, setCoversContent] = useState(false);
@@ -73,18 +73,13 @@ function AppLayout() {
   });
 
   return (
-    <MotionConfig transition={{ duration: 0.3 }}>
-      <BackgroundLayer />
-      <div
-        ref={ref}
-        className="scrollbar-thin flex h-screen w-full flex-1 flex-col overflow-y-scroll pb-18 font-sans text-foreground scrollbar-thumb-accent scrollbar-track-transparent selection:bg-primary selection:text-primary-foreground md:pb-0"
-      >
-        <Header withBackground={coversContent} />
-        <Routes />
-        <MobileNav />
-      </div>
-      <div id="modal-root"></div>
-    </MotionConfig>
+    <div
+      ref={ref}
+      className="scrollbar-thin flex h-screen w-full flex-1 flex-col overflow-y-scroll pb-18 font-sans text-foreground scrollbar-thumb-accent scrollbar-track-transparent selection:bg-primary selection:text-primary-foreground md:pb-0"
+    >
+      <Header withBackground={coversContent} />
+      <Routes />
+    </div>
   );
 }
 
@@ -104,9 +99,10 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <TRPCProvider trpcClient={trpcClient} queryClient={queryClient}>
-        <ThemeProvider defaultTheme="dark" storageKey="ui-theme">
-          <AppLayout />
-        </ThemeProvider>
+        <BackgroundLayer />
+        <MainScaffold />
+        <MobileNav />
+        <div id="modal-root" />
       </TRPCProvider>
     </QueryClientProvider>
   );
@@ -115,7 +111,11 @@ function App() {
 const elem = document.getElementById("root")!;
 const app = (
   <StrictMode>
-    <App />
+    <MotionConfig transition={{ duration: 0.3 }}>
+      <ThemeProvider defaultTheme="dark" storageKey="ui-theme">
+        <App />
+      </ThemeProvider>
+    </MotionConfig>
   </StrictMode>
 );
 

@@ -1,5 +1,4 @@
 import { Footer } from "@/components/Footer";
-import { Logo } from "@/components/Header";
 import { motion, type HTMLMotionProps } from "motion/react";
 import { forwardRef } from "react";
 import BackgroundSetting from "./BackgroundSetting";
@@ -14,9 +13,6 @@ const Settings = forwardRef<HTMLDivElement, HTMLMotionProps<"div">>(
         className="container mx-auto max-w-screen-2xl"
         {...props}
       >
-        <div className="flex w-full p-4 md:hidden">
-          <Logo />
-        </div>
         <div className="grid grid-flow-row grid-cols-1 gap-2 p-4 md:grid-cols-2 md:flex-row">
           <BackgroundSetting />
           <SliderSettings />

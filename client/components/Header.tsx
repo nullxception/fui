@@ -1,17 +1,18 @@
 import { AtomIcon, ImageIcon, SettingsIcon, ZapIcon } from "lucide-react";
-import { AnimatePresence } from "motion/react";
+import { AnimatePresence, motion } from "motion/react";
 import { useLocation } from "wouter";
 import { NavItem } from "./NavItems";
 
 export function Logo({ className = "" }: { className?: string }) {
   const [, navigate] = useLocation();
   return (
-    <h1
+    <motion.h1
+      layoutId="fuilogo"
       className={`bg-linear-to-r from-blue-400 to-purple-500 bg-clip-text text-xl font-bold text-transparent ${className}`}
       onClick={() => navigate("/")}
     >
       fui²
-    </h1>
+    </motion.h1>
   );
 }
 
@@ -27,12 +28,12 @@ export function Header({ withBackground }: { withBackground: boolean }) {
 
   return (
     <header
-      className={`sticky top-0 z-3 hidden w-full justify-center ${withBackground && "border-b border-border bg-background/60 backdrop-blur"} md:flex`}
+      className={`top-0 z-3 w-full justify-center md:sticky ${withBackground && "md:border-b md:border-border md:bg-background/60 md:backdrop-blur"} flex`}
     >
       <div className="container flex h-14 max-w-screen-2xl items-center justify-between px-2">
         <Logo className="px-4" />
 
-        <nav className="flex items-center gap-2 rounded-lg border border-border bg-background/50 p-1">
+        <nav className="hidden items-center gap-2 rounded-lg border border-border bg-background/50 p-1 md:flex">
           {navItems.map((item) => (
             <AnimatePresence key={item.name} mode="wait">
               <NavItem

@@ -1,6 +1,5 @@
 import { ConsoleOutput } from "@/components/ConsoleOutput";
 import { Footer } from "@/components/Footer";
-import { Logo } from "@/components/Header";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -202,9 +201,6 @@ export const Converter = forwardRef<HTMLDivElement, HTMLMotionProps<"div">>(
         className="container mx-auto max-w-screen-2xl"
         {...props}
       >
-        <div className="flex items-center p-4 md:hidden">
-          <Logo />
-        </div>
         <div className="flex flex-auto flex-col gap-2 p-2 lg:h-full lg:flex-row">
           <JobQueryProvider type="convert">
             <LogsPanel className="h-[30vh] bg-background/60 lg:h-[80vh] lg:w-1/2" />

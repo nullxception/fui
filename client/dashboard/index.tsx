@@ -1,6 +1,5 @@
 import { ConsoleOutput } from "@/components/ConsoleOutput";
 import { DottedBackground } from "@/components/DottedBackground";
-import { Logo } from "@/components/Header";
 import { NavItem, type NavEntry } from "@/components/NavItems";
 import { Button } from "@/components/ui/button";
 import { JobQueryContext, JobQueryProvider } from "@/hooks/useJobQuery";
@@ -225,9 +224,6 @@ export const TextToImage = forwardRef<HTMLDivElement, HTMLMotionProps<"div">>(
         className="container mx-auto max-w-screen-2xl p-2 lg:overflow-hidden"
         {...props}
       >
-        <div className="flex items-center p-4 md:hidden">
-          <Logo />
-        </div>
         <div className="flex flex-col gap-2 lg:h-full lg:flex-row lg:items-stretch">
           <div className="flex min-h-0 flex-col overflow-clip rounded-xl border border-border bg-background/60 lg:mb-4 lg:w-1/2">
             <JobQueryProvider type="txt2img">

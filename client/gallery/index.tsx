@@ -1,5 +1,4 @@
 import { Footer } from "@/components/Footer";
-import { Logo } from "@/components/Header";
 import Modal from "@/components/Modal";
 import { RemoveImagesDialog } from "@/components/RemoveImagesDialog";
 import { Thumbnail } from "@/components/Thumbnail";
@@ -103,9 +102,6 @@ export const Gallery = forwardRef<HTMLDivElement, HTMLMotionProps<"div">>(
     return (
       <>
         <motion.div ref={ref} {...props} className="grow p-2">
-          <div className="flex items-center justify-between p-2 md:hidden">
-            <Logo />
-          </div>
           <ResponsiveMasonry
             columnsCountBreakPoints={{ 350: 2, 512: 3, 720: 4, 900: 5 }}
             gutterBreakPoints={{ 350: "6px", 720: "12px" }}
@@ -163,7 +159,7 @@ export const Gallery = forwardRef<HTMLDivElement, HTMLMotionProps<"div">>(
           <Footer className="col-span-full flex justify-center p-4" />
         </motion.div>
         {selectedImages.length > 0 && (
-          <motion.div className="absolute bottom-25 left-1/2 -translate-x-1/2">
+          <motion.div className="absolute bottom-40 left-1/2 -translate-x-1/2 md:bottom-25">
             <ButtonGroup className="overflow-clip rounded-md bg-background/80 backdrop-blur-xs">
               <Button
                 variant="destructive"
