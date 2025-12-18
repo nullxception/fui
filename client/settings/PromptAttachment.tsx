@@ -288,7 +288,7 @@ export function PromptAttachmentEditor() {
       if (loraStrength < 1) {
         tw = {
           ...entry,
-          strength: 7,
+          strength: normalizeFP(loraStrength),
         };
       }
       addTW(tw);
