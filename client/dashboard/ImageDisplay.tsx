@@ -1,14 +1,16 @@
-import { Thumbnail } from "@/components/Thumbnail";
+import { Thumbnail, ThumbnailMenu } from "@/components/Thumbnail";
 import { useTRPC } from "@/query";
 import { useQuery } from "@tanstack/react-query";
 import { ImageIcon } from "lucide-react";
 import { motion } from "motion/react";
 import Masonry, { ResponsiveMasonry } from "react-responsive-masonry";
+import type { SDImage } from "server/types";
 import { useLocation } from "wouter";
 
 interface ImageDisplayProps {
   imageUrls: string[];
   isProcessing: boolean;
+  onImageRemoved?: (image: SDImage) => void;
 }
 
 const AnimationSettings = {
@@ -36,13 +38,19 @@ export function ImageDisplay({ imageUrls, isProcessing }: ImageDisplayProps) {
         </motion.div>
       )}
       {images && images.length === 1 && (
-        <motion.img
-          {...AnimationSettings}
-          src={`${images?.[0]?.url}?preview`}
-          alt="Generated output"
+        <ThumbnailMenu
+          image={images?.[0]}
+          key={images?.[0]?.name}
           className="z-1 h-full w-full object-contain"
-          onClick={() => navigate(`~/result/${images?.[0]?.name}`)}
-        />
+        >
+          <motion.img
+            {...AnimationSettings}
+            src={`${images?.[0]?.url}?preview`}
+            alt="Generated output"
+            className="z-1 h-full w-full object-contain"
+            onClick={() => navigate(`~/result/${images?.[0]?.name}`)}
+          />
+        </ThumbnailMenu>
       )}
       {images && images.length > 1 && (
         <motion.div
@@ -56,12 +64,17 @@ export function ImageDisplay({ imageUrls, isProcessing }: ImageDisplayProps) {
           >
             <Masonry className="">
               {images.map((img) => (
-                <Thumbnail
+                <ThumbnailMenu
                   image={img}
                   key={img.name}
-                  className="rounded-md"
-                  onClick={() => navigate(`~/result/${img.name}`)}
-                />
+                  className="w-full rounded-md"
+                >
+                  <Thumbnail
+                    image={img}
+                    className="rounded-md"
+                    onClick={() => navigate(`~/result/${img.name}`)}
+                  />
+                </ThumbnailMenu>
               ))}
             </Masonry>
           </ResponsiveMasonry>

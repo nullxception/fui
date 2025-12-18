@@ -9,7 +9,7 @@ import type { SDImage } from "server/types";
 
 interface RemoveDialogProps {
   onCancel: () => void;
-  onRemove: () => Promise<void>;
+  onRemove: () => Promise<unknown> | void;
   onRemoved: () => void;
   count?: number;
   images?: SDImage[];

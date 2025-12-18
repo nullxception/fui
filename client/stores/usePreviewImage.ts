@@ -5,6 +5,7 @@ interface PreviewImageStore {
   urls?: string[];
   from: "txt2img" | "gallery";
   setPreviewImages: (from: "txt2img" | "gallery", urls?: string[]) => void;
+  remove: (imageUrls: string[]) => void;
 }
 
 export const usePreviewImage = create<PreviewImageStore>((set) => ({
@@ -12,5 +13,11 @@ export const usePreviewImage = create<PreviewImageStore>((set) => ({
   setPreviewImages(from, urls) {
     set({ from, urls });
     useAppStore.getState().setOutputTab("image");
+  },
+  remove(imageUrls) {
+    set((prev) => ({
+      ...prev,
+      urls: prev?.urls?.filter((it) => !imageUrls.includes(it)),
+    }));
   },
 }));

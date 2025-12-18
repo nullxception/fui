@@ -1,4 +1,5 @@
 import { useTRPC } from "@/query";
+import { usePreviewImage } from "@/stores/usePreviewImage";
 import {
   useInfiniteQuery,
   useMutation,
@@ -46,6 +47,9 @@ export function useImageQuery() {
   return {
     ...query,
     images,
-    removeImages: (urls: string[]) => mutation.mutateAsync(urls),
+    removeImages: async (urls: string[]) => {
+      await mutation.mutateAsync(urls);
+      usePreviewImage.getState().remove(urls);
+    },
   };
 }

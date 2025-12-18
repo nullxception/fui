@@ -1,8 +1,17 @@
 import { AspectRatio } from "@/components/ui/aspect-ratio";
+import {
+  ContextMenu,
+  ContextMenuContent,
+  ContextMenuItem,
+  ContextMenuTrigger,
+} from "@/components/ui/context-menu";
 import { Skeleton } from "@/components/ui/skeleton";
+import { RemoveDialog } from "@/gallery/RemoveDialog";
+import { useImageQuery } from "@/gallery/useImageQuery";
 import { Trash2Icon } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import type { SDImage } from "server/types";
+import Modal from "./Modal";
 
 function useElementWidth<T extends HTMLElement>() {
   const ref = useRef<T | null>(null);
@@ -76,5 +85,50 @@ export function Thumbnail({
         </div>
       )}
     </div>
+  );
+}
+
+export function ThumbnailMenu({
+  image,
+  className = "",
+  children,
+}: {
+  image?: SDImage;
+  className?: string;
+  children: ReactNode;
+}) {
+  const { removeImages } = useImageQuery();
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  if (!image) {
+    return children;
+  }
+
+  return (
+    <ContextMenu>
+      <ContextMenuTrigger
+        className={`inset-0 ${className}`}
+        children={children}
+      ></ContextMenuTrigger>
+      <ContextMenuContent>
+        <ContextMenuItem
+          className="gap-2"
+          onClick={() => setShowDeleteDialog(true)}
+        >
+          <Trash2Icon />
+          Remove
+        </ContextMenuItem>
+      </ContextMenuContent>
+      <Modal
+        isOpen={showDeleteDialog}
+        onClose={() => setShowDeleteDialog(false)}
+      >
+        <RemoveDialog
+          images={[image]}
+          onRemove={() => removeImages([image.url])}
+          onRemoved={() => setShowDeleteDialog(false)}
+          onCancel={() => setShowDeleteDialog(false)}
+        />
+      </Modal>
+    </ContextMenu>
   );
 }

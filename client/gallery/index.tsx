@@ -1,7 +1,7 @@
 import { Footer } from "@/components/Footer";
 import { Logo } from "@/components/Header";
 import Modal from "@/components/Modal";
-import { Thumbnail } from "@/components/Thumbnail";
+import { Thumbnail, ThumbnailMenu } from "@/components/Thumbnail";
 import { Button } from "@/components/ui/button";
 import { ButtonGroup } from "@/components/ui/button-group";
 import { ImageIcon, Trash2Icon, XIcon } from "lucide-react";
@@ -41,14 +41,6 @@ export const Gallery = forwardRef<HTMLDivElement, HTMLMotionProps<"div">>(
         newSelected.add(name);
       }
       setSelectedImages(newSelected);
-    };
-
-    const handleBatchDelete = () => {
-      setShowDeleteDialog(true);
-    };
-
-    const onRemoveImages = async () => {
-      await removeImages(Array.from(selectedImages));
     };
 
     const onImagesRemoved = async () => {
@@ -139,7 +131,7 @@ export const Gallery = forwardRef<HTMLDivElement, HTMLMotionProps<"div">>(
               <ButtonGroup className="overflow-clip rounded-md bg-background">
                 <Button
                   variant="secondary"
-                  onClick={handleBatchDelete}
+                  onClick={() => setShowDeleteDialog(true)}
                   disabled={selectedImages.size === 0}
                   className="bg-pink-600 opacity-100"
                 >
@@ -174,21 +166,27 @@ export const Gallery = forwardRef<HTMLDivElement, HTMLMotionProps<"div">>(
           >
             <Masonry>
               {data?.pages.flatMap((group) =>
-                group.map((image, i) => (
-                  <Thumbnail
-                    key={i}
+                group.map((img, i) => (
+                  <ThumbnailMenu
+                    image={img}
+                    key={img.name}
                     className="w-full rounded-xl"
-                    image={image}
-                    isSelectionMode={isSelectionMode}
-                    selected={selectedImages.has(image.url)}
-                    onClick={() => {
-                      if (isSelectionMode) {
-                        toggleSelection(image.url);
-                      } else {
-                        navigate(`~/gallery/${image.name}`);
-                      }
-                    }}
-                  />
+                  >
+                    <Thumbnail
+                      key={i}
+                      image={img}
+                      className="rounded-xl"
+                      isSelectionMode={isSelectionMode}
+                      selected={selectedImages.has(img.url)}
+                      onClick={() => {
+                        if (isSelectionMode) {
+                          toggleSelection(img.url);
+                        } else {
+                          navigate(`~/gallery/${img.name}`);
+                        }
+                      }}
+                    />
+                  </ThumbnailMenu>
                 )),
               )}
             </Masonry>
@@ -207,7 +205,7 @@ export const Gallery = forwardRef<HTMLDivElement, HTMLMotionProps<"div">>(
         >
           <RemoveDialog
             images={images.filter((img) => selectedImages.has(img.url))}
-            onRemove={onRemoveImages}
+            onRemove={() => removeImages(Array.from(selectedImages))}
             onRemoved={onImagesRemoved}
             onCancel={() => setShowDeleteDialog(false)}
           />
