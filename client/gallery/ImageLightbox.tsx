@@ -1,4 +1,6 @@
+import { DottedBackground } from "@/components/DottedBackground";
 import Modal from "@/components/Modal";
+import { RemoveImagesDialog } from "@/components/RemoveImagesDialog";
 import { Button } from "@/components/ui/button";
 import {
   ChevronLeftIcon,
@@ -10,9 +12,7 @@ import { AnimatePresence, motion } from "motion/react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { SDImage } from "server/types";
 import { useLocation, useRoute } from "wouter";
-import { DottedBackground } from "../components/DottedBackground";
 import ImageMetadata from "./ImageMetadata";
-import { RemoveDialog } from "./RemoveDialog";
 import { useImageQuery } from "./useImageQuery";
 
 interface PageDirection {
@@ -243,7 +243,7 @@ export default function ImageLightbox() {
           isOpen={shouldShowRemoveDialog}
           onClose={() => showRemoveDialog(false)}
         >
-          <RemoveDialog
+          <RemoveImagesDialog
             onRemove={async () => {
               if (!image) return;
               await removeImages([image.url]);

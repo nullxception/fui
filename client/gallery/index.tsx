@@ -1,15 +1,21 @@
 import { Footer } from "@/components/Footer";
 import { Logo } from "@/components/Header";
 import Modal from "@/components/Modal";
-import { Thumbnail, ThumbnailMenu } from "@/components/Thumbnail";
+import { RemoveImagesDialog } from "@/components/RemoveImagesDialog";
+import { Thumbnail } from "@/components/Thumbnail";
 import { Button } from "@/components/ui/button";
 import { ButtonGroup } from "@/components/ui/button-group";
-import { ImageIcon, Trash2Icon, XIcon } from "lucide-react";
+import {
+  ContextMenu,
+  ContextMenuContent,
+  ContextMenuItem,
+  ContextMenuTrigger,
+} from "@/components/ui/context-menu";
+import { ImageIcon, ImagesIcon, Trash2Icon, XIcon } from "lucide-react";
 import { motion, type HTMLMotionProps } from "motion/react";
 import { forwardRef, useEffect, useRef, useState } from "react";
 import Masonry, { ResponsiveMasonry } from "react-responsive-masonry";
 import { useLocation } from "wouter";
-import { RemoveDialog } from "./RemoveDialog";
 import { useImageQuery } from "./useImageQuery";
 
 export const Gallery = forwardRef<HTMLDivElement, HTMLMotionProps<"div">>(
@@ -27,26 +33,15 @@ export const Gallery = forwardRef<HTMLDivElement, HTMLMotionProps<"div">>(
     } = useImageQuery();
     const observerTarget = useRef(null);
     const [, navigate] = useLocation();
-    const [isSelectionMode, setIsSelectionMode] = useState(false);
-    const [selectedImages, setSelectedImages] = useState<Set<string>>(
-      new Set(),
-    );
-    const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+    const [selectedImages, setSelectedImages] = useState<Array<string>>([]);
+    const [trashQueue, setTrashQueue] = useState<Array<string>>([]);
 
     const toggleSelection = (name: string) => {
-      const newSelected = new Set(selectedImages);
-      if (newSelected.has(name)) {
-        newSelected.delete(name);
-      } else {
-        newSelected.add(name);
-      }
-      setSelectedImages(newSelected);
-    };
-
-    const onImagesRemoved = async () => {
-      setIsSelectionMode(false);
-      setSelectedImages(new Set());
-      setShowDeleteDialog(false);
+      setSelectedImages(
+        selectedImages.includes(name)
+          ? selectedImages.filter((it) => it !== name)
+          : [...selectedImages, name],
+      );
     };
 
     useEffect(() => {
@@ -108,56 +103,8 @@ export const Gallery = forwardRef<HTMLDivElement, HTMLMotionProps<"div">>(
     return (
       <>
         <motion.div ref={ref} {...props} className="grow p-2">
-          <div className="flex items-center justify-between px-2 md:hidden">
-            <div className="flex items-center gap-2">
-              <Logo />
-            </div>
-
-            <nav className="flex items-center gap-2 rounded-lg p-1">
-              {!isSelectionMode && (
-                <Button
-                  variant="outline"
-                  onClick={() => setIsSelectionMode(true)}
-                >
-                  <Trash2Icon />
-                </Button>
-              )}
-            </nav>
-          </div>
-          <div
-            className={`${isSelectionMode ? "sticky top-4 right-0 md:top-16" : "relative top-1"} z-2 mx-auto mb-4 flex max-w-screen-2xl justify-end gap-2 px-4`}
-          >
-            {isSelectionMode && (
-              <ButtonGroup className="overflow-clip rounded-md bg-background">
-                <Button
-                  variant="secondary"
-                  onClick={() => setShowDeleteDialog(true)}
-                  disabled={selectedImages.size === 0}
-                  className="bg-pink-600 opacity-100"
-                >
-                  <Trash2Icon /> Delete ({selectedImages.size})
-                </Button>
-                <Button
-                  variant="outline"
-                  onClick={() => {
-                    setIsSelectionMode(false);
-                    setSelectedImages(new Set());
-                  }}
-                  className="bg-background"
-                >
-                  <XIcon /> Cancel
-                </Button>
-              </ButtonGroup>
-            )}
-            {!isSelectionMode && (
-              <Button
-                variant="outline"
-                onClick={() => setIsSelectionMode(true)}
-                className="hidden md:block"
-              >
-                <Trash2Icon />
-              </Button>
-            )}
+          <div className="flex items-center justify-between p-2 md:hidden">
+            <Logo />
           </div>
           <ResponsiveMasonry
             columnsCountBreakPoints={{ 350: 2, 512: 3, 720: 4, 900: 5 }}
@@ -167,26 +114,42 @@ export const Gallery = forwardRef<HTMLDivElement, HTMLMotionProps<"div">>(
             <Masonry>
               {data?.pages.flatMap((group) =>
                 group.map((img, i) => (
-                  <ThumbnailMenu
-                    image={img}
-                    key={img.name}
-                    className="w-full rounded-xl"
-                  >
-                    <Thumbnail
-                      key={i}
-                      image={img}
-                      className="rounded-xl"
-                      isSelectionMode={isSelectionMode}
-                      selected={selectedImages.has(img.url)}
-                      onClick={() => {
-                        if (isSelectionMode) {
-                          toggleSelection(img.url);
-                        } else {
-                          navigate(`~/gallery/${img.name}`);
-                        }
-                      }}
-                    />
-                  </ThumbnailMenu>
+                  <ContextMenu key={img.name}>
+                    <ContextMenuTrigger
+                      disabled={selectedImages.length > 0}
+                      className={`inset-0 w-full rounded-xl`}
+                    >
+                      <Thumbnail
+                        key={i}
+                        image={img}
+                        className="rounded-xl"
+                        isSelectionMode={selectedImages.length > 0}
+                        selected={selectedImages.includes(img.url)}
+                        onClick={() => {
+                          if (selectedImages.length > 0) {
+                            toggleSelection(img.url);
+                          } else {
+                            navigate(`~/gallery/${img.name}`);
+                          }
+                        }}
+                      />
+                    </ContextMenuTrigger>
+                    <ContextMenuContent className="bg-background/80 backdrop-blur-xs">
+                      <ContextMenuItem onClick={() => setTrashQueue([img.url])}>
+                        <Trash2Icon />
+                        Remove
+                      </ContextMenuItem>
+                      {selectedImages.length === 0 && (
+                        <ContextMenuItem
+                          onClick={() => toggleSelection(img.url)}
+                          variant="destructive"
+                        >
+                          <ImagesIcon />
+                          Bulk Remove
+                        </ContextMenuItem>
+                      )}
+                    </ContextMenuContent>
+                  </ContextMenu>
                 )),
               )}
             </Masonry>
@@ -199,15 +162,39 @@ export const Gallery = forwardRef<HTMLDivElement, HTMLMotionProps<"div">>(
           )}
           <Footer className="col-span-full flex justify-center p-4" />
         </motion.div>
-        <Modal
-          isOpen={showDeleteDialog}
-          onClose={() => setShowDeleteDialog(false)}
-        >
-          <RemoveDialog
-            images={images.filter((img) => selectedImages.has(img.url))}
-            onRemove={() => removeImages(Array.from(selectedImages))}
-            onRemoved={onImagesRemoved}
-            onCancel={() => setShowDeleteDialog(false)}
+        {selectedImages.length > 0 && (
+          <motion.div className="absolute bottom-25 left-1/2 -translate-x-1/2">
+            <ButtonGroup className="overflow-clip rounded-md bg-background/80 backdrop-blur-xs">
+              <Button
+                variant="destructive"
+                onClick={() => setTrashQueue(selectedImages)}
+                size="lg"
+                disabled={!(selectedImages.length > 0)}
+              >
+                <Trash2Icon /> Remove ({selectedImages.length})
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setSelectedImages([]);
+                }}
+                size="lg"
+                className="bg-background"
+              >
+                <XIcon /> Cancel
+              </Button>
+            </ButtonGroup>
+          </motion.div>
+        )}
+        <Modal isOpen={trashQueue.length > 0} onClose={() => setTrashQueue([])}>
+          <RemoveImagesDialog
+            images={images.filter((img) => trashQueue.includes(img.url))}
+            onRemove={() => removeImages(trashQueue)}
+            onRemoved={() => {
+              setSelectedImages([]);
+              setTrashQueue([]);
+            }}
+            onCancel={() => setTrashQueue([])}
           />
         </Modal>
       </>

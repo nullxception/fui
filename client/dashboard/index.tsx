@@ -1,3 +1,4 @@
+import { ConsoleOutput } from "@/components/ConsoleOutput";
 import { DottedBackground } from "@/components/DottedBackground";
 import { Logo } from "@/components/Header";
 import { NavItem, type NavEntry } from "@/components/NavItems";
@@ -21,9 +22,8 @@ import { forwardRef, useContext, useEffect, useRef, useState } from "react";
 import { optimizePrompt } from "server/lib/metadataParser";
 import type { Job } from "server/types";
 import { useShallow } from "zustand/react/shallow";
-import { ConsoleOutput } from "../components/ConsoleOutput";
 import { ControlPanel } from "./ControlPanel";
-import { ImageDisplay } from "./ImageDisplay";
+import { ImageResult } from "./ImageResult";
 import { useDiffusionConfig } from "./useDiffusionConfig";
 
 type TabType = "image" | "console";
@@ -110,10 +110,7 @@ function OutputCard() {
       <div className="relative min-h-0 w-full flex-1">
         <DottedBackground />
         {outputTab === "image" ? (
-          <ImageDisplay
-            imageUrls={urls ?? []}
-            isProcessing={isProcessing ?? false}
-          />
+          <ImageResult urls={urls ?? []} isProcessing={isProcessing ?? false} />
         ) : (
           <ConsoleOutput
             logs={logs.filter((x) => x.jobId === job?.id)}

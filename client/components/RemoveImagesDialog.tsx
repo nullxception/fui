@@ -7,7 +7,7 @@ import Masonry, { ResponsiveMasonry } from "react-responsive-masonry";
 
 import type { SDImage } from "server/types";
 
-interface RemoveDialogProps {
+interface RemoveImagesDialogProps {
   onCancel: () => void;
   onRemove: () => Promise<unknown> | void;
   onRemoved: () => void;
@@ -15,12 +15,12 @@ interface RemoveDialogProps {
   images?: SDImage[];
 }
 
-export function RemoveDialog({
+export function RemoveImagesDialog({
   onCancel,
   onRemove,
   onRemoved,
   images = [],
-}: RemoveDialogProps) {
+}: RemoveImagesDialogProps) {
   const [isRemoving, setIsRemoving] = useState(false);
   const handleRemove = async () => {
     setIsRemoving(true);
