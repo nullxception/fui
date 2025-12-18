@@ -143,7 +143,6 @@ export default function ImageLightbox() {
     <>
       <motion.div
         className="fixed inset-0 z-3 flex h-full w-screen flex-col overflow-hidden bg-background/90 shadow-2xl backdrop-blur-xs md:h-screen md:flex-row"
-        transition={{ duration: 0.3 }}
         initial={{ opacity: 0, scale: 1.3 }}
         animate={{ opacity: 1, scale: 1 }}
         exit={{ opacity: 0, scale: 1.3 }}
@@ -151,7 +150,6 @@ export default function ImageLightbox() {
         <motion.div
           className="relative flex flex-1 items-stretch justify-center overflow-hidden"
           ref={ref}
-          transition={{ duration: 0.3 }}
           initial={{ opacity: 0, scale: 0.6 }}
           animate={{ opacity: 1, scale: 1 }}
           exit={{ opacity: 0, scale: 0.6 }}
@@ -171,8 +169,7 @@ export default function ImageLightbox() {
                 animate="center"
                 exit="exit"
                 transition={{
-                  x: { type: "tween", duration: 0.3, ease: "circOut" },
-                  opacity: { duration: 0.3 },
+                  x: { type: "tween", ease: "circOut" },
                 }}
                 drag="x"
                 dragConstraints={{

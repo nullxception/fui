@@ -164,7 +164,6 @@ export default function ImageMetadata({
       initial="enter"
       animate="animate"
       exit="exit"
-      transition={{ duration: 0.3, ease: "easeInOut" }}
       style={{ overflow: "hidden" }}
       className="relative"
     >

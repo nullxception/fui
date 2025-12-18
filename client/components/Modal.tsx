@@ -17,10 +17,9 @@ export default function Modal({
       {isOpen && (
         <motion.div
           layoutId="rootModalFade"
-          transition={{ duration: 0.3 }}
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
+          initial={{ opacity: 0, filter: "blur(4px)" }}
+          animate={{ opacity: 1, filter: "blur(0)" }}
+          exit={{ opacity: 0, filter: "blur(4px)" }}
           ref={ref}
           className="fixed inset-0 z-5 flex items-center-safe justify-center bg-background/75 backdrop-blur-xs"
           onClick={(e) => {
@@ -31,10 +30,9 @@ export default function Modal({
         >
           <motion.div
             layoutId="rootModalFadeZoom"
-            transition={{ duration: 0.3 }}
-            initial={{ opacity: 0, scale: 0.8, filter: "blur(4px)" }}
-            animate={{ opacity: 1, scale: 1, filter: "blur(0)" }}
-            exit={{ opacity: 0, scale: 0.8, filter: "blur(4px)" }}
+            initial={{ scale: 0.8 }}
+            animate={{ scale: 1 }}
+            exit={{ scale: 0.8 }}
             ref={ref}
             className="flex items-center-safe justify-center"
             onClick={(e) => {

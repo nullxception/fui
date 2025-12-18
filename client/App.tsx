@@ -6,7 +6,12 @@ import {
   isNonJsonSerializable,
   splitLink,
 } from "@trpc/client";
-import { AnimatePresence, useMotionValueEvent, useScroll } from "motion/react";
+import {
+  AnimatePresence,
+  MotionConfig,
+  useMotionValueEvent,
+  useScroll,
+} from "motion/react";
 import { StrictMode, useRef, useState } from "react";
 import { createRoot } from "react-dom/client";
 import type { AppRouter } from "server/rpc";
@@ -24,7 +29,6 @@ import { queryClient, TRPCProvider } from "./query";
 import Settings from "./settings/Settings";
 
 const AnimationSettings = {
-  transition: { duration: 0.3 },
   initial: { opacity: 0, y: 20 },
   animate: { opacity: 1, y: 0 },
   exit: { opacity: 0, y: -20 },
@@ -39,7 +43,7 @@ function Routes() {
   const [isIndex] = useRoute("/");
 
   return (
-    <AnimatePresence>
+    <>
       {isSettings && <Settings {...AnimationSettings} />}
       {isConverter && <Converter {...AnimationSettings} />}
       {(isGallery || (isLightbox && lightboxPage === "gallery")) && (
@@ -48,8 +52,10 @@ function Routes() {
       {(isIndex || (isLightbox && lightboxPage === "result")) && (
         <TextToImage {...AnimationSettings} />
       )}
-      {isLightbox && <ImageLightbox key="imgLightbox" />}
-    </AnimatePresence>
+      <AnimatePresence mode="wait">
+        {isLightbox && <ImageLightbox key="imgLightbox" />}
+      </AnimatePresence>
+    </>
   );
 }
 
@@ -67,14 +73,18 @@ function AppLayout() {
   });
 
   return (
-    <div
-      ref={ref}
-      className="scrollbar-thin flex h-screen w-full flex-1 flex-col overflow-y-scroll pb-18 font-sans text-foreground scrollbar-thumb-accent scrollbar-track-transparent selection:bg-primary selection:text-primary-foreground md:pb-0"
-    >
-      <Header withBackground={coversContent} />
-      <Routes />
-      <MobileNav />
-    </div>
+    <MotionConfig transition={{ duration: 0.3 }}>
+      <BackgroundLayer />
+      <div
+        ref={ref}
+        className="scrollbar-thin flex h-screen w-full flex-1 flex-col overflow-y-scroll pb-18 font-sans text-foreground scrollbar-thumb-accent scrollbar-track-transparent selection:bg-primary selection:text-primary-foreground md:pb-0"
+      >
+        <Header withBackground={coversContent} />
+        <Routes />
+        <MobileNav />
+      </div>
+      <div id="modal-root"></div>
+    </MotionConfig>
   );
 }
 
@@ -95,9 +105,7 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <TRPCProvider trpcClient={trpcClient} queryClient={queryClient}>
         <ThemeProvider defaultTheme="dark" storageKey="ui-theme">
-          <BackgroundLayer />
           <AppLayout />
-          <div id="modal-root"></div>
         </ThemeProvider>
       </TRPCProvider>
     </QueryClientProvider>
