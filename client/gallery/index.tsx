@@ -22,7 +22,7 @@ import { motion, type HTMLMotionProps } from "motion/react";
 import { forwardRef, useEffect, useRef, useState } from "react";
 import Masonry, { ResponsiveMasonry } from "react-responsive-masonry";
 import { useLocation } from "wouter";
-import { useImageQuery } from "./useImageQuery";
+import { useImageQuery } from "../hooks/useImageQuery";
 
 export const Gallery = forwardRef<HTMLDivElement, HTMLMotionProps<"div">>(
   (props, ref) => {

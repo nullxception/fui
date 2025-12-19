@@ -1,5 +1,5 @@
+import { usePreviewImage } from "@/hooks/usePreviewImage";
 import { useTRPC } from "@/query";
-import { usePreviewImage } from "@/stores/usePreviewImage";
 import {
   useInfiniteQuery,
   useMutation,

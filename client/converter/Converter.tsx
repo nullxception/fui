@@ -18,9 +18,9 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
+import { useAppStore } from "@/hooks/useAppStore";
 import { JobQueryContext, JobQueryProvider } from "@/hooks/useJobQuery";
 import { useTRPC } from "@/query";
-import { useAppStore } from "@/stores/useAppStore";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { AlertTriangleIcon, CircleStopIcon, ZapIcon } from "lucide-react";
 import { motion, type HTMLMotionProps } from "motion/react";

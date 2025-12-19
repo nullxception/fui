@@ -9,7 +9,7 @@ import {
   ContextMenuItem,
   ContextMenuTrigger,
 } from "@/components/ui/context-menu";
-import { useImageQuery } from "@/gallery/useImageQuery";
+import { useImageQuery } from "@/hooks/useImageQuery";
 import { saveImage } from "@/lib/image";
 import { useTRPC } from "@/query";
 import { useQuery } from "@tanstack/react-query";

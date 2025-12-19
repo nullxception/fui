@@ -18,15 +18,15 @@ import type { AppRouter } from "server/rpc";
 import { useRoute } from "wouter";
 import { BackgroundLayer } from "./components/BackgroundLayer";
 import { Header } from "./components/Header";
+import { ImageLightbox } from "./components/ImageLightbox";
 import { MobileNav } from "./components/MobileNav";
 import { ThemeProvider } from "./components/theme-provider";
 import { Converter } from "./converter/Converter";
 import { TextToImage } from "./dashboard";
 import { Gallery } from "./gallery";
-import ImageLightbox from "./gallery/ImageLightbox";
 import "./index.css";
 import { queryClient, TRPCProvider } from "./query";
-import Settings from "./settings/Settings";
+import { Settings } from "./settings";
 
 const AnimationSettings = {
   initial: { opacity: 0, y: 20 },

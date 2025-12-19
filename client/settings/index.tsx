@@ -5,7 +5,7 @@ import BackgroundSetting from "./BackgroundSetting";
 import { PromptAttachmentEditor } from "./PromptAttachment";
 import SliderSettings from "./SliderSettings";
 
-const Settings = forwardRef<HTMLDivElement, HTMLMotionProps<"div">>(
+export const Settings = forwardRef<HTMLDivElement, HTMLMotionProps<"div">>(
   (props, ref) => {
     return (
       <motion.div
@@ -23,5 +23,3 @@ const Settings = forwardRef<HTMLDivElement, HTMLMotionProps<"div">>(
     );
   },
 );
-
-export default Settings;

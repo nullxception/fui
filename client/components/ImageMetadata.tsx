@@ -2,8 +2,8 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { CopyButton } from "@/components/ui/shadcn-io/copy-button";
 import { useDiffusionConfig } from "@/dashboard/useDiffusionConfig";
+import { usePreviewImage } from "@/hooks/usePreviewImage";
 import { saveImage } from "@/lib/image";
-import { usePreviewImage } from "@/stores/usePreviewImage";
 import {
   ChevronDownIcon,
   DownloadIcon,

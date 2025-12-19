@@ -1,12 +1,12 @@
+import { usePreviewImage } from "@/hooks/usePreviewImage";
 import { useTRPC } from "@/query";
-import { usePreviewImage } from "@/stores/usePreviewImage";
 import type { Timeout } from "@/types";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { createContext, useEffect, useRef, useState } from "react";
 import type { JobType, LogEntry } from "server/types";
 import { logEntrySchema } from "server/types/jobs";
 import z from "zod";
-import { useAppStore } from "../stores/useAppStore";
+import { useAppStore } from "./useAppStore";
 
 export const useJobQuery = (type: JobType) => {
   const rpc = useTRPC();

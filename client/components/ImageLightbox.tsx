@@ -13,8 +13,8 @@ import { AnimatePresence, motion } from "motion/react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { SDImage } from "server/types";
 import { useLocation, useRoute } from "wouter";
+import { useImageQuery } from "../hooks/useImageQuery";
 import ImageMetadata from "./ImageMetadata";
-import { useImageQuery } from "./useImageQuery";
 
 interface PageDirection {
   index: number;
@@ -38,7 +38,7 @@ const variants = {
   }),
 };
 
-export default function ImageLightbox() {
+export function ImageLightbox() {
   const isMd = window.innerWidth < 768;
   const [shouldShowRemoveDialog, showRemoveDialog] = useState(false);
   const [shouldShowMetadata, showMetadata] = useState(!isMd);
