@@ -19,12 +19,15 @@ function putModelFiles(
   file: string,
   subdir: string,
   target: string[],
+  recursive = true,
   match?: RegExp,
 ) {
   const ext = match ? match : /.*\.(ckpt|safetensors|sft|pth|gguf)$/;
   if (!ext.test(file)) return;
   if (file.startsWith(subdir + path.sep)) {
-    target.push(path.relative(subdir, file));
+    const rel = path.relative(subdir, file);
+    if (!recursive && rel.includes(path.sep)) return;
+    target.push(rel);
   }
 }
 
@@ -51,7 +54,7 @@ export async function listDiffusionModels() {
 
     for await (const file of glob.scan(MODELS_DIR)) {
       putModelFiles(file, rCheckpoint, models.checkpoints);
-      putModelFiles(file, rEmbedding, models.embeddings);
+      putModelFiles(file, rEmbedding, models.embeddings, false);
       putModelFiles(file, rLora, models.loras);
       putModelFiles(file, rVae, models.vaes);
       putModelFiles(file, rUpscaler, models.upscalers);
