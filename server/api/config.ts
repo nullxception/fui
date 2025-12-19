@@ -30,6 +30,22 @@ function getValuable<T extends object, V = Valuable<T>>(obj: T): V {
 
 const config: UserConfig = defaultUserConfig();
 
+function dedup(entries: PromptAttachment[]): PromptAttachment[] {
+  const result: PromptAttachment[] = [];
+  entries.sort((a, b) => (a.type + a.target).localeCompare(b.type + b.target));
+  for (const entry of entries) {
+    const prev = result[result.length - 1];
+    if (prev?.target === entry.target) {
+      result[result.length - 1] = merge(prev, entry, {
+        arrayMerge: (dst, src) => Array.from(new Set([...dst, ...src])),
+      });
+      continue;
+    }
+    result.push(entry);
+  }
+  return result;
+}
+
 export async function readConfig() {
   try {
     if (
@@ -45,10 +61,15 @@ export async function readConfig() {
           Bun.YAML.parse(file) as Partial<DiffusionParams>,
         ),
       );
+      const mergedAttachment = dedup(conf.promptAttachment);
       config.diffusion = conf.diffusion;
       config.settings = conf.settings;
-      config.promptAttachment = conf.promptAttachment;
-      return conf;
+      if (mergedAttachment.length !== config.promptAttachment.length) {
+        savePromptAttachment(mergedAttachment);
+      } else {
+        config.promptAttachment = mergedAttachment;
+      }
+      return config;
     } else {
       saveConfig(); // initialize config.yaml
       return config;
