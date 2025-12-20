@@ -10,26 +10,95 @@ import {
   ContextMenuTrigger,
 } from "@/components/ui/context-menu";
 import { useImageQuery } from "@/hooks/useImageQuery";
+import { JobQueryContext } from "@/hooks/useJobQuery";
+import { usePreviewImage } from "@/hooks/usePreviewImage";
 import { saveImage } from "@/lib/image";
 import { useTRPC } from "@/lib/query";
+import type { Timeout } from "@/types";
 import { useQuery } from "@tanstack/react-query";
+import { formatDuration, intervalToDuration } from "date-fns";
 import {
+  ClockIcon,
   DownloadIcon,
   ImageIcon,
   ImagesIcon,
   Trash2Icon,
   XIcon,
 } from "lucide-react";
-import { motion } from "motion/react";
-import { useState } from "react";
+import { AnimatePresence, motion } from "motion/react";
+import { useContext, useEffect, useRef, useState } from "react";
 import Masonry, { ResponsiveMasonry } from "react-responsive-masonry";
-import type { SDImage } from "server/types";
+import type { Job } from "server/types";
 import { useLocation } from "wouter";
+import { useShallow } from "zustand/react/shallow";
 
-interface ImageResultProps {
-  urls: string[];
-  isProcessing: boolean;
-  onImageRemoved?: (image: SDImage) => void;
+function getCompletionTime(job: Job) {
+  if (!job.completedAt) return;
+  const start = new Date(job.createdAt);
+  const end = new Date(job.completedAt);
+  const duration = intervalToDuration({ start, end });
+  const units = { xHours: "h", xMinutes: "m", xSeconds: "s" };
+  return formatDuration(duration, {
+    format: ["hours", "minutes", "seconds"],
+    delimiter: " ",
+    locale: {
+      formatDistance: (token, count) => {
+        const unit = Object.entries(units).find(([k]) => k === token)?.[1];
+        return unit ? `${count}${unit}` : "";
+      },
+    },
+  });
+}
+
+export function CompletionTime() {
+  const { job } = useContext(JobQueryContext);
+  const { urls, from } = usePreviewImage(
+    useShallow((s) => ({ urls: s.urls, from: s.from })),
+  );
+
+  const last = from === "txt2img" && job?.status === "completed" ? job : null;
+  const compTime =
+    urls?.[0] && last?.result?.includes(urls?.[0]) && getCompletionTime(last);
+
+  const compTimeRef = useRef<Timeout | null>(null);
+
+  const [showCompTime, setShowCompTime] = useState<boolean | null>(null);
+  useEffect(() => {
+    if (!compTime || showCompTime !== null) return;
+    if (compTimeRef.current) clearTimeout(compTimeRef.current);
+    compTimeRef.current = setTimeout(() => {
+      if (showCompTime === null) {
+        setShowCompTime(false);
+      }
+    }, 2000);
+  }, [from, compTime, showCompTime]);
+
+  if (!compTime) return null;
+
+  return (
+    <div
+      onClick={() =>
+        setShowCompTime(showCompTime === null ? false : !showCompTime)
+      }
+      className={`absolute right-2 bottom-2 z-2 flex cursor-pointer flex-row items-center justify-center gap-2 rounded-xl border border-primary bg-primary/50 px-1.5 py-0.5 text-xs font-semibold backdrop-blur-xs select-none ${
+        showCompTime !== false ? "opacity-100" : "opacity-50 hover:opacity-100"
+      } transition-opacity duration-300`}
+    >
+      <AnimatePresence>
+        {showCompTime !== false && (
+          <motion.div
+            initial={{ opacity: 0, width: 0 }}
+            animate={{ opacity: 1, width: "auto" }}
+            exit={{ opacity: 0, width: 0 }}
+            className="overflow-clip text-nowrap"
+          >
+            Completed in {compTime}
+          </motion.div>
+        )}
+      </AnimatePresence>
+      <ClockIcon className="w-4" />
+    </div>
+  );
 }
 
 const AnimationSettings = {
@@ -37,10 +106,13 @@ const AnimationSettings = {
   animate: { opacity: 1, x: 0 },
 };
 
-export function ImageResult({ urls, isProcessing }: ImageResultProps) {
+export function ImageResult() {
+  const { job } = useContext(JobQueryContext);
+  const isProcessing = job?.status === "running";
   const [, navigate] = useLocation();
   const rpc = useTRPC();
-  const { data } = useQuery(rpc.images.byUrls.queryOptions(urls));
+  const { urls } = usePreviewImage(useShallow((s) => ({ urls: s.urls })));
+  const { data } = useQuery(rpc.images.byUrls.queryOptions(urls ?? []));
   const images = data ?? [];
   const { removeImages } = useImageQuery();
   const [selectedImages, setSelectedImages] = useState<Array<string>>([]);
@@ -182,6 +254,7 @@ export function ImageResult({ urls, isProcessing }: ImageResultProps) {
           </ButtonGroup>
         </motion.div>
       )}
+      <CompletionTime />
       <Modal isOpen={trashQueue.length > 0} onClose={() => setTrashQueue([])}>
         <RemoveImagesDialog
           images={images.filter((img) => trashQueue.includes(img.url))}

@@ -2,7 +2,7 @@ import { usePreviewImage } from "@/hooks/usePreviewImage";
 import { useTRPC } from "@/lib/query";
 import type { Timeout } from "@/types";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { createContext, useEffect, useRef, useState } from "react";
+import React, { createContext, useEffect, useRef, useState } from "react";
 import type { JobType, LogEntry } from "server/types";
 import { logEntrySchema } from "server/types/jobs";
 import z from "zod";
@@ -150,13 +150,9 @@ export const JobQueryContext = createContext<ReturnType<typeof useJobQuery>>({
   stop: () => {},
 });
 
-export function JobQueryProvider({
-  type,
-  children,
-}: {
-  type: JobType;
-  children: React.ReactNode;
-}) {
-  const jq = useJobQuery(type);
-  return <JobQueryContext value={jq}>{children}</JobQueryContext>;
-}
+export const JobQueryProvider = React.memo(
+  ({ type, children }: { type: JobType; children: React.ReactNode }) => {
+    const jq = useJobQuery(type);
+    return <JobQueryContext value={jq}>{children}</JobQueryContext>;
+  },
+);
