@@ -6,12 +6,7 @@ import {
   isNonJsonSerializable,
   splitLink,
 } from "@trpc/client";
-import {
-  AnimatePresence,
-  MotionConfig,
-  useMotionValueEvent,
-  useScroll,
-} from "motion/react";
+import { AnimatePresence, MotionConfig } from "motion/react";
 import { StrictMode, useRef, useState } from "react";
 import { createRoot } from "react-dom/client";
 import type { AppRouter } from "server/rpc";
@@ -61,23 +56,12 @@ function Routes() {
 
 function MainScaffold() {
   const ref = useRef<HTMLDivElement>(null);
-  const { scrollY } = useScroll({ container: ref });
-  const [coversContent, setCoversContent] = useState(false);
-
-  useMotionValueEvent(scrollY, "change", (latest) => {
-    if (latest > 10 && !coversContent) {
-      setCoversContent(true);
-    } else if (latest <= 10 && coversContent) {
-      setCoversContent(false);
-    }
-  });
-
   return (
     <div
       ref={ref}
       className="scrollbar-thin flex h-screen w-full flex-1 flex-col overflow-y-scroll pb-18 font-sans text-foreground scrollbar-thumb-accent scrollbar-track-transparent selection:bg-primary selection:text-primary-foreground md:pb-0"
     >
-      <Header withBackground={coversContent} />
+      <Header parentRef={ref} />
       <Routes />
     </div>
   );
