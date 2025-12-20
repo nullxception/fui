@@ -3,7 +3,7 @@ import { motion, type HTMLMotionProps } from "motion/react";
 import { forwardRef } from "react";
 import BackgroundSetting from "./BackgroundSetting";
 import { PromptAttachmentEditor } from "./PromptAttachment";
-import SliderSettings from "./SliderSettings";
+import { SliderSettings } from "./SliderSettings";
 
 export const Settings = forwardRef<HTMLDivElement, HTMLMotionProps<"div">>(
   (props, ref) => {

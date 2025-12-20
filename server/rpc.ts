@@ -68,10 +68,21 @@ export const router = t.router({
     batchSaveDiffusion: t.procedure
       .input(diffusionParamsSchema.partial())
       .mutation((opts) => batchSaveDiffusion(opts.input)),
-    settings: t.procedure.query(async () => (await readConfig()).settings),
+    settings: t.procedure
+      .input(appSettingsSchema.keyof())
+      .query(async (opt) => ({
+        [opt.input]: (await readConfig()).settings[opt.input],
+      })),
     saveSettings: t.procedure
-      .input(appSettingsSchema)
-      .mutation((opts) => saveAppSettings(opts.input)),
+      .input(
+        z.object({
+          paramKey: appSettingsSchema.keyof(),
+          paramValue: z.union([z.string(), z.number(), z.undefined()]),
+        }),
+      )
+      .mutation((opts) =>
+        saveAppSettings(opts.input.paramKey, opts.input.paramValue),
+      ),
     updateBackground: t.procedure
       .input(z.instanceof(FormData).optional())
       .mutation((opts) => uploadBackground(opts.input)),

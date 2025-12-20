@@ -3,38 +3,32 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { defaultUserConfig } from "server/defaults";
 import type { AppSettings } from "server/types";
 
-export function useSettings() {
+export function useSettings<K extends keyof AppSettings>(paramKey: K) {
   const rpc = useTRPC();
   const queryClient = useQueryClient();
-  const defaults = defaultUserConfig().settings;
-  const { data } = useQuery(
-    rpc.conf.settings.queryOptions(undefined, {
-      placeholderData: defaults,
-    }),
-  );
-  const settings = data ?? defaults;
+  const defaults = defaultUserConfig().settings[paramKey];
+  const { data } = useQuery(rpc.conf.settings.queryOptions(paramKey));
+  const value = (data?.[paramKey] ?? defaults) as AppSettings[K];
 
   const mutation = useMutation(
     rpc.conf.saveSettings.mutationOptions({
       onMutate: async (newConf) => {
-        const queryKey = rpc.conf.settings.queryKey();
+        const queryKey = rpc.conf.settings.queryKey(paramKey);
         await queryClient.cancelQueries({ queryKey });
         const lastConf = queryClient.getQueryData(queryKey);
-        queryClient.setQueryData(queryKey, newConf);
+        queryClient.setQueryData(queryKey, { [paramKey]: newConf.paramValue });
         return { lastConf, newConf };
       },
       onSettled: () => {
-        const queryKey = rpc.conf.settings.queryKey();
+        const queryKey = rpc.conf.settings.queryKey(paramKey);
         return queryClient.invalidateQueries({ queryKey });
       },
     }),
   );
 
   return {
-    settings,
-    update: (key: keyof AppSettings, value: AppSettings[keyof AppSettings]) =>
-      mutation.mutate({ ...settings, [key]: value }),
-    updateAll: (partial: Partial<AppSettings>) =>
-      mutation.mutate({ ...settings, ...partial }),
+    value,
+    update: (newValue: AppSettings[K]) =>
+      mutation.mutateAsync({ paramKey, paramValue: newValue }),
   };
 }

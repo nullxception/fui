@@ -106,11 +106,6 @@ async function saveConfig() {
   }
 }
 
-export async function saveAppSettings(settings: AppSettings) {
-  config.settings = getValuable(settings || {});
-  return await saveConfig();
-}
-
 export async function savePromptAttachment(attachments: PromptAttachment[]) {
   config.promptAttachment = attachments;
   return await saveConfig();
@@ -126,5 +121,13 @@ export async function saveDiffusion<K extends keyof DiffusionParams>(
 
 export async function batchSaveDiffusion(params: Partial<DiffusionParams>) {
   config.diffusion = getValuable({ ...config.diffusion, ...params });
+  return await saveConfig();
+}
+
+export async function saveAppSettings<K extends keyof AppSettings>(
+  paramKey: keyof AppSettings,
+  value: AppSettings[K],
+) {
+  config.settings = { ...config.settings, [paramKey]: value };
   return await saveConfig();
 }

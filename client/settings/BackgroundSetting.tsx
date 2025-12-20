@@ -10,7 +10,7 @@ import React, { useState } from "react";
 import { useSettings } from "./useSettings";
 
 function BackgroundSetting() {
-  const { settings: app, update } = useSettings();
+  const { value, update } = useSettings("background");
   const [imageUrl, setImageUrl] = useState("");
   const rpc = useTRPC();
   const mutation = useMutation(
@@ -19,7 +19,7 @@ function BackgroundSetting() {
         alert("Failed to update background: " + error);
       },
       async onSettled(data) {
-        update("background", data?.url);
+        update(data?.url);
       },
     }),
   );
@@ -47,7 +47,7 @@ function BackgroundSetting() {
 
   const handleUrlSubmit = () => {
     if (imageUrl.trim()) {
-      update("background", imageUrl.trim());
+      update(imageUrl?.trim());
       setImageUrl("");
     }
   };
@@ -105,10 +105,10 @@ function BackgroundSetting() {
       </div>
 
       {/* Preview */}
-      {app.background && app.background.length > 0 && (
+      {value && value.length > 0 && (
         <div className="group relative">
           <img
-            src={app.background}
+            src={value}
             alt="Background preview"
             className="h-48 w-full rounded-md border border-border object-cover"
           />

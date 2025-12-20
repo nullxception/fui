@@ -43,9 +43,9 @@ function CfgScaleInput() {
 
 function WidthInput() {
   const store = useDiffusionConf("width");
-  const { settings } = useSettings();
+  const { value: userMaxWidth } = useSettings("maxWidth");
   const defs = defaultUserConfig().settings;
-  const maxSliderWidth = settings.maxWidth || defs.maxWidth;
+  const maxSliderWidth = userMaxWidth || defs.maxWidth;
 
   return (
     <SliderInput
@@ -62,9 +62,9 @@ function WidthInput() {
 
 function HeightInput() {
   const store = useDiffusionConf("height");
-  const { settings } = useSettings();
+  const { value: userMaxWidth } = useSettings("maxHeight");
   const defs = defaultUserConfig().settings;
-  const maxSliderHeight = settings.maxHeight || defs.maxHeight;
+  const maxSliderHeight = userMaxWidth || defs.maxHeight;
 
   return (
     <SliderInput
