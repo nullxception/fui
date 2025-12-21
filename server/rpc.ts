@@ -95,7 +95,7 @@ export const router = t.router({
     byUrls: t.procedure
       .input(z.array(z.string()))
       .query((opts) => getImagesInfo(opts.input)),
-    bygPage: t.procedure
+    byPage: t.procedure
       .input(z.object({ limit: z.number(), cursor: z.number().optional() }))
       .query((opts) => listImages(opts.input.limit, opts.input.cursor)),
     remove: t.procedure

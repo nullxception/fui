@@ -72,12 +72,12 @@ function App() {
     createTRPCClient<AppRouter>({
       links: [
         splitLink({
+          // Batch all info.* and *.byFoo requests
           condition: (op) =>
-            isNonJsonSerializable(op.input) ||
-            op.path.startsWith("conf.") ||
-            op.path.startsWith("images."),
-          true: httpLink({ url: "/rpc" }),
-          false: httpBatchLink({ url: "/rpc" }),
+            /(^info\.|\.by[A-Z])/.test(op.path) ||
+            isNonJsonSerializable(op.input),
+          true: httpBatchLink({ url: "/rpc" }),
+          false: httpLink({ url: "/rpc" }),
         }),
       ],
     }),

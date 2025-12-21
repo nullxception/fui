@@ -12,7 +12,7 @@ const limit = 20;
 export function useImageQuery() {
   const rpc = useTRPC();
   const query = useInfiniteQuery(
-    rpc.images.bygPage.infiniteQueryOptions(
+    rpc.images.byPage.infiniteQueryOptions(
       { limit },
       {
         getNextPageParam(lastPage, _allPages, lastPageParam) {
@@ -37,7 +37,7 @@ export function useImageQuery() {
     rpc.images.remove.mutationOptions({
       onSuccess: async () => {
         const job = rpc.info.lastJob.queryKey("txt2img");
-        const images = rpc.images.bygPage.infiniteQueryKey();
+        const images = rpc.images.byPage.infiniteQueryKey();
         await queryClient.invalidateQueries({ queryKey: images });
         await queryClient.invalidateQueries({ queryKey: job });
       },

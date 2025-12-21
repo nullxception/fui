@@ -60,7 +60,7 @@ export const useJobQuery = (type: JobType) => {
           });
         } else {
           await queryClient.invalidateQueries({
-            queryKey: rpc.images.bygPage.infiniteQueryKey(),
+            queryKey: rpc.images.byPage.infiniteQueryKey(),
           });
           usePreviewImage
             .getState()
@@ -111,7 +111,7 @@ export const useJobQuery = (type: JobType) => {
     type,
     queryClient,
     rpc.info.models,
-    rpc.images.bygPage,
+    rpc.images.byPage,
     rpc.info.lastJob,
   ]);
 
