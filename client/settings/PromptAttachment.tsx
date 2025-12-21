@@ -222,23 +222,25 @@ function PromptAttachmentForm({
           </InputGroupButton>
         </InputGroup>
       </div>
-      {entry.type === "lora" && (
-        <div className="flex justify-end gap-4 px-4 pb-2">
-          <Label htmlFor="loraStrengthNumber">Strength</Label>
-          <NumberInput
-            id="loraStrengthNumber"
-            min={0}
-            max={1}
-            step={0.01}
-            value={loraStrength}
-            onChange={(e) => {
-              handleStrengthChange(e);
-            }}
-            placeholder="1"
-            className="w-30 text-center"
-          />
-        </div>
-      )}
+      <motion.div layout layoutId={`attachmentStrength--${entry.target}`}>
+        {entry.type === "lora" && (
+          <div className="flex justify-end gap-4 px-4 pb-2">
+            <Label htmlFor="loraStrengthNumber">Strength</Label>
+            <NumberInput
+              id="loraStrengthNumber"
+              min={0}
+              max={1}
+              step={0.01}
+              value={loraStrength}
+              onChange={(e) => {
+                handleStrengthChange(e);
+              }}
+              placeholder="1"
+              className="w-30 text-center"
+            />
+          </div>
+        )}
+      </motion.div>
       <motion.div layout layoutId={`attachmentAction--${entry.target}`}>
         <CardFooter className="flex flex-row items-stretch justify-stretch justify-items-stretch gap-2 bg-background/60">
           <Button onClick={onCancel} variant="outline" className="grow">
@@ -446,7 +448,11 @@ export function PromptAttachmentEditor() {
                     </span>
                   ))}
                 </motion.div>
-                <div className="flex items-center justify-end">
+                <motion.div
+                  layout
+                  layoutId={`attachmentStrength--${entry.target}`}
+                  className="flex items-center justify-end"
+                >
                   {entry.strength && entry.strength < 1 && (
                     <div className="grow">
                       <span className="items-center rounded bg-purple-500/20 px-2 py-1 text-xs">
@@ -454,7 +460,7 @@ export function PromptAttachmentEditor() {
                       </span>
                     </div>
                   )}
-                </div>
+                </motion.div>
                 <motion.div
                   layout
                   layoutId={`attachmentAction--${entry.target}`}
