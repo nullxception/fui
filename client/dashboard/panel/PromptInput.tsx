@@ -41,7 +41,7 @@ const ExtraSelector: React.FC<{
       <SelectContent className="bg-background/80 p-1 backdrop-blur-xs">
         {extras.map((extra) => (
           <SelectItem key={extra} value={extra}>
-            {extra}
+            {extra.replace(/\.(safetensors|ckpt)$/, "")}
           </SelectItem>
         ))}
       </SelectContent>

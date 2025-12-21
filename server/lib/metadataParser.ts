@@ -1,4 +1,4 @@
-import type { Models } from "server/types";
+import type { Models, PromptAttachment } from "server/types";
 import type { SDImageParams } from "server/types/image";
 
 function snakeToCamel(str: string) {
@@ -30,7 +30,11 @@ export function splitSmart(t: string) {
   return result;
 }
 
-export function optimizePrompt(text?: string, models?: Models) {
+export function optimizePrompt(
+  text?: string,
+  models?: Models,
+  attachment?: PromptAttachment,
+) {
   if (!text) return "";
 
   // Pre-calculate valid Lora paths once for performance
@@ -57,6 +61,14 @@ export function optimizePrompt(text?: string, models?: Models) {
     return properPath
       ? tag.replace(`<lora:${name}:`, `<lora:${properPath}:`)
       : tag;
+  };
+
+  const record = {
+    lora: [] as string[],
+    embed: [] as string[],
+
+    score: [] as string[],
+    text: [] as string[],
   };
 
   return text
@@ -91,25 +103,64 @@ export function optimizePrompt(text?: string, models?: Models) {
       // Process Chunks & Extract Tags
       for (let chunk of chunks) {
         chunk = chunk.replace(/<lora:[^>]+>/g, (match) => {
-          buckets.lora.push(fixLora(match));
+          const lora = fixLora(match);
+          if (!record.lora.includes(lora)) {
+            buckets.lora.push(lora);
+            record.lora.push(lora);
+          }
           return "";
         });
 
         chunk = chunk.replace(/embedding:[^,\s)]+/gi, (match) => {
-          buckets.embed.push(match);
+          if (!record.embed.includes(match)) {
+            buckets.embed.push(match);
+            record.embed.push(match);
+          }
           return "";
         });
 
         chunk = chunk.replace(/score_\d+.*/gi, (match) => {
-          buckets.score.push(match);
+          if (!record.score.includes(match)) {
+            buckets.score.push(match);
+            record.score.push(match);
+          }
           return "";
         });
 
-        const cleanText = chunk.replace(/\s+/g, " ").trim();
-        if (cleanText) buckets.text.push(cleanText);
+        const text = chunk.replace(/\s+/g, " ").trim();
+        if (text && !record.text.includes(text)) {
+          buckets.text.push(text);
+          record.text.push(text);
+        }
       }
 
       buckets.score.sort().reverse();
+      if (attachment) {
+        const name = attachment.target.replace(/\.(safetensors|ckpt)$/, "");
+        if (attachment.type === "lora") {
+          const strength = attachment.strength || 1;
+          const lora = `<lora:${name}:${strength}>`;
+          if (!record.lora.includes(lora)) {
+            buckets.lora.push(lora);
+            record.lora.push(lora);
+          }
+        } else {
+          const embed = `embedding:${name}`;
+          if (!record.embed.includes(embed)) {
+            buckets.embed.push(embed);
+            record.embed.push(embed);
+          }
+        }
+        for (const word of attachment.words) {
+          const text = word.replace(/\s+/g, " ").trim();
+          if (text && !record.text.includes(text)) {
+            buckets.text.push(text);
+            record.text.push(text);
+          }
+        }
+        // clear attachment after injected
+        attachment = undefined;
+      }
 
       return (
         [...buckets.lora, ...buckets.embed, ...buckets.score, ...buckets.text]

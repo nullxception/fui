@@ -52,13 +52,13 @@ export function usePromptAttachment() {
       const match = data?.find(
         (tw) => tw.type === type && tw.target.startsWith(filename),
       );
-      const words = match?.words ?? [];
-      const name = filename.replace(/\.(safetensors|ckpt)$/, "");
-      const strength = match?.strength || 1;
-      const embed =
-        type === "lora" ? `<lora:${name}:${strength}>` : `embedding:${name}`;
 
-      return optimizePrompt([embed, ...words, prompt].join(","));
+      return optimizePrompt(prompt, undefined, {
+        type,
+        target: filename,
+        words: match?.words ?? [],
+        strength: match?.strength ?? 1,
+      });
     },
   };
 }
