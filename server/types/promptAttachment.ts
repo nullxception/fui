@@ -1,9 +1,6 @@
 import { z } from "zod";
 
-export const promptAttachmentTypeSchema = z.union([
-  z.literal("embedding"),
-  z.literal("lora"),
-]);
+export const promptAttachmentTypeSchema = z.literal(["embedding", "lora"]);
 
 export const promptAttachmentSchema = z.object({
   type: promptAttachmentTypeSchema,

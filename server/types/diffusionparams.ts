@@ -1,10 +1,7 @@
 import { z } from "zod";
 import { quantizationSchema } from "./ggml";
 
-export const diffusionModelTypeSchema = z.union([
-  z.literal("full"),
-  z.literal("standalone"),
-]);
+export const diffusionModelTypeSchema = z.literal(["full", "standalone"]);
 
 export const diffusionParamsSchema = z.object({
   model: z.string(),
