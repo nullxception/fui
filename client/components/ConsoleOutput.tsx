@@ -95,7 +95,7 @@ export function ConsoleOutput({ className }: { className?: string }) {
     let lastProgressIndex = -1;
 
     logs
-      ?.filter((x) => x.jobId === job?.id)
+      ?.filter((x) => x.id === job?.id)
       ?.forEach((log) => {
         if (typeof log?.message !== "string") return;
         const message = log.message.trim();

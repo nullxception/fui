@@ -3,12 +3,7 @@ import { spawn } from "bun";
 import path from "path";
 import { CHECKPOINT_DIR } from "server/dirs";
 import { filterLogs, resolveSD } from "server/services/diffusion";
-import {
-  addJobLog,
-  createJob,
-  getJob,
-  updateJobStatus,
-} from "server/services/jobs";
+import { addJobLog, createJob, updateJobStatus } from "server/services/jobs";
 import type { ConvertParams, LogType } from "server/types";
 
 export async function quantizationStart(params: ConvertParams) {
@@ -67,7 +62,7 @@ export async function startQuantization(jobId: string, params: ConvertParams) {
     } else {
       console.log(message);
     }
-    addJobLog("txt2img", { type, message, jobId, timestamp: Date.now() });
+    addJobLog("txt2img", { type, message, id: jobId, timestamp: Date.now() });
   };
 
   const exec = await resolveSD();
@@ -86,7 +81,7 @@ export async function startQuantization(jobId: string, params: ConvertParams) {
   if (proc.exitCode != null) {
     updateJobStatus({
       id: jobId,
-      status: "failed",
+      status: "error",
       result: `Process spawn failed (${proc.exitCode})`,
     });
     return;
@@ -137,17 +132,16 @@ export async function startQuantization(jobId: string, params: ConvertParams) {
 
     // Wait for all stream reading to finish
     await Promise.allSettled([stdoutPromise, stderrPromise]);
-    const job = getJob(jobId);
     if (code === 0) {
       updateJobStatus({
         id: jobId,
-        status: "completed",
+        status: "complete",
         result: outputPath,
       });
-    } else if (job?.status !== "cancelled") {
+    } else {
       updateJobStatus({
         id: jobId,
-        status: "failed",
+        status: "error",
         result: `Quantization failed with exit code: ${code}`,
       });
     }
@@ -155,7 +149,7 @@ export async function startQuantization(jobId: string, params: ConvertParams) {
     const msg = error instanceof Error ? error.message : String(error);
     updateJobStatus({
       id: jobId,
-      status: "failed",
+      status: "error",
       result: `Process error: ${msg}`,
     });
   }

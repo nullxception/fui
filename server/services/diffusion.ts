@@ -237,7 +237,7 @@ export async function startDiffusion(id: string, params: DiffusionParams) {
     } else {
       console.log(message);
     }
-    addJobLog("txt2img", { type, message, jobId: id, timestamp: Date.now() });
+    addJobLog("txt2img", { type, message, id: id, timestamp: Date.now() });
   };
   const exec = await resolveSD();
   sendLog(
@@ -257,7 +257,7 @@ export async function startDiffusion(id: string, params: DiffusionParams) {
   if (sdProcess.exitCode != null) {
     updateJobStatus({
       id,
-      status: "failed",
+      status: "error",
       result: `Process spawn failed (${sdProcess.exitCode})`,
     });
     return;
@@ -328,16 +328,16 @@ export async function startDiffusion(id: string, params: DiffusionParams) {
           )
           .join(",");
       }
-      updateJobStatus({ id, status: "completed", result });
-    } else if (job?.status !== "cancelled") {
+      updateJobStatus({ id, status: "complete", result });
+    } else {
       updateJobStatus({
         id,
-        status: "failed",
+        status: "error",
         result: `Diffusion failed with exit code: ${code}`,
       });
     }
   } catch (error) {
     const msg = error instanceof Error ? error.message : String(error);
-    updateJobStatus({ id, status: "failed", result: `Process error: ${msg}` });
+    updateJobStatus({ id, status: "error", result: `Process error: ${msg}` });
   }
 }

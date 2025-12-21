@@ -38,19 +38,12 @@ export function createJob(type: JobType, id?: string) {
   const job: Job = {
     id: id ?? randomUUIDv7(),
     type,
-    status: "pending",
+    status: "running",
     createdAt: Date.now(),
   };
 
   cleanupFailedJobs();
-
-  insertJob.run({
-    id: job.id,
-    type: job.type,
-    status: job.status,
-    createdAt: job.createdAt,
-  });
-
+  insertJob.run(job);
   return job;
 }
 
@@ -72,8 +65,9 @@ export function updateJobStatus({
   if (status === "running" && process) {
     activeProcesses.set(id, process);
   }
+  const finished = ["error", "complete"];
 
-  if (["completed", "failed", "cancelled"].includes(status)) {
+  if (finished.includes(status)) {
     const proc = activeProcesses.get(id);
     if (proc) {
       if (!proc.killed) {
@@ -87,7 +81,6 @@ export function updateJobStatus({
   const job = getJob(id);
   if (!job) return;
 
-  const finished = ["completed", "failed", "cancelled"];
   let completedAt: number | null = null;
   let startedAt: number | null = job.startedAt || null;
 
@@ -97,8 +90,12 @@ export function updateJobStatus({
 
   if (finished.includes(status)) {
     completedAt = Date.now();
-    const event = status === "completed" ? "complete" : "error";
-    emitEvent({ id: id, type: event, result });
+    emitEvent({
+      id,
+      type: job.result === "complete" ? "result" : "stderr",
+      message: result ?? "",
+      timestamp: completedAt,
+    });
   }
 
   updateStatus.run({
@@ -111,13 +108,13 @@ export function updateJobStatus({
 }
 
 export function addJobLog(type: JobType, log: LogEntry) {
-  const job = getJob(log.jobId);
+  const job = getJob(log.id);
   if (!job) {
-    createJob(type, log.jobId);
+    createJob(type, log.id);
   }
 
-  logs.set(log.jobId, [...(logs.get(log.jobId) ?? []), log]);
-  emitEvent({ id: log.jobId, type: "log", log });
+  logs.set(log.id, [...(logs.get(log.id) ?? []), log]);
+  emitEvent(log);
 }
 
 export function getJobs(type: JobType) {
@@ -172,7 +169,7 @@ export function stopJob(id?: string) {
   if (id) {
     updateJobStatus({
       id,
-      status: "cancelled",
+      status: "error",
       result: `Job ${id} has been cancelled`,
     });
   }

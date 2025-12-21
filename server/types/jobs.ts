@@ -2,13 +2,7 @@ import z from "zod";
 
 export const jobsTypeSchema = z.literal(["txt2img", "convert"]);
 
-export const jobStatusSchema = z.literal([
-  "pending",
-  "running",
-  "completed",
-  "failed",
-  "cancelled",
-]);
+export const jobStatusSchema = z.literal(["running", "complete", "error"]);
 
 const dbOptional = <T extends z.ZodTypeAny>(schema: T) =>
   schema
@@ -26,24 +20,16 @@ export const jobSchema = z.object({
   result: dbOptional(z.string()),
 });
 
-export const logTypeSchema = z.literal(["stdout", "stderr"]);
+export const logTypeSchema = z.literal(["stdout", "stderr", "result"]);
 export const logEntrySchema = z.object({
+  id: z.string(),
   type: logTypeSchema,
   message: z.string(),
-  jobId: z.string(),
   timestamp: z.number(),
-});
-
-export const jobResultSchema = z.object({
-  id: z.string(),
-  type: z.literal(["log", "complete", "error"]),
-  log: logEntrySchema.optional(),
-  result: z.string().optional(),
 });
 
 export type JobType = z.infer<typeof jobsTypeSchema>;
 export type JobStatus = z.infer<typeof jobStatusSchema>;
 export type Job = z.infer<typeof jobSchema>;
-export type JobResult = z.infer<typeof jobResultSchema>;
 export type LogType = z.infer<typeof logTypeSchema>;
 export type LogEntry = z.infer<typeof logEntrySchema>;

@@ -56,7 +56,7 @@ export function CompletionTime() {
     useShallow((s) => ({ urls: s.urls, from: s.from })),
   );
 
-  const last = from === "txt2img" && job?.status === "completed" ? job : null;
+  const last = from === "txt2img" && job?.status === "complete" ? job : null;
   const compTime =
     urls?.[0] && last?.result?.includes(urls?.[0]) && getCompletionTime(last);
 

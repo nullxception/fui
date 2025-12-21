@@ -1,36 +1,36 @@
 import EventEmitter, { on } from "events";
 import { getJob, getLogs } from "server/services/jobs";
-import { jobResultSchema, type JobResult } from "server/types/jobs";
+import { logEntrySchema, type LogEntry } from "server/types/jobs";
 
 const jobEvents = new EventEmitter();
 
-export async function* jobProcess(opts: {
-  input: string;
-  signal?: AbortSignal;
-}) {
-  const id = opts.input;
+export async function* jobProcess(id: string, signal?: AbortSignal) {
   const job = getJob(id);
 
   // Send existing logs
   for (const log of getLogs(id) ?? []) {
-    yield jobResultSchema.parse({ type: "log", id, log });
+    yield log;
   }
 
   // Send current result/error if job is done
   if (job?.result) {
-    const type = job.status === "completed" ? "complete" : "error";
-    yield jobResultSchema.parse({ type, id, result: job.result });
+    yield logEntrySchema.parse({
+      id,
+      type: job.result === "complete" ? "result" : "stderr",
+      message: job.result,
+      timestamp: job.completedAt ?? Date.now(),
+    });
   }
 
-  const events = on(jobEvents, "event", { signal: opts.signal });
+  const events = on(jobEvents, "event", { signal });
   for await (const [data] of events) {
-    const result = jobResultSchema.parse(data);
-    if (result.id === id) {
-      yield result;
+    const log = logEntrySchema.parse(data);
+    if (log.id === id) {
+      yield log;
     }
   }
 }
 
-export function emitEvent(event: JobResult) {
+export function emitEvent(event: LogEntry) {
   jobEvents.emit("event", event);
 }

@@ -103,7 +103,9 @@ export const router = t.router({
       .input(z.array(z.string()))
       .mutation((opts) => removeImages(opts.input)),
   }),
-  jobs: t.procedure.input(z.string()).subscription(jobProcess),
+  jobs: t.procedure
+    .input(z.string())
+    .subscription((opts) => jobProcess(opts.input, opts.signal)),
 });
 
 export type AppRouter = typeof router;

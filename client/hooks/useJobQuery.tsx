@@ -14,16 +14,14 @@ export const useJobQuery = (type: JobType) => {
   const queryClient = useQueryClient();
 
   function addLog(log: LogEntry) {
-    setLogs((prev) => [...prev, { ...log, timestamp: Date.now() }]);
+    setLogs((prev) => [...prev, log]);
   }
 
   useSubscription(
     rpc.jobs.subscriptionOptions(job?.id ?? "", {
       enabled: job && job.id.length > 0 && !job.completedAt,
       onData: async (data) => {
-        if (data.type === "log" && data.log) {
-          addLog(data.log);
-        } else if (data.type === "complete" && data.result) {
+        if (data.type === "result") {
           await queryClient.invalidateQueries({
             queryKey: rpc.info.lastJob.queryKey(type),
           });
@@ -39,21 +37,16 @@ export const useJobQuery = (type: JobType) => {
               .getState()
               .setPreviewImages(
                 "txt2img",
-                z.string().parse(data.result).split(","),
+                z.string().parse(data.message).split(","),
               );
           }
-        } else if (data.type === "error") {
-          if (data.result) {
-            addLog({
-              jobId: data.id,
-              type: "stderr",
-              message: z.string().parse(data.result),
-              timestamp: 0,
+        } else {
+          addLog(data);
+          if (data.type === "stderr") {
+            queryClient.invalidateQueries({
+              queryKey: rpc.info.lastJob.queryKey(type),
             });
           }
-          queryClient.invalidateQueries({
-            queryKey: rpc.info.lastJob.queryKey(type),
-          });
         }
       },
     }),
@@ -64,7 +57,7 @@ export const useJobQuery = (type: JobType) => {
     logs,
     addLog,
     async connect() {
-      if (job?.status === "pending" || job?.status === "running") return;
+      if (job?.status === "running") return;
       setLogs([]);
       await queryClient.invalidateQueries({
         queryKey: rpc.info.lastJob.queryKey(type),
@@ -75,7 +68,7 @@ export const useJobQuery = (type: JobType) => {
       addLog({
         type: "stderr",
         message,
-        jobId: job?.id ?? "",
+        id: job?.id ?? "",
         timestamp: Date.now(),
       });
     },

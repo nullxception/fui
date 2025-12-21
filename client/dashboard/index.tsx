@@ -145,7 +145,7 @@ function TextToImageAction() {
     }),
   );
 
-  const isProcessing = job?.status === "running" || job?.status === "pending";
+  const isProcessing = job?.status === "running";
   const handleDiffusion = async () => {
     if (isProcessing && job?.id) {
       diffusionStop.mutate(job.id);
