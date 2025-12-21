@@ -8,10 +8,10 @@ import { JobQueryContext, JobQueryProvider } from "@/hooks/useJobQuery";
 import { useTRPC } from "@/lib/query";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import {
-  CircleStopIcon,
   ClockIcon,
   ImageIcon,
   TerminalIcon,
+  XIcon,
   ZapIcon,
 } from "lucide-react";
 import { AnimatePresence, motion, type HTMLMotionProps } from "motion/react";
@@ -87,19 +87,35 @@ function OutputCard() {
     </>
   );
 }
-
-function GenerateButton() {
+function GenerateButtonLabel() {
   const batchMode = useDiffusionConf("batchMode");
   const batchCount = useDiffusionConf("batchCount");
   return (
-    <>
-      <ZapIcon className="text-primary" />
+    <motion.span
+      key="generate"
+      layout="preserve-aspect"
+      initial={{ x: -20, opacity: 0 }}
+      animate={{ x: 0, opacity: 1 }}
+      exit={{ x: 20, opacity: 0 }}
+      transition={{ duration: 0.1 }}
+      className="flex items-center gap-1"
+    >
+      <ZapIcon className="mr-1 size-4.5 text-primary" />
       Generate
-      {batchMode.value && ` ${batchCount.value} images`}
-    </>
+      <AnimatePresence mode="wait" initial={false}>
+        <motion.span
+          key={`gb${batchCount.value ?? 1}`}
+          initial={{ y: -20, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          exit={{ y: 20, opacity: 0 }}
+          transition={{ duration: 0.1 }}
+        >
+          {batchMode.value && `${batchCount.value} images`}
+        </motion.span>
+      </AnimatePresence>
+    </motion.span>
   );
 }
-
 function TextToImageAction() {
   const { job, connect, setError, stop } = useContext(JobQueryContext);
   const promptStore = useDiffusionConf("prompt");
@@ -145,23 +161,31 @@ function TextToImageAction() {
   return (
     <div className="relative">
       <div
-        className={`absolute top-0 left-0 -z-1 h-full w-full rounded-xl shadow-md ${isProcessing ? "animate-pulse shadow-destructive" : "shadow-primary"}`}
+        className={`absolute left-0 -z-1 h-full w-full rounded-xl shadow-md ${isProcessing ? "animate-pulse shadow-destructive" : "shadow-primary"}`}
       />
-      <Button
+      <motion.button
         onClick={handleDiffusion}
-        variant="ghost"
-        size="lg"
-        className={`my-1 flex w-full cursor-pointer flex-row items-center justify-center gap-2 rounded-xl hover:bg-background!`}
+        layout
+        className="my-1 mt-2 flex h-9 w-full cursor-pointer flex-row items-center justify-center gap-2 overflow-hidden rounded-xl p-2 text-sm hover:bg-background"
       >
-        {isProcessing ? (
-          <>
-            <CircleStopIcon className="text-destructive" />
-            Stop
-          </>
-        ) : (
-          <GenerateButton />
-        )}
-      </Button>
+        <AnimatePresence mode="wait" initial={false}>
+          {isProcessing ? (
+            <motion.span
+              key="stop"
+              initial={{ x: -20, opacity: 0 }}
+              animate={{ x: 0, opacity: 1 }}
+              exit={{ x: 20, opacity: 0 }}
+              transition={{ duration: 0.1 }}
+              className="flex items-center gap-1"
+            >
+              <XIcon className="mr-1 size-4.5 text-destructive" />
+              Stop
+            </motion.span>
+          ) : (
+            <GenerateButtonLabel />
+          )}
+        </AnimatePresence>
+      </motion.button>
     </div>
   );
 }
