@@ -13,6 +13,7 @@ import {
 import { quantizationStart } from "./api/converter";
 import { diffusionStart, listDiffusionModels } from "./api/diffusion";
 import { getImagesInfo, listImages, removeImages } from "./api/gallery";
+import { jobProcess } from "./api/jobs";
 import system from "./api/system";
 import { getRecentJob, stopJob } from "./services/jobs";
 import { diffusionParamsSchema } from "./types/diffusionparams";
@@ -102,6 +103,7 @@ export const router = t.router({
       .input(z.array(z.string()))
       .mutation((opts) => removeImages(opts.input)),
   }),
+  jobs: t.procedure.input(z.string()).subscription(jobProcess),
 });
 
 export type AppRouter = typeof router;

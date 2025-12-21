@@ -3,6 +3,7 @@ import {
   createTRPCClient,
   httpBatchLink,
   httpLink,
+  httpSubscriptionLink,
   isNonJsonSerializable,
   splitLink,
 } from "@trpc/client";
@@ -72,12 +73,16 @@ function App() {
     createTRPCClient<AppRouter>({
       links: [
         splitLink({
-          // Batch all info.* and *.byFoo requests
-          condition: (op) =>
-            /(^info\.|\.by[A-Z])/.test(op.path) ||
-            isNonJsonSerializable(op.input),
-          true: httpBatchLink({ url: "/rpc" }),
-          false: httpLink({ url: "/rpc" }),
+          condition: (op) => op.type === "subscription",
+          true: httpSubscriptionLink({ url: "/rpc" }),
+          false: splitLink({
+            // Batch all info.* and *.byFoo requests
+            condition: (op) =>
+              /(^info\.|\.by[A-Z])/.test(op.path) ||
+              isNonJsonSerializable(op.input),
+            true: httpBatchLink({ url: "/rpc" }),
+            false: httpLink({ url: "/rpc" }),
+          }),
         }),
       ],
     }),

@@ -1,10 +1,9 @@
 import { usePreviewImage } from "@/hooks/usePreviewImage";
 import { useTRPC } from "@/lib/query";
-import type { Timeout } from "@/types";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import React, { createContext, useEffect, useRef, useState } from "react";
+import { useSubscription } from "@trpc/tanstack-react-query";
+import React, { createContext, useState } from "react";
 import type { JobType, LogEntry } from "server/types";
-import { logEntrySchema } from "server/types/jobs";
 import z from "zod";
 import { useAppStore } from "./useAppStore";
 
@@ -12,108 +11,53 @@ export const useJobQuery = (type: JobType) => {
   const rpc = useTRPC();
   const { data: job } = useQuery(rpc.info.lastJob.queryOptions(type));
   const [logs, setLogs] = useState<LogEntry[]>([]);
-  const esRef = useRef<EventSource | null>(null);
-  const closingRef = useRef<Timeout | null>(null);
   const queryClient = useQueryClient();
-  const hasLogs = logs.length > 0;
 
   function addLog(log: LogEntry) {
     setLogs((prev) => [...prev, { ...log, timestamp: Date.now() }]);
   }
 
-  useEffect(() => {
-    const esState = esRef.current?.readyState;
-    if (esState === EventSource.OPEN || esState === EventSource.CONNECTING)
-      return;
-
-    if (esRef.current) esRef.current.close();
-
-    if (!job?.id) return;
-
-    const stopped = ["completed", "failed", "cancelled"];
-    if (stopped.includes(job.status)) return;
-
-    const es = new EventSource(`/api/jobs/${job?.id}`);
-    esRef.current = es;
-
-    es.addEventListener("open", () => {
-      setLogs([]);
-      useAppStore.getState().setOutputTab("console");
-    });
-
-    es.addEventListener("message", (event) => {
-      try {
-        addLog(logEntrySchema.parse(JSON.parse(event.data)));
-      } catch (e) {
-        console.error(e);
-      }
-    });
-
-    es.addEventListener("complete", async (event) => {
-      try {
-        await queryClient.invalidateQueries({
-          queryKey: rpc.info.lastJob.queryKey(type),
-        });
-        if (type === "convert") {
+  useSubscription(
+    rpc.jobs.subscriptionOptions(job?.id ?? "", {
+      enabled: job && job.id.length > 0 && !job.completedAt,
+      onData: async (data) => {
+        if (data.type === "log" && data.log) {
+          addLog(data.log);
+        } else if (data.type === "complete" && data.result) {
           await queryClient.invalidateQueries({
-            queryKey: rpc.info.models.queryKey(),
+            queryKey: rpc.info.lastJob.queryKey(type),
           });
-        } else {
-          await queryClient.invalidateQueries({
-            queryKey: rpc.images.byPage.infiniteQueryKey(),
-          });
-          usePreviewImage
-            .getState()
-            .setPreviewImages(
-              "txt2img",
-              z.string().parse(event.data).split(","),
-            );
-        }
-      } catch (e) {
-        console.error(e);
-      }
-      es.close();
-    });
-
-    es.addEventListener("error", (event: MessageEvent) => {
-      try {
-        if (event.data) {
-          addLog({
-            jobId: job?.id,
-            type: "stderr",
-            message: z.string().parse(event.data),
-            timestamp: Date.now(),
-          });
-        }
-      } catch (e) {
-        console.error(e);
-      }
-      if (!closingRef.current) {
-        closingRef.current = setTimeout(() => {
-          es.close();
-          closingRef.current = null;
+          if (type === "convert") {
+            await queryClient.invalidateQueries({
+              queryKey: rpc.info.models.queryKey(),
+            });
+          } else {
+            await queryClient.invalidateQueries({
+              queryKey: rpc.images.byPage.infiniteQueryKey(),
+            });
+            usePreviewImage
+              .getState()
+              .setPreviewImages(
+                "txt2img",
+                z.string().parse(data.result).split(","),
+              );
+          }
+        } else if (data.type === "error") {
+          if (data.result) {
+            addLog({
+              jobId: data.id,
+              type: "stderr",
+              message: z.string().parse(data.result),
+              timestamp: 0,
+            });
+          }
           queryClient.invalidateQueries({
             queryKey: rpc.info.lastJob.queryKey(type),
           });
-        }, 500);
-      }
-    });
-
-    return () => {
-      if (esRef.current) {
-        esRef.current.close();
-        esRef.current = null;
-      }
-    };
-  }, [
-    job,
-    hasLogs,
-    type,
-    queryClient,
-    rpc.info.models,
-    rpc.images.byPage,
-    rpc.info.lastJob,
-  ]);
+        }
+      },
+    }),
+  );
 
   return {
     job,
@@ -121,9 +65,11 @@ export const useJobQuery = (type: JobType) => {
     addLog,
     async connect() {
       if (job?.status === "pending" || job?.status === "running") return;
+      setLogs([]);
       await queryClient.invalidateQueries({
         queryKey: rpc.info.lastJob.queryKey(type),
       });
+      useAppStore.getState().setOutputTab("console");
     },
     setError(message: string) {
       addLog({

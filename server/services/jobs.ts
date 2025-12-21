@@ -1,10 +1,9 @@
 import { randomUUIDv7, type Subprocess } from "bun";
-import { EventEmitter } from "events";
+import { emitEvent } from "server/api/jobs";
 import type { Job, JobStatus, LogEntry } from "server/types";
 import { jobSchema, type JobType } from "server/types/jobs";
 import db from "../db";
 
-const jobEvents = new EventEmitter();
 const activeProcesses = new Map<string, Subprocess>();
 
 const insertJob = db.query(`
@@ -59,9 +58,6 @@ export const getJob = (id: string) => {
   return jobSchema.safeParse(selectJob.get({ id })).data;
 };
 
-export const withJobEvents = (predicate: (events: EventEmitter) => void) =>
-  predicate(jobEvents);
-
 export function updateJobStatus({
   id,
   status,
@@ -102,9 +98,7 @@ export function updateJobStatus({
   if (finished.includes(status)) {
     completedAt = Date.now();
     const event = status === "completed" ? "complete" : "error";
-    if (jobEvents.listenerCount(event) > 0) {
-      jobEvents.emit(event, { id, data: result });
-    }
+    emitEvent({ id: id, type: event, result });
   }
 
   updateStatus.run({
@@ -123,7 +117,7 @@ export function addJobLog(type: JobType, log: LogEntry) {
   }
 
   logs.set(log.jobId, [...(logs.get(log.jobId) ?? []), log]);
-  jobEvents.emit("log", log);
+  emitEvent({ id: log.jobId, type: "log", log });
 }
 
 export function getJobs(type: JobType) {
