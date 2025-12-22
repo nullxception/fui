@@ -9,7 +9,7 @@ const _dirname =
 
 export const ROOT_DIR = path.join(_dirname, "..");
 export const MODELS_DIR =
-  process.env.FUIFUI_MODELS_DIR || path.join(ROOT_DIR, "models");
+  process.env.FUI_MODELS_DIR || path.join(ROOT_DIR, "models");
 
 export const CHECKPOINT_DIR = path.join(MODELS_DIR, "checkpoint");
 export const EMBEDDING_DIR = path.join(MODELS_DIR, "embedding");
@@ -21,7 +21,7 @@ export const LLM_DIR = path.join(MODELS_DIR, "llm");
 
 export const OUTPUT_DIR = path.join(ROOT_DIR, "output");
 export const THUMBS_DIR =
-  process.env.FUIFUI_THUMBNAILS_DIR || path.join(ROOT_DIR, ".thumbs");
+  process.env.FUI_THUMBNAILS_DIR || path.join(ROOT_DIR, ".thumbs");
 export const PUBLIC_DIR = path.join(ROOT_DIR, "public");
 export const UPLOAD_DIR = path.join(PUBLIC_DIR, "upload");
 export const CONFIG_PATH = path.join(ROOT_DIR, "config.yaml");

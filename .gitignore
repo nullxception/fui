@@ -29,8 +29,8 @@ models/**/*.*
 output
 public/upload
 config.yaml
-fuifui
-fuifui.service
+fui
+fui.service
 /bin
 .env
 .thumbs

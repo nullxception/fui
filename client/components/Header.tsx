@@ -17,7 +17,7 @@ export function Logo({ className = "" }: { className?: string }) {
       className={`bg-linear-to-r from-blue-400 to-purple-500 bg-clip-text text-xl font-bold text-transparent ${className}`}
       onClick={() => navigate("/")}
     >
-      fui²
+      fui
     </motion.h1>
   );
 }

@@ -1,4 +1,4 @@
-# fuifui
+# fui
 
 A simple, modern txt2img web UI for [stable-diffusion.cpp](https://github.com/leejet/stable-diffusion.cpp).
 
@@ -8,8 +8,8 @@ A simple, modern txt2img web UI for [stable-diffusion.cpp](https://github.com/le
 
 - **[Bun](https://bun.sh/)** as a runtime and package manager.
 - **[stable-diffusion.cpp](https://github.com/leejet/stable-diffusion.cpp)**: You can place `sd-cli` binary from `stable-diffusion.cpp` in:
-  - `bin` directory inside `fuifui`
-  - `fuifui` root directory, or
+  - `bin` directory inside `fui`
+  - `fui` root directory, or
   - system's `$PATH`.
 
 ## Installation
@@ -17,8 +17,8 @@ A simple, modern txt2img web UI for [stable-diffusion.cpp](https://github.com/le
 1.  Clone the repository:
 
     ```bash
-    git clone https://github.com/nullxception/fuifui.git
-    cd fuifui
+    git clone https://github.com/nullxception/fui.git
+    cd fui
     ```
 
 2.  Install dependencies:
@@ -56,10 +56,10 @@ cp .env.example .env
 
 ### Available Settings
 
-| Variable            | Default    |
-| ------------------- | ---------- |
-| `PORT`              | `5141`     |
-| `FUIFUI_MODELS_DIR` | `./models` |
+| Variable         | Default    |
+| ---------------- | ---------- |
+| `PORT`           | `5141`     |
+| `FUI_MODELS_DIR` | `./models` |
 
 ### Directory Layout
 

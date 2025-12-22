@@ -1,11 +1,11 @@
 [Unit]
-Description=Fuifui
+Description=Fui
 After=network.target
 
 [Service]
 Type=simple
 Environment=NODE_ENV=production
-WorkingDirectory=/app/fuifui
+WorkingDirectory=/app/fui
 ExecStart=bun start
 Restart=on-failure
 RestartSec=3
