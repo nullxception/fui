@@ -16,10 +16,11 @@ export async function* jobProcess(id: string, signal?: AbortSignal) {
   if (job?.result) {
     yield logEntrySchema.parse({
       id,
-      type: job.result === "complete" ? "result" : "stderr",
+      type: job.status === "error" ? "stderr" : "result",
       message: job.result,
       timestamp: job.completedAt ?? Date.now(),
     });
+    return;
   }
 
   const events = on(jobEvents, "event", { signal });

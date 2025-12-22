@@ -1,21 +1,20 @@
-import { file, spawn } from "bun";
-import { promises as fs } from "fs";
+import { TRPCError } from "@trpc/server";
+import { spawn } from "bun";
 import path from "path";
 import {
   CHECKPOINT_DIR,
   EMBEDDING_DIR,
   LLM_DIR,
   LORA_DIR,
-  MODELS_DIR,
   OUTPUT_DIR,
-  ROOT_DIR,
   TEXT_ENCODER_DIR,
   UPSCALER_DIR,
   VAE_DIR,
 } from "server/dirs";
 import type { DiffusionParams, LogType } from "server/types";
 import z from "zod";
-import { addJobLog, getJob, updateJobStatus } from "./jobs";
+import { addJobLog, getJob, updateJob } from "./jobs";
+import { processLog, resolveSD } from "./utils";
 
 function printableArgs(args: (string | number)[]) {
   return args
@@ -40,34 +39,6 @@ function filename(timestamp: number) {
   const minute = pad(date.getMinutes());
   const second = pad(date.getSeconds());
   return `${year}${month}${day}-${hour}${minute}${second}`;
-}
-
-export const filterLogs = (message: string) => {
-  const modelRoot = path.resolve(MODELS_DIR, "..");
-  const r = String.raw`(["'\s])(${modelRoot}|${ROOT_DIR})${path.sep}`;
-
-  return message
-    .replace(/\[(\w)\w+.*\](.*)\.\wpp:(\d+)\s+-./, "")
-    .replaceAll(RegExp(r, "g"), "$1");
-};
-
-export async function resolveSD() {
-  // sd-cli at project root (./bin/sd-cli, or ./sd-cli) or from $PATH
-  const project_sd = [
-    path.join(ROOT_DIR, "bin", "sd-cli"),
-    path.join(ROOT_DIR, "sd-cli"),
-  ];
-
-  for (const psd of project_sd) {
-    const f = file(psd);
-    const exists = await f.exists();
-    if (!exists) continue;
-
-    const rsd = await fs.realpath(psd); // auto handle symlink case
-    return { sd: rsd, cwd: path.dirname(rsd) };
-  }
-
-  return { sd: "sd", cwd: process.cwd() };
 }
 
 /**
@@ -253,99 +224,82 @@ export async function startDiffusion(id: string, params: DiffusionParams) {
     `Starting diffusion with command: ${exec.sd} ${printableArgs(args)}`,
   );
 
-  const sdProcess = spawn({
-    cmd: [exec.sd, ...args.map((x) => x.toString())],
-    cwd: exec.cwd,
-    stdout: "pipe",
-    stderr: "pipe",
-  });
-  updateJobStatus({ id, status: "running", process: sdProcess });
-
-  // Check for errors related to process creation
-  if (sdProcess.exitCode != null) {
-    updateJobStatus({
-      id,
-      status: "error",
-      result: `Process spawn failed (${sdProcess.exitCode})`,
+  try {
+    const proc = spawn({
+      cmd: [exec.sd, ...args.map((x) => x.toString())],
+      cwd: exec.cwd,
+      stdout: "pipe",
+      stderr: "pipe",
     });
-    return;
-  }
-
-  const textDecoder = new TextDecoder();
-  const stdoutReader = sdProcess.stdout.getReader();
-
-  const readStdout = async () => {
-    while (true) {
-      const { done, value } = await stdoutReader.read();
-      if (done) break;
-      const data = textDecoder.decode(value);
-      data
-        .split(/\n|\x1b\[K.*/)
-        .map((line) => line.trim())
-        .filter((line) => line.length > 1)
-        .forEach((log) => sendLog("stdout", filterLogs(log)));
+    updateJob({ id, status: "running", process: proc });
+    if (proc.exitCode != null) {
+      throw new TRPCError({
+        code: "INTERNAL_SERVER_ERROR",
+        message: `Process spawn failed (${proc.exitCode})`,
+      });
     }
-  };
 
-  const stderrReader = sdProcess.stderr.getReader();
-  let errTimeout: NodeJS.Timeout;
-  const readStderr = async () => {
-    while (true) {
-      const { done, value } = await stderrReader.read();
-      if (done) break;
-      const data = textDecoder.decode(value);
-      sendLog("stderr", data);
-      if (!errTimeout) {
+    const textDecoder = new TextDecoder();
+    const reader = proc.stdout.getReader();
+    const errReader = proc.stderr.getReader();
+    const stdoutPromise = async () => {
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        const data = textDecoder.decode(value);
+        processLog(data).forEach((it) => sendLog("stdout", it));
+      }
+    };
+
+    let errTimeout: NodeJS.Timeout;
+    const errors: string[] = [];
+    const stderrPromise = async () => {
+      while (true) {
+        const { done, value } = await errReader.read();
+        if (done) break;
+        const data = textDecoder.decode(value);
+        processLog(data).forEach((it) => errors.push(it));
+        if (errTimeout) {
+          clearTimeout(errTimeout);
+        }
         errTimeout = setTimeout(() => {
-          if (!sdProcess.exited) {
-            sdProcess.kill("SIGTERM");
-            sdProcess.kill("SIGKILL");
+          if (!proc.exited) {
+            proc.kill("SIGTERM");
+            proc.kill("SIGKILL");
           }
         }, 500);
       }
+    };
+
+    await Promise.allSettled([stdoutPromise(), stderrPromise()]);
+    const code = await proc.exited;
+    if (getJob(id)?.result?.endsWith("cancelled")) {
+      // no need to report any further
+      return;
     }
-  };
 
-  const stdoutPromise = readStdout();
-  const stderrPromise = readStderr();
-
-  // Wait for the process to complete and get the exit code
-  // Bun's Subprocess has an .exited property which is a Promise<number>
-  try {
-    const code = await sdProcess.exited;
-
-    // Wait for all stream reading to finish
-    await Promise.allSettled([stdoutPromise, stderrPromise]);
     if (code === 0) {
-      let result = path.join("/output", path.relative(OUTPUT_DIR, outputPath));
-
+      let result = path.join("/output", "txt2img", `${outputName}.png`);
       if (params.batchMode && batchSize.success) {
         const resultFiles = [outputName];
         for (let i = 2; i <= batchSize.data; i++) {
           resultFiles.push(`${outputName}_${i}`);
         }
         result = resultFiles
-          .map((f) =>
-            path.join(
-              "/output",
-              path.relative(
-                OUTPUT_DIR,
-                path.join(OUTPUT_DIR, "txt2img", `${f}.png`),
-              ),
-            ),
-          )
+          .map((f) => path.join("/output", "txt2img", `${f}.png`))
           .join(",");
       }
-      updateJobStatus({ id, status: "complete", result });
+      updateJob({ id, status: "complete", result });
     } else {
-      updateJobStatus({
-        id,
-        status: "error",
-        result: `Diffusion failed with exit code: ${code}`,
+      throw new TRPCError({
+        code: "INTERNAL_SERVER_ERROR",
+        message: `Diffusion failed with exit code: ${code}`,
+        cause: errors.join("\n"),
       });
     }
-  } catch (error) {
-    const msg = error instanceof Error ? error.message : String(error);
-    updateJobStatus({ id, status: "error", result: `Process error: ${msg}` });
+  } catch (e) {
+    const msg =
+      e instanceof Error ? [e.message, e.cause].join("\n") : String(e);
+    updateJob({ id, status: "error", result: msg });
   }
 }

@@ -2,7 +2,7 @@ import { TRPCError } from "@trpc/server";
 import { file, spawn, version_with_sha } from "bun";
 import path from "path";
 import { ROOT_DIR } from "server/dirs";
-import { resolveSD } from "server/services/diffusion";
+import { resolveSD } from "server/services/utils";
 import packageJson from "../../package.json";
 
 async function getGitCommitHash() {

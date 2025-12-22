@@ -51,44 +51,42 @@ export const getJob = (id: string) => {
   return jobSchema.safeParse(selectJob.get({ id })).data;
 };
 
-export function updateJobStatus({
+function updateProcess(id: string, status: JobStatus, process?: Subprocess) {
+  if (status === "running" && process) {
+    activeProcesses.set(id, process);
+    return;
+  }
+
+  if (["error", "complete"].includes(status)) {
+    const proc = activeProcesses.get(id);
+    console.log(`closing job ${id}`);
+    proc?.kill();
+    activeProcesses.delete(id);
+  }
+}
+
+export function updateJob({
   id,
   status,
-  process = null,
   result,
+  process,
 }: {
   id: string;
   status: JobStatus;
-  process?: Subprocess | null;
   result?: string;
+  process?: Subprocess;
 }) {
-  if (status === "running" && process) {
-    activeProcesses.set(id, process);
-  }
-  const finished = ["error", "complete"];
-
-  if (finished.includes(status)) {
-    const proc = activeProcesses.get(id);
-    if (proc) {
-      if (!proc.killed) {
-        console.log(`closing job ${id}`);
-        proc.kill();
-      }
-      activeProcesses.delete(id);
-    }
-  }
-
+  updateProcess(id, status, process);
   const job = getJob(id);
   if (!job) return;
 
   let completedAt: number | null = null;
   let startedAt: number | null = job.startedAt || null;
-
   if (status === "running" && !startedAt) {
     startedAt = Date.now();
   }
 
-  if (finished.includes(status)) {
+  if (["error", "complete"].includes(status)) {
     completedAt = Date.now();
     emitEvent({
       id,
@@ -166,13 +164,12 @@ export function removeJobResult(type: JobType, resultPart: string) {
 }
 
 export function stopJob(id?: string) {
-  if (id) {
-    updateJobStatus({
-      id,
-      status: "error",
-      result: `Job ${id} has been cancelled`,
-    });
-  }
+  if (!id) return;
+  updateJob({
+    id,
+    status: "error",
+    result: `Job ${id} has been cancelled`,
+  });
 }
 
 export function stopJobs() {

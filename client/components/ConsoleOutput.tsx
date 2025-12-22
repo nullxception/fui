@@ -31,21 +31,21 @@ function ConsoleTime({ time }: { time: number }) {
 }
 
 const ConsoleLog = React.memo(({ log }: { log: LogEntry }) => {
-  return (
+  const logs = log.message.split("\n");
+  return logs.map((data, i) => (
     <motion.div
+      key={i}
       transition={{ duration: 0.2 }}
       initial={{ opacity: 0, filter: "blur(3px)" }}
       animate={{ opacity: 1, filter: "blur(0px)" }}
       className="py-px"
     >
       <ConsoleTime time={log.timestamp} />
-      {log.type === "stderr" ? (
-        <span className="text-destructive">{log.message}</span>
-      ) : (
-        log.message
-      )}
+      <span className={`${log.type === "stderr" && "text-destructive"}`}>
+        {data}
+      </span>
     </motion.div>
-  );
+  ));
 });
 
 export function ConsoleOutput({ className }: { className?: string }) {
