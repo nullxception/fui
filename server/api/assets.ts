@@ -1,5 +1,5 @@
 import path from "path";
-import { OUTPUT_DIR, PUBLIC_DIR, THUMBS_DIR } from "server/dirs";
+import { OUTPUT_DIR, THUMBS_DIR, UPLOAD_DIR } from "server/dirs";
 import sharp from "sharp";
 
 const assetsCacheControl = "public, max-age=31536000, immutable";
@@ -38,7 +38,7 @@ async function serveStatic(req: Request) {
 
   // Serve static files from public directory (user-uploaded images)
   if (pathname.startsWith("/upload/")) {
-    const filepath = path.join(PUBLIC_DIR, pathname);
+    const filepath = path.join(UPLOAD_DIR, pathname.replace("/upload", ""));
     return new Response(Bun.file(filepath), {
       headers: { "Cache-Control": assetsCacheControl },
     });

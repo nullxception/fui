@@ -78,8 +78,7 @@ models/           # Your models collection (you can customize this path)
 output/           # Your generated images (created automatically)
  └─ txt2img/      # Text-to-image creations
 
-public/
- └─ upload/       # Files you upload from the web UI (created automatically)
+upload/           # Files you upload from the web UI (created automatically)
 
 config.yaml       # Your app preferences (created automatically when configuring from the web UI)
 ```
