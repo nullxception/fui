@@ -172,7 +172,7 @@ export function optimizePrompt(
       }
 
       return (
-        [...buckets.lora, ...buckets.embed, ...buckets.score, ...buckets.text]
+        [...buckets.score, ...buckets.lora, ...buckets.embed, ...buckets.text]
           .filter((item) => {
             const k = item.toLowerCase();
             if (seen.has(k)) return false;
