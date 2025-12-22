@@ -1,8 +1,8 @@
 # fui
 
-A simple, modern txt2img web UI for [stable-diffusion.cpp](https://github.com/leejet/stable-diffusion.cpp).
+Web UI for [stable-diffusion.cpp](https://github.com/leejet/stable-diffusion.cpp)
 
-![preview](.github/preview.webp)
+![preview](https://github.com/user-attachments/assets/77fc9e5c-1a2c-4fe1-9023-32fc9d7014d7)
 
 ## Prerequisites
 
@@ -69,13 +69,17 @@ The application will automatically organize your files in this structure:
 models/           # Your models collection (you can customize this path)
  ├─ checkpoint/   # Main model files
  ├─ vae/          # VAE enhancement files
- ├─ lora/         # LoRA style files
- ├─ embedding/    # Text embedding models
  ├─ upscaler/     # Image upscaling models
  └─ textencoder/  # Text encoder models
+ └─ llm/          # LLM
+ ├─ embedding/    # Text embedding models
+ ├─ lora/         # LoRA style files
+
 output/           # Your generated images (created automatically)
  └─ txt2img/      # Text-to-image creations
+
 public/
  └─ upload/       # Files you upload from the web UI (created automatically)
+
 config.yaml       # Your app preferences (created automatically when configuring from the web UI)
 ```
