@@ -36,6 +36,8 @@ export const diffusionParamsSchema = z.object({
   batchMode: z.boolean().optional(),
   batchCount: z.number().optional(),
   verbose: z.boolean().optional(),
+  clipOnCpu: z.boolean().optional(),
+  vaeOnCpu: z.boolean().optional(),
 });
 
 export type DiffusionModelType = z.infer<typeof diffusionModelTypeSchema>;

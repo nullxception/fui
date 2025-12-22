@@ -214,6 +214,14 @@ export async function startDiffusion(id: string, params: DiffusionParams) {
     args.push("--offload-to-cpu");
   }
 
+  if (params.clipOnCpu) {
+    args.push("--clip-on-cpu");
+  }
+
+  if (params.vaeOnCpu) {
+    args.push("--vae-on-cpu");
+  }
+
   if (params.forceSdxlVaeConvScale) {
     args.push("--force-sdxl-vae-conv-scale");
   }

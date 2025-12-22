@@ -44,10 +44,42 @@ function OffloadToCpuSwitch() {
   return (
     <div className="flex items-center justify-between py-2">
       <Label htmlFor="offloadToCpuSwitch" className="cursor-pointer">
-        Offload weights to (CPU) RAM
+        Offload weights to RAM
       </Label>
       <Switch
         id="offloadToCpuSwitch"
+        checked={store.value ?? false}
+        onCheckedChange={(e) => store.update(e)}
+      />
+    </div>
+  );
+}
+
+function ClipOnCpuSwitch() {
+  const store = useDiffusionConf("clipOnCpu");
+  return (
+    <div className="flex items-center justify-between py-2">
+      <Label htmlFor="clipOnCpuSwitch" className="cursor-pointer">
+        Offload CLIP to CPU
+      </Label>
+      <Switch
+        id="clipOnCpuSwitch"
+        checked={store.value ?? false}
+        onCheckedChange={(e) => store.update(e)}
+      />
+    </div>
+  );
+}
+
+function VaeOnCpuSwitch() {
+  const store = useDiffusionConf("vaeOnCpu");
+  return (
+    <div className="flex items-center justify-between py-2">
+      <Label htmlFor="vaeOnCpuSwitch" className="cursor-pointer">
+        Offload VAE to CPU
+      </Label>
+      <Switch
+        id="vaeOnCpuSwitch"
         checked={store.value ?? false}
         onCheckedChange={(e) => store.update(e)}
       />
@@ -125,6 +157,8 @@ export function OtherSetting() {
       <ThreadsInput />
       <FlashAttentionSwitch />
       <OffloadToCpuSwitch />
+      <ClipOnCpuSwitch />
+      <VaeOnCpuSwitch />
       <SdxlVaeConvScaleSwitch />
       <DiffusionConvDirectSwitch />
       <VaeConvDirectSwitch />
