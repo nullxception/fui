@@ -195,15 +195,16 @@ export function optimizePrompt(
 }
 
 function parsePairs(
+  pairs: string,
   data: SDImageParams,
   width: number,
   height: number,
   otherParams: Record<string, string | number>,
   models?: Models,
-): (value: string, index: number, array: string[]) => void {
-  return (pair) => {
+) {
+  for (const pair of pairs.split(", ")) {
     const [k, ...values] = pair.split(": ");
-    if (!k || values.length < 1) return;
+    if (!k || values.length < 1) continue;
     let key = k.toLowerCase().replace(/ /g, "_").trim();
     key = snakeToCamel(key);
     const value = values.join(": ").trim();
@@ -273,7 +274,7 @@ function parsePairs(
         otherParams[key] = value;
         break;
     }
-  };
+  }
 }
 
 const emptyMetadata: SDImageParams = {
@@ -301,7 +302,6 @@ export function parseDiffusionParams(
   const data: SDImageParams = Object.create(emptyMetadata);
 
   if (!metadata) return data;
-
   try {
     const lines = metadata.split("\n").filter((l) => l.trim() !== "");
     let prompt = "";
@@ -320,10 +320,7 @@ export function parseDiffusionParams(
       if (line.startsWith("Steps: ")) {
         isParams = true;
         isNegative = false; // End of negative prompt section
-        const pairs = line.split(", ");
-        pairs.forEach(
-          parsePairs(data, width ?? 0, height ?? 0, otherParams, models),
-        );
+        parsePairs(line, data, width ?? 0, height ?? 0, otherParams, models);
         continue;
       }
 
@@ -337,11 +334,8 @@ export function parseDiffusionParams(
       }
     }
 
-    data.prompt = optimizePrompt(prompt.replace(/['"]+/g, ""), models);
-    data.negativePrompt = optimizePrompt(
-      negativePrompt.replace(/['"]+/g, ""),
-      models,
-    );
+    data.prompt = optimizePrompt(prompt, models);
+    data.negativePrompt = optimizePrompt(negativePrompt, models);
     const te =
       data.textEncoders?.map((enc) => {
         const asLLM = models?.llms.find((path) => path.endsWith(enc));
