@@ -92,7 +92,7 @@ function PromptAttachmentForm({
   };
 
   const handleStrengthChange = (value: number) => {
-    if (value > 1) value = 1;
+    if (value < 0.01) value = 0.01;
     onChange({ entry: { ...entry, strength: normalizeFP(value) } });
   };
 
@@ -104,7 +104,7 @@ function PromptAttachmentForm({
     const hasWords = entry.words.length > 0 || newWords.length > 0;
     if (entry.type === "embedding" && !hasWords) return false;
     if (entry.type === "lora") {
-      if (!hasWords && loraStrength >= 1) return false;
+      if (!hasWords && loraStrength <= 0.01) return false;
     }
     return true;
   };
@@ -230,7 +230,6 @@ function PromptAttachmentForm({
             <NumberInput
               id="loraStrengthNumber"
               min={0}
-              max={1}
               step={0.01}
               value={loraStrength}
               onChange={(e) => {
@@ -285,16 +284,12 @@ export function PromptAttachmentEditor() {
   const saveNewEntry = (entry: PromptAttachment | null) => {
     if (!entry) return;
     const loraStrength = entry.strength ?? 1;
-    const isSaveable = entry.words.length > 0 || loraStrength < 1;
+    const isSaveable = entry.words.length > 0 || loraStrength > 0.0;
     if (entry && entry.target && isSaveable) {
-      let tw = entry;
-      if (loraStrength < 1) {
-        tw = {
-          ...entry,
-          strength: normalizeFP(loraStrength),
-        };
-      }
-      addTW(tw);
+      addTW({
+        ...entry,
+        strength: normalizeFP(loraStrength),
+      });
       setNewEntry(null);
     }
   };
@@ -454,13 +449,11 @@ export function PromptAttachmentEditor() {
                   layoutId={`attachmentStrength--${entry.target}`}
                   className="flex items-center justify-end"
                 >
-                  {entry.strength && entry.strength < 1 && (
-                    <div className="grow">
-                      <span className="items-center rounded bg-purple-500/20 px-2 py-1 text-xs">
-                        strength:{entry.strength}
-                      </span>
-                    </div>
-                  )}
+                  <div className="grow">
+                    <span className="items-center rounded bg-purple-500/20 px-2 py-1 text-xs">
+                      strength: {entry.strength ?? 1}
+                    </span>
+                  </div>
                 </motion.div>
                 <motion.div
                   layout
