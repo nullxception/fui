@@ -35,7 +35,16 @@ export function optimizePrompt(
   models?: Models,
   attachment?: PromptAttachment,
 ) {
-  if (!text) return "";
+  if ((!text || text === "") && attachment) {
+    const name = attachment.target.replace(/\.(safetensors|ckpt)$/, "");
+    const embed =
+      attachment.type === "lora"
+        ? `<lora:${name}:${attachment.strength || 1}>`
+        : `embedding:${name}`;
+    return [embed, ...attachment.words].join(", ");
+  } else if (!text) {
+    return "";
+  }
 
   // Pre-calculate valid Lora paths once for performance
   const validLoras = new Set(
