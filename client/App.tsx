@@ -79,7 +79,7 @@ function App() {
             // Batch all info.* and *.byFoo requests
             condition: (op) =>
               /(^info\.|\.by[A-Z])/.test(op.path) ||
-              isNonJsonSerializable(op.input),
+              !isNonJsonSerializable(op.input),
             true: httpBatchLink({ url: "/rpc" }),
             false: httpLink({ url: "/rpc" }),
           }),

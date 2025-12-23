@@ -27,7 +27,7 @@ dist-ssr
 models/**/*.*
 !models/**/.placeholder
 output
-public/upload
+upload
 config.yaml
 fui
 fui.service
