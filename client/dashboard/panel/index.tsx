@@ -6,6 +6,7 @@ import { ModelSelector } from "./ModelSelector";
 import { OtherSetting } from "./OtherSetting";
 import { PromptInput } from "./PromptInput";
 import { RNGSetting, SamplerRngSetting, SeedSetting } from "./RNGSetting";
+import { TAESetting } from "./TAESetting";
 import { UpscalerSetting } from "./UpscalerSetting";
 
 export function ControlPanel({ className }: { className?: string }) {
@@ -22,6 +23,7 @@ export function ControlPanel({ className }: { className?: string }) {
           <BatchModeSetting />
           <BatchCountSetting />
           <UpscalerSetting />
+          <TAESetting />
           <OtherSetting />
         </div>
       </Card>

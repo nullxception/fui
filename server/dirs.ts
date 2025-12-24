@@ -18,6 +18,7 @@ export const VAE_DIR = path.join(MODELS_DIR, "vae");
 export const UPSCALER_DIR = path.join(MODELS_DIR, "upscaler");
 export const TEXT_ENCODER_DIR = path.join(MODELS_DIR, "textencoder");
 export const LLM_DIR = path.join(MODELS_DIR, "llm");
+export const TAE_DIR = path.join(MODELS_DIR, "tae");
 export const PUBLIC_DIR = path.join(ROOT_DIR, "public");
 export const OUTPUT_DIR = path.join(ROOT_DIR, "output");
 export const THUMBS_DIR =
@@ -34,6 +35,7 @@ export async function ensureDirectories() {
     UPSCALER_DIR,
     TEXT_ENCODER_DIR,
     LLM_DIR,
+    TAE_DIR,
     OUTPUT_DIR,
     THUMBS_DIR,
     UPLOAD_DIR,

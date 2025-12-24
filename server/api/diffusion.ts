@@ -7,6 +7,7 @@ import {
   LLM_DIR,
   LORA_DIR,
   MODELS_DIR,
+  TAE_DIR,
   TEXT_ENCODER_DIR,
   UPSCALER_DIR,
   VAE_DIR,
@@ -50,6 +51,7 @@ export async function listDiffusionModels() {
       upscalers: [],
       llms: [],
       textEncoders: [],
+      taes: [],
     };
 
     const rCheckpoint = path.relative(MODELS_DIR, CHECKPOINT_DIR);
@@ -58,6 +60,7 @@ export async function listDiffusionModels() {
     const rVae = path.relative(MODELS_DIR, VAE_DIR);
     const rUpscaler = path.relative(MODELS_DIR, UPSCALER_DIR);
     const rLlm = path.relative(MODELS_DIR, LLM_DIR);
+    const rTae = path.relative(MODELS_DIR, TAE_DIR);
     const rTextEncoder = path.relative(MODELS_DIR, TEXT_ENCODER_DIR);
 
     for await (const file of glob.scan(MODELS_DIR)) {
@@ -68,6 +71,7 @@ export async function listDiffusionModels() {
       putModelFiles(file, rUpscaler, models.upscalers);
       putModelFiles(file, rLlm, models.llms);
       putModelFiles(file, rTextEncoder, models.textEncoders);
+      putModelFiles(file, rTae, models.taes);
     }
 
     for (const key in models) {

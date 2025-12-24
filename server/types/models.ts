@@ -6,4 +6,5 @@ export interface Models {
   upscalers: string[];
   textEncoders: string[];
   llms: string[];
+  taes: string[];
 }

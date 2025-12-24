@@ -68,12 +68,13 @@ The application will automatically organize your files in this structure:
 ```
 models/           # Your models collection (you can customize this path)
  ├─ checkpoint/   # Main model files
- ├─ vae/          # VAE enhancement files
- ├─ upscaler/     # Image upscaling models
- └─ textencoder/  # Text encoder models
- └─ llm/          # LLM
  ├─ embedding/    # Text embedding models
+ ├─ llm/          # LLM
  ├─ lora/         # LoRA style files
+ ├─ tae/          # TinyAutoEncoder models
+ ├─ textencoder/  # Text encoder models
+ ├─ upscaler/     # Image upscaling models
+ └─ vae/          # VAE enhancement files
 
 output/           # Your generated images (created automatically)
  └─ txt2img/      # Text-to-image creations

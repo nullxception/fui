@@ -2,6 +2,7 @@ import { z } from "zod";
 import { quantizationSchema } from "./ggml";
 
 export const diffusionModelTypeSchema = z.literal(["full", "standalone"]);
+export const taeModelTypeSchema = z.literal(["taesd", "taehv"]);
 
 export const diffusionParamsSchema = z.object({
   model: z.string(),
@@ -35,6 +36,9 @@ export const diffusionParamsSchema = z.object({
   upscaleTileSize: z.number().optional(),
   batchMode: z.boolean().optional(),
   batchCount: z.number().optional(),
+  enableTae: z.boolean().optional(),
+  taeType: taeModelTypeSchema.optional(),
+  taeModel: z.string().optional(),
   verbose: z.boolean().optional(),
   clipOnCpu: z.boolean().optional(),
   vaeOnCpu: z.boolean().optional(),

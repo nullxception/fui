@@ -7,6 +7,7 @@ import {
   LLM_DIR,
   LORA_DIR,
   OUTPUT_DIR,
+  TAE_DIR,
   TEXT_ENCODER_DIR,
   UPSCALER_DIR,
   VAE_DIR,
@@ -108,6 +109,13 @@ export async function startDiffusion(id: string, params: DiffusionParams) {
   if (z.string().min(1).safeParse(params.llm).success) {
     const llmPath = path.join(LLM_DIR, params.llm || "");
     args.push("--llm", llmPath);
+  }
+
+  if (params.enableTae) {
+    const taesdPath = path.join(TAE_DIR, params.taeModel || "");
+    if (z.string().min(1).safeParse(taesdPath).success) {
+      args.push(params.taeType === "taesd" ? "--taesd" : "--tae", taesdPath);
+    }
   }
 
   if (z.string().min(1).safeParse(positivePrompt).success) {
