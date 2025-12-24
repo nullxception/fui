@@ -1,8 +1,9 @@
 import client from "@/index.html";
+import path from "path";
 import serveStatic from "./api/assets";
 import { readConfig } from "./api/config";
 import db from "./db";
-import { ensureDirectories } from "./dirs";
+import { ensureDirectories, PUBLIC_DIR, ROOT_DIR } from "./dirs";
 import { handleRPC } from "./rpc";
 import { cleanupFailedJobs, stopJobs } from "./services/jobs";
 
@@ -32,20 +33,35 @@ process.on("unhandledRejection", (reason, promise) => {
   cleanup();
 });
 
+async function serveDist(req: Bun.BunRequest) {
+  const target = new URL(req.url).pathname;
+  const dist = path.join(ROOT_DIR, "dist");
+  const distFile = Bun.file(path.join(dist, target));
+  if (await distFile.exists()) {
+    return new Response(distFile);
+  }
+
+  const pubFile = Bun.file(path.join(PUBLIC_DIR, target));
+  if (await pubFile.exists()) {
+    return new Response(pubFile);
+  }
+  return new Response(Bun.file(path.join(dist, "index.html")));
+}
+
+const isProd = process.env.NODE_ENV === "production";
+
 Bun.serve({
   port: PORT,
   idleTimeout: 0, // Disable timeout for long-running diffusion processes
-  development: process.env.NODE_ENV !== "production" && {
+  development: !isProd && {
     hmr: true,
     console: true,
   },
   routes: {
     "/rpc/*": handleRPC,
-    // Serve static files from public directory (user-uploaded images)
-    "/upload/*": serveStatic,
-    // Serve output images
-    "/output/*": serveStatic,
-    "/*": client,
+    "/upload/*": serveStatic, //  User-uploaded images
+    "/output/*": serveStatic, // Output images
+    "/*": isProd ? serveDist : client,
   },
 });
 

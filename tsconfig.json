@@ -31,6 +31,5 @@
     "noUnusedParameters": false,
     "noPropertyAccessFromIndexSignature": false
   },
-
-  "exclude": ["dist", "models", "node_modules", "output", "public/upload"]
+  "exclude": ["dist", "models", "node_modules", "output", "upload"]
 }

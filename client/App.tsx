@@ -7,16 +7,15 @@ import {
   isNonJsonSerializable,
   splitLink,
 } from "@trpc/client";
-import { AnimatePresence, MotionConfig } from "motion/react";
-import { StrictMode, useRef, useState } from "react";
-import { createRoot } from "react-dom/client";
+import { AnimatePresence } from "motion/react";
+import { useRef, useState } from "react";
+import { Helmet } from "react-helmet";
 import type { AppRouter } from "server/rpc";
 import { useRoute } from "wouter";
 import { BackgroundLayer } from "./components/BackgroundLayer";
 import { Header } from "./components/Header";
 import { ImageLightbox } from "./components/ImageLightbox";
 import { MobileNav } from "./components/MobileNav";
-import { ThemeProvider } from "./components/theme-provider";
 import { Converter } from "./converter/Converter";
 import { TextToImage } from "./dashboard";
 import { Gallery } from "./gallery";
@@ -68,7 +67,18 @@ function MainScaffold() {
   );
 }
 
-function App() {
+export function PWAHelmet() {
+  if (import.meta.hot) return; // skip dev env
+
+  return (
+    <Helmet>
+      <link rel="manifest" href="/app.webmanifest" />
+      <link rel="apple-touch-icon" href="/appicon-180.png" />
+    </Helmet>
+  );
+}
+
+export function App() {
   const [trpcClient] = useState(() =>
     createTRPCClient<AppRouter>({
       links: [
@@ -98,23 +108,4 @@ function App() {
       </TRPCProvider>
     </QueryClientProvider>
   );
-}
-
-const elem = document.getElementById("root")!;
-const app = (
-  <StrictMode>
-    <MotionConfig transition={{ duration: 0.3 }}>
-      <ThemeProvider defaultTheme="dark" storageKey="ui-theme">
-        <App />
-      </ThemeProvider>
-    </MotionConfig>
-  </StrictMode>
-);
-
-if (import.meta.hot) {
-  const root = (import.meta.hot.data.root ??= createRoot(elem));
-  root.render(app);
-} else {
-  // The hot module reloading API is not available in production.
-  createRoot(elem).render(app);
 }
