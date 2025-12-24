@@ -6,9 +6,9 @@ import type { DiffusionParams } from "server/types";
 export function useDiffusionConf<K extends keyof DiffusionParams>(paramKey: K) {
   const rpc = useTRPC();
   const queryClient = useQueryClient();
-  const defaults = defaultUserConfig().diffusion[paramKey];
+  const defaultValue = defaultUserConfig().diffusion[paramKey];
   const { data } = useQuery(rpc.conf.diffusion.queryOptions(paramKey));
-  const value = (data?.[paramKey] ?? defaults) as DiffusionParams[K];
+  const value = (data?.[paramKey] ?? defaultValue) as DiffusionParams[K];
 
   const mutation = useMutation(
     rpc.conf.saveDiffusion.mutationOptions({
@@ -44,6 +44,7 @@ export function useDiffusionConf<K extends keyof DiffusionParams>(paramKey: K) {
 
   return {
     value,
+    defaultValue,
     update: (newValue: DiffusionParams[K]) =>
       mutation.mutateAsync({ [paramKey]: newValue }),
     unset: () => removal.mutate(paramKey),

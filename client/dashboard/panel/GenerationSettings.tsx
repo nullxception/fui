@@ -10,7 +10,6 @@ import {
 } from "@/components/ui/select";
 import { useDiffusionConf } from "@/hooks/useDiffusionConfig";
 import { useSettings } from "@/settings/useSettings";
-import { defaultUserConfig } from "server/defaults";
 
 function StepsInput() {
   const store = useDiffusionConf("steps");
@@ -43,9 +42,8 @@ function CfgScaleInput() {
 
 function WidthInput() {
   const store = useDiffusionConf("width");
-  const { value: userMaxWidth } = useSettings("maxWidth");
-  const defs = defaultUserConfig().settings;
-  const maxSliderWidth = userMaxWidth || defs.maxWidth;
+  const { value: userMaxWidth, defaultValue } = useSettings("maxWidth");
+  const maxSliderWidth = userMaxWidth ?? defaultValue;
 
   return (
     <SliderInput
@@ -62,9 +60,8 @@ function WidthInput() {
 
 function HeightInput() {
   const store = useDiffusionConf("height");
-  const { value: userMaxWidth } = useSettings("maxHeight");
-  const defs = defaultUserConfig().settings;
-  const maxSliderHeight = userMaxWidth || defs.maxHeight;
+  const { value: userMaxWidth, defaultValue } = useSettings("maxHeight");
+  const maxSliderHeight = userMaxWidth ?? defaultValue;
 
   return (
     <SliderInput

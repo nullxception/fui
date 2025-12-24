@@ -1,19 +1,16 @@
 import { NumberInput } from "@/components/NumberInput";
 import { Card } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
-import { defaultUserConfig } from "server/defaults";
 import { useSettings } from "./useSettings";
 
 function MaxWidthSetting() {
-  const { value, update } = useSettings("maxWidth");
-  const defs = defaultUserConfig().settings;
-
+  const { value, defaultValue, update } = useSettings("maxWidth");
   return (
     <div className="flex w-full flex-row items-center justify-between space-y-2">
       <Label htmlFor="maxWidthSliderSetting">Max width slider</Label>
       <NumberInput
         id="maxWidthSliderSetting"
-        placeholder={`default: ${defs.maxWidth}`}
+        placeholder={`default: ${defaultValue}`}
         min={64}
         step={64}
         value={value}
@@ -25,15 +22,13 @@ function MaxWidthSetting() {
 }
 
 function MaxHeightSetting() {
-  const { value, update } = useSettings("maxHeight");
-  const defs = defaultUserConfig().settings;
-
+  const { value, defaultValue, update } = useSettings("maxHeight");
   return (
     <div className="flex w-full flex-row items-center justify-between space-y-2">
       <Label htmlFor="maxHeightSliderSetting">Max height slider</Label>
       <NumberInput
         id="maxHeightSliderSetting"
-        placeholder={`default: ${defs.maxHeight}`}
+        placeholder={`default: ${defaultValue}`}
         min={64}
         step={64}
         value={value}

@@ -6,9 +6,9 @@ import type { AppSettings } from "server/types";
 export function useSettings<K extends keyof AppSettings>(paramKey: K) {
   const rpc = useTRPC();
   const queryClient = useQueryClient();
-  const defaults = defaultUserConfig().settings[paramKey];
+  const defaultValue = defaultUserConfig().settings[paramKey];
   const { data } = useQuery(rpc.conf.settings.queryOptions(paramKey));
-  const value = (data?.[paramKey] ?? defaults) as AppSettings[K];
+  const value = (data?.[paramKey] ?? defaultValue) as AppSettings[K];
 
   const mutation = useMutation(
     rpc.conf.saveSettings.mutationOptions({
@@ -28,6 +28,7 @@ export function useSettings<K extends keyof AppSettings>(paramKey: K) {
 
   return {
     value,
+    defaultValue,
     update: (newValue: AppSettings[K]) =>
       mutation.mutateAsync({ [paramKey]: newValue }),
   };

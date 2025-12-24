@@ -7,7 +7,6 @@ import type {
   AppSettings,
   DiffusionParams,
   PromptAttachment,
-  UserConfig,
 } from "server/types";
 import { userConfigSchema } from "server/types/userConfig";
 
@@ -28,7 +27,7 @@ function getValuable<T extends object, V = Valuable<T>>(obj: T): V {
   ) as V;
 }
 
-const config: UserConfig = defaultUserConfig();
+const config = defaultUserConfig();
 
 function dedup(entries: PromptAttachment[]): PromptAttachment[] {
   const result: PromptAttachment[] = [];
