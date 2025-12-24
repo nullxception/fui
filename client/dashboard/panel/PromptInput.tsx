@@ -1,45 +1,55 @@
 import { Label } from "@/components/ui/label";
 import {
   Select,
+  SelectAddTrigger,
   SelectContent,
   SelectItem,
-  SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { useTRPC } from "@/lib/query";
+import { cn } from "@/lib/utils";
 import { usePromptAttachment } from "@/settings/usePromptAttachment";
 import { useQuery } from "@tanstack/react-query";
-import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { FilePlusIcon, PackagePlusIcon } from "lucide-react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import type { PromptAttachmentType } from "server/types";
 import { usePromptState } from "./usePromptState";
 
 type PromptType = "prompt" | "negativePrompt";
 
-const ExtraSelector: React.FC<{
-  onAddExtra: (filename: string) => void;
-  extras: string[];
+function PromptAttachmentSelector({
+  onAdd,
+  attachments,
+  type,
+}: {
+  onAdd: (filename: string) => void;
+  attachments: string[];
   type: PromptAttachmentType;
-}> = ({ onAddExtra, extras, type }) => {
+}) {
   const [value, setValue] = useState("");
   return (
     <Select
       value={value}
       onValueChange={(e) => {
         if (e) {
-          onAddExtra(e);
+          onAdd(e);
           // reset value after selecting
           setValue("");
         }
       }}
     >
-      <SelectTrigger className="w-full">
+      <SelectAddTrigger
+        className="border-0"
+        size="sm"
+        icon={type === "lora" ? PackagePlusIcon : FilePlusIcon}
+      >
         <SelectValue
           placeholder={`Add ${type === "lora" ? "LoRA" : "Embedding"}`}
         />
-      </SelectTrigger>
+      </SelectAddTrigger>
       <SelectContent className="bg-background/80 p-1 backdrop-blur-xs">
-        {extras.map((extra) => (
+        {attachments.map((extra) => (
           <SelectItem key={extra} value={extra}>
             {extra.replace(/\.(safetensors|ckpt)$/, "")}
           </SelectItem>
@@ -47,7 +57,7 @@ const ExtraSelector: React.FC<{
       </SelectContent>
     </Select>
   );
-};
+}
 
 function autoResize(el: HTMLTextAreaElement) {
   requestAnimationFrame(() => {
@@ -95,7 +105,10 @@ function Prompt({ type }: { type: PromptType }) {
       <div className="flex items-center justify-between">
         <Label
           htmlFor={`${type}Text`}
-          className={`${type === "prompt" ? "text-blue-500" : "text-pink-500"} py-1`}
+          className={cn(
+            "py-1",
+            type === "prompt" ? "text-blue-500" : "text-pink-500",
+          )}
         >
           {title}
         </Label>
@@ -106,40 +119,43 @@ function Prompt({ type }: { type: PromptType }) {
           Saving...
         </div>
       </div>
-      <Textarea
-        id={`${type}Text`}
-        ref={ref}
-        value={value}
-        onChange={(e) => {
-          updatePrompt(e.target.value);
-        }}
-        onBlur={(e) => {
-          forceSave();
-          autoResize(e.target);
-        }}
-        className={`scrollbar-none ${
-          type === "prompt"
-            ? "focus-visible:ring-blue-500/50"
-            : "focus-visible:ring-pink-500/50"
-        }`}
-        placeholder={`Enter your ${title.toLowerCase()} here...`}
-        spellCheck={false}
-      />
-      <div className="grid grid-cols-2 gap-2">
-        {data && (
-          <ExtraSelector
-            type="embedding"
-            onAddExtra={(file) => addAttachment(file, "embedding")}
-            extras={data?.embeddings}
-          />
-        )}
-        {data && (
-          <ExtraSelector
-            type="lora"
-            onAddExtra={(file) => addAttachment(file, "lora")}
-            extras={data?.loras}
-          />
-        )}
+      <div className="relative">
+        <Textarea
+          id={`${type}Text`}
+          ref={ref}
+          value={value}
+          onChange={(e) => {
+            updatePrompt(e.target.value);
+          }}
+          onBlur={(e) => {
+            forceSave();
+            autoResize(e.target);
+          }}
+          className={cn(
+            "scrollbar-none resize-none pb-12 font-mono text-[12px]!",
+            type === "prompt"
+              ? "focus-visible:ring-blue-500/50"
+              : "focus-visible:ring-pink-500/50",
+          )}
+          placeholder={`Enter your ${title.toLowerCase()} here...`}
+          spellCheck={false}
+        />
+        <div className="absolute bottom-0 flex w-full overflow-clip p-1">
+          {data && (
+            <PromptAttachmentSelector
+              type="embedding"
+              onAdd={(file) => addAttachment(file, "embedding")}
+              attachments={data?.embeddings}
+            />
+          )}
+          {data && (
+            <PromptAttachmentSelector
+              type="lora"
+              onAdd={(file) => addAttachment(file, "lora")}
+              attachments={data?.loras}
+            />
+          )}
+        </div>
       </div>
     </div>
   );
