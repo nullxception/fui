@@ -4,6 +4,7 @@ import { motion } from "motion/react";
 import React, { useContext, useEffect, useMemo, useRef, useState } from "react";
 import type { LogEntry } from "server/types";
 import { useShallow } from "zustand/react/shallow";
+import { Progress } from "./ui/progress";
 
 function formatTime(timestamp: number) {
   return new Date(timestamp).toLocaleTimeString();
@@ -19,18 +20,35 @@ function isAtBottom(el: HTMLElement, threshold = 100) {
   return el.scrollHeight - el.scrollTop - el.clientHeight <= threshold;
 }
 
-function ConsoleTime({ time }: { time: number }) {
+function ConsoleTime({
+  time,
+  className = "",
+}: {
+  time: number;
+  className?: string;
+}) {
   const { show } = useAppStore(useShallow((s) => ({ show: s.showLogsTime })));
   return (
     <span
-      className={`mr-2 text-muted-foreground select-none ${!show && "hidden"}`}
+      className={`text-muted-foreground select-none ${!show && "hidden"} ${className}`}
     >
       {time && `[${formatTime(time)}]`}
     </span>
   );
 }
 
-const ConsoleLog = React.memo(({ log }: { log: LogEntry }) => {
+interface LogProgress {
+  current: number;
+  total: number;
+  percentage: number;
+  speed: string;
+}
+
+interface LogWithProgress extends LogEntry {
+  progress?: LogProgress;
+}
+
+const ConsoleLog = React.memo(({ log }: { log: LogWithProgress }) => {
   const logs = log.message.split("\n");
   return logs.map((data, i) => (
     <motion.div
@@ -38,15 +56,38 @@ const ConsoleLog = React.memo(({ log }: { log: LogEntry }) => {
       transition={{ duration: 0.2 }}
       initial={{ opacity: 0, filter: "blur(3px)" }}
       animate={{ opacity: 1, filter: "blur(0px)" }}
-      className="py-px"
+      className="flex flex-row gap-2 py-px"
     >
-      <ConsoleTime time={log.timestamp} />
-      <span className={`${log.type === "stderr" && "text-destructive"}`}>
-        {data}
-      </span>
+      <ConsoleTime time={log.timestamp} className="text-nowrap" />
+      {log.progress ? (
+        <>
+          <div className="flex w-full flex-row items-center">
+            <Progress
+              value={log.progress.percentage}
+              className="h-2 grow"
+              indicatorClassName="bg-foreground/40"
+            />
+          </div>
+          <span className="text-nowrap">{log.progress.speed}</span>
+        </>
+      ) : (
+        <span className={`${log.type === "stderr" && "text-destructive"}`}>
+          {data}
+        </span>
+      )}
     </motion.div>
   ));
 });
+
+function parseProgress(text: string): LogProgress | undefined {
+  const match = text.match(/\|.*\|\s*(\d+)\/(\d+)\s-\s(.*\/.*)/);
+  if (!match) return;
+  const [, lineCurrent, lineTotal, speed] = match;
+  const current = parseInt(lineCurrent ?? "1");
+  const total = parseInt(lineTotal ?? "1");
+  const percentage = 100 * (current / total);
+  return { current, total, percentage, speed: speed ?? "-it/s" };
+}
 
 export function ConsoleOutput({ className }: { className?: string }) {
   const { job, logs } = useContext(JobQueryContext);
@@ -87,11 +128,7 @@ export function ConsoleOutput({ className }: { className?: string }) {
   }, [logs, autoScroll]);
 
   const processedLogs = useMemo(() => {
-    const result: Array<
-      LogEntry & {
-        isProgress?: boolean;
-      }
-    > = [];
+    const result: Array<LogWithProgress> = [];
     let lastProgressIndex = -1;
 
     logs
@@ -104,12 +141,13 @@ export function ConsoleOutput({ className }: { className?: string }) {
 
         if (isProgress) {
           const lastProg = result[lastProgressIndex];
+          const progress = parseProgress(message);
           if (lastProgressIndex >= 0 && lastProg) {
             // Update the last progress line
-            Object.assign(lastProg, log, { isProgress: true });
+            Object.assign(lastProg, log, { progress });
           } else {
             // Add new progress line
-            result.push({ ...log, isProgress: true });
+            result.push({ ...log, progress });
             lastProgressIndex = result.length - 1;
           }
         } else {
