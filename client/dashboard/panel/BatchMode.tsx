@@ -3,7 +3,7 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { useDiffusionConf } from "@/hooks/useDiffusionConfig";
 
-export function BatchCountSetting() {
+function BatchCountSetting() {
   const modeStore = useDiffusionConf("batchMode");
   const countStore = useDiffusionConf("batchCount");
   return (
@@ -27,7 +27,7 @@ export function BatchCountSetting() {
   );
 }
 
-export function BatchModeSetting() {
+function BatchModeSwitch() {
   const store = useDiffusionConf("batchMode");
   return (
     <div className="flex items-center justify-between py-2">
@@ -40,5 +40,14 @@ export function BatchModeSetting() {
         onCheckedChange={(e) => store.update(e)}
       />
     </div>
+  );
+}
+
+export function BatchModeSetting() {
+  return (
+    <>
+      <BatchModeSwitch />
+      <BatchCountSetting />
+    </>
   );
 }

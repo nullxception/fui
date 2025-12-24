@@ -1,6 +1,6 @@
 import { Footer } from "@/components/Footer";
 import { Card } from "@/components/ui/card";
-import { BatchCountSetting, BatchModeSetting } from "./BatchMode";
+import { BatchModeSetting } from "./BatchMode";
 import { GenerationSettings } from "./GenerationSettings";
 import { ModelSelector } from "./ModelSelector";
 import { OtherSetting } from "./OtherSetting";
@@ -21,7 +21,6 @@ export function ControlPanel({ className }: { className?: string }) {
           <SamplerRngSetting />
           <SeedSetting />
           <BatchModeSetting />
-          <BatchCountSetting />
           <UpscalerSetting />
           <TAESetting />
           <OtherSetting />
