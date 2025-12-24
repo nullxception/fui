@@ -1,18 +1,100 @@
-<svg version="1.1" viewBox="0 0 256 256" xmlns="http://www.w3.org/2000/svg">
- <defs>
-  <linearGradient id="linearGradient21" x1="44.021" x2="170.01" y1="128.63" y2="128.63" gradientTransform="rotate(2.6733,79.674,289.14)" gradientUnits="userSpaceOnUse">
-   <stop stop-color="#ad46ff" offset="0"/>
-   <stop stop-color="#51a2ff" offset="1"/>
-  </linearGradient>
-  <linearGradient id="linearGradient22" x1="174.13" x2="117.84" y1="32.56" y2="215.63" gradientUnits="userSpaceOnUse">
-   <stop stop-color="#fff" offset="0"/>
-   <stop stop-color="#fff" stop-opacity=".175" offset="1"/>
-  </linearGradient>
- </defs>
- <rect width="256" height="256" rx="128" fill="#000000" stroke-width="30"/>
- <g transform="translate(-6.178 1.1244)">
-  <path d="m160.88 106.74a15 15 0 0 0-7.1578 3.0073c-22.3 17.292-59.49 18.483-81.388 8.8992a15 15 0 0 0-19.757 7.7276 15 15 0 0 0 7.7277 19.755c32.779 14.346 78.51 13.14 111.8-12.674a15 15 0 0 0 2.6622-21.045 15 15 0 0 0-13.887-5.6695z" fill="url(#linearGradient21)" stop-color="#000000" stroke-linecap="round" style="paint-order:stroke fill markers"/>
-  <path d="m154.05 34.902c-31.012 3.1464-55.229 14.405-71.189 31.861s-22.948 40.413-22.35 64.004c0.65249 25.726 17.784 45.848 32.852 60.789 15.068 14.942 29.951 24.844 29.951 24.844a15 15 0 0 0 20.805-4.1426 15 15 0 0 0-4.1426-20.805s-12.721-8.5368-25.49-21.199c-12.769-12.662-23.707-29.309-23.984-40.246-0.4414-17.404 4.3129-31.858 14.5-43 10.187-11.142 26.521-19.667 52.078-22.26a15 15 0 0 0 13.408-16.436 15 15 0 0 0-16.438-13.41z" fill="url(#linearGradient22)" stop-color="#000000" stroke-linecap="round" style="paint-order:stroke fill markers"/>
-  <circle cx="201.5" cy="79.651" r="15.537" fill="#fff" fill-opacity=".74576" style="paint-order:markers stroke fill"/>
- </g>
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   version="1.1"
+   viewBox="0 0 256 256"
+   id="svg5"
+   sodipodi:docname="icon.svg"
+   inkscape:version="1.4.2 (ebf0e940d0, 2025-05-08)"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview5"
+     pagecolor="#ffffff"
+     bordercolor="#000000"
+     borderopacity="0.25"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     inkscape:zoom="2.0881747"
+     inkscape:cx="151.08889"
+     inkscape:cy="166.89217"
+     inkscape:window-width="1920"
+     inkscape:window-height="1046"
+     inkscape:window-x="0"
+     inkscape:window-y="0"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="svg5" />
+  <defs
+     id="defs4">
+    <linearGradient
+       id="linearGradient21"
+       x1="44.021"
+       x2="170.01"
+       y1="128.63"
+       y2="128.63"
+       gradientTransform="rotate(2.6733,79.674,289.14)"
+       gradientUnits="userSpaceOnUse">
+      <stop
+         stop-color="#ad46ff"
+         offset="0"
+         id="stop1" />
+      <stop
+         stop-color="#51a2ff"
+         offset="1"
+         id="stop2" />
+    </linearGradient>
+    <linearGradient
+       id="linearGradient22"
+       x1="174.13"
+       x2="117.84"
+       y1="32.56"
+       y2="215.63"
+       gradientUnits="userSpaceOnUse">
+      <stop
+         stop-color="#fff"
+         offset="0"
+         id="stop3" />
+      <stop
+         stop-color="#fff"
+         stop-opacity=".175"
+         offset="1"
+         id="stop4" />
+    </linearGradient>
+  </defs>
+  <rect
+     width="256"
+     height="256"
+     rx="128"
+     fill="#000000"
+     stroke-width="30"
+     id="rect4" />
+  <g
+     transform="matrix(0.8,0,0,0.8,20.657581,26.499538)"
+     id="g5">
+    <path
+       d="m 160.88,106.74 a 15,15 0 0 0 -7.1578,3.0073 c -22.3,17.292 -59.49,18.483 -81.388,8.8992 a 15,15 0 0 0 -19.757,7.7276 15,15 0 0 0 7.7277,19.755 c 32.779,14.346 78.51,13.14 111.8,-12.674 a 15,15 0 0 0 2.6622,-21.045 15,15 0 0 0 -13.887,-5.6695 z"
+       fill="url(#linearGradient21)"
+       stop-color="#000000"
+       stroke-linecap="round"
+       style="fill:url(#linearGradient21);paint-order:stroke fill markers"
+       id="path4" />
+    <path
+       d="m 154.05,34.902 c -31.012,3.1464 -55.229,14.405 -71.189,31.861 -15.96,17.456 -22.948,40.413 -22.35,64.004 0.65249,25.726 17.784,45.848 32.852,60.789 15.068,14.942 29.951,24.844 29.951,24.844 a 15,15 0 0 0 20.805,-4.1426 15,15 0 0 0 -4.1426,-20.805 c 0,0 -12.721,-8.5368 -25.49,-21.199 -12.769,-12.662 -23.707,-29.309 -23.984,-40.246 -0.4414,-17.404 4.3129,-31.858 14.5,-43 10.187,-11.142 26.521,-19.667 52.078,-22.26 a 15,15 0 0 0 13.408,-16.436 15,15 0 0 0 -16.438,-13.41 z"
+       fill="url(#linearGradient22)"
+       stop-color="#000000"
+       stroke-linecap="round"
+       style="fill:url(#linearGradient22);paint-order:stroke fill markers"
+       id="path5" />
+    <circle
+       cx="201.5"
+       cy="79.651001"
+       r="15.537"
+       fill="#ffffff"
+       fill-opacity="0.74576"
+       style="paint-order:markers stroke fill"
+       id="circle5" />
+  </g>
 </svg>
