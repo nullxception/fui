@@ -105,12 +105,24 @@ export function updateJob({
   });
 }
 
+export function parseProgress(text: string) {
+  const match = text.match(/\|.*\|\s*(\d+)\/(\d+)\s-\s(.*\/.*)/);
+  if (!match) return;
+  const [, lineCurrent, lineTotal, speed] = match;
+  const current = parseInt(lineCurrent ?? "1");
+  const total = parseInt(lineTotal ?? "1");
+  const percentage = 100 * (current / total);
+  return { current, total, percentage, speed: speed ?? "-it/s" };
+}
 export function addJobLog(type: JobType, log: LogEntry) {
   const job = getJob(log.id);
   if (!job) {
     createJob(type, log.id);
   }
 
+  if (/\|=*.*\| \d+\/\d+/.test(log.message)) {
+    log.progress = parseProgress(log.message);
+  }
   logs.set(log.id, [...(logs.get(log.id) ?? []), log]);
   emitEvent(log);
 }

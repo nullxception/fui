@@ -3,6 +3,7 @@ import { JobQueryContext } from "@/hooks/useJobQuery";
 import { motion } from "motion/react";
 import React, { useContext, useEffect, useMemo, useRef, useState } from "react";
 import type { LogEntry } from "server/types";
+import type { LogProgress } from "server/types/jobs";
 import { useShallow } from "zustand/react/shallow";
 import { Progress } from "./ui/progress";
 
@@ -36,19 +37,23 @@ function ConsoleTime({
     </span>
   );
 }
+const LogProgressBar = React.memo(({ progress }: { progress: LogProgress }) => {
+  return (
+    <div className="relative flex w-full flex-row items-center-safe justify-center gap-2">
+      <Progress
+        value={progress.percentage}
+        className="h-2 grow"
+        indicatorClassName="bg-foreground/40"
+      />
+      <span className="text-nowrap text-purple-300">
+        {progress.current} of {progress.total}
+      </span>
+      <span className="text-nowrap text-blue-300">({progress.speed})</span>
+    </div>
+  );
+});
 
-interface LogProgress {
-  current: number;
-  total: number;
-  percentage: number;
-  speed: string;
-}
-
-interface LogWithProgress extends LogEntry {
-  progress?: LogProgress;
-}
-
-const ConsoleLog = React.memo(({ log }: { log: LogWithProgress }) => {
+const ConsoleLog = React.memo(({ log }: { log: LogEntry }) => {
   const logs = log.message.split("\n");
   return logs.map((data, i) => (
     <motion.div
@@ -60,16 +65,7 @@ const ConsoleLog = React.memo(({ log }: { log: LogWithProgress }) => {
     >
       <ConsoleTime time={log.timestamp} className="text-nowrap" />
       {log.progress ? (
-        <>
-          <div className="flex w-full flex-row items-center">
-            <Progress
-              value={log.progress.percentage}
-              className="h-2 grow"
-              indicatorClassName="bg-foreground/40"
-            />
-          </div>
-          <span className="text-nowrap">{log.progress.speed}</span>
-        </>
+        <LogProgressBar progress={log.progress} />
       ) : (
         <span className={`${log.type === "stderr" && "text-destructive"}`}>
           {data}
@@ -78,16 +74,6 @@ const ConsoleLog = React.memo(({ log }: { log: LogWithProgress }) => {
     </motion.div>
   ));
 });
-
-function parseProgress(text: string): LogProgress | undefined {
-  const match = text.match(/\|.*\|\s*(\d+)\/(\d+)\s-\s(.*\/.*)/);
-  if (!match) return;
-  const [, lineCurrent, lineTotal, speed] = match;
-  const current = parseInt(lineCurrent ?? "1");
-  const total = parseInt(lineTotal ?? "1");
-  const percentage = 100 * (current / total);
-  return { current, total, percentage, speed: speed ?? "-it/s" };
-}
 
 export function ConsoleOutput({ className }: { className?: string }) {
   const { job, logs } = useContext(JobQueryContext);
@@ -128,33 +114,20 @@ export function ConsoleOutput({ className }: { className?: string }) {
   }, [logs, autoScroll]);
 
   const processedLogs = useMemo(() => {
-    const result: Array<LogWithProgress> = [];
+    const result: Array<LogEntry> = [];
     let lastProgressIndex = -1;
-
     logs
-      ?.filter((x) => x.id === job?.id)
+      ?.filter((x) => x.id === job?.id && typeof x.message === "string")
       ?.forEach((log) => {
-        if (typeof log?.message !== "string") return;
-        const message = log.message.trim();
-        // Check if this is a progress bar line
-        const isProgress = /\|=*.*\| \d+\/\d+/.test(message);
-
-        if (isProgress) {
-          const lastProg = result[lastProgressIndex];
-          const progress = parseProgress(message);
-          if (lastProgressIndex >= 0 && lastProg) {
-            // Update the last progress line
-            Object.assign(lastProg, log, { progress });
-          } else {
-            // Add new progress line
-            result.push({ ...log, progress });
-            lastProgressIndex = result.length - 1;
+        if (log.progress) {
+          const last = result[lastProgressIndex];
+          if (lastProgressIndex >= 0 && last) {
+            result[lastProgressIndex] = log;
+            return;
           }
-        } else {
-          // Regular log line
-          result.push(log);
-          lastProgressIndex = -1; // Reset progress tracking
         }
+        result.push(log);
+        lastProgressIndex = (log.progress ? result.length : 0) - 1;
       });
 
     return result;
