@@ -27,7 +27,7 @@ registerRoute(({ url }) => url.pathname.startsWith("/_bun"), new NetworkOnly());
 
 // Cacheable RPC calls
 registerRoute(
-  ({ url }) => /^\/rpc\/(info\.|images\.by)/.test(url.pathname),
+  ({ url }) => /^\/rpc\/(info\.|images\.by|.*\.get$)/.test(url.pathname),
   new NetworkFirst({
     cacheName: "rpc",
     networkTimeoutSeconds: 3,

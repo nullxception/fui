@@ -1,10 +1,8 @@
 import { QueryClientProvider } from "@tanstack/react-query";
 import {
   createTRPCClient,
-  httpBatchLink,
   httpLink,
   httpSubscriptionLink,
-  isNonJsonSerializable,
   splitLink,
 } from "@trpc/client";
 import { AnimatePresence } from "motion/react";
@@ -85,14 +83,7 @@ export function App() {
         splitLink({
           condition: (op) => op.type === "subscription",
           true: httpSubscriptionLink({ url: "/rpc" }),
-          false: splitLink({
-            // Batch all info.* and *.byFoo requests
-            condition: (op) =>
-              /(^info\.|\.by[A-Z])/.test(op.path) ||
-              !isNonJsonSerializable(op.input),
-            true: httpBatchLink({ url: "/rpc" }),
-            false: httpLink({ url: "/rpc" }),
-          }),
+          false: httpLink({ url: "/rpc" }),
         }),
       ],
     }),
