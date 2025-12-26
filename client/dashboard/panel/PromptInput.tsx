@@ -6,14 +6,14 @@ import {
   SelectItem,
   SelectValue,
 } from "@/components/ui/select";
-import { Textarea } from "@/components/ui/textarea";
 import { useTRPC } from "@/lib/query";
 import { cn } from "@/lib/utils";
 import { usePromptAttachment } from "@/settings/usePromptAttachment";
 import { useQuery } from "@tanstack/react-query";
 import { FilePlusIcon, PackagePlusIcon } from "lucide-react";
-import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import type { PromptAttachmentType } from "server/types";
+import { AutoSuggestTextarea } from "./AutoSuggestTextarea";
 import { usePromptState } from "./usePromptState";
 
 type PromptType = "prompt" | "negativePrompt";
@@ -59,46 +59,16 @@ function PromptAttachmentSelector({
   );
 }
 
-function autoResize(el: HTMLTextAreaElement) {
-  requestAnimationFrame(() => {
-    el.style.height = "auto";
-    el.style.height = el.scrollHeight + "px";
-  });
-}
-
 function Prompt({ type }: { type: PromptType }) {
   const rpc = useTRPC();
   const { data } = useQuery(rpc.info.models.queryOptions());
   const { value, changed, updatePrompt, forceSave } = usePromptState(type);
-  const ref = useRef<HTMLTextAreaElement>(null);
   const { buildPrompt } = usePromptAttachment();
-  const title = type === "prompt" ? "Prompt" : "Negative Prompt";
   const boxRef = useRef<HTMLDivElement>(null);
-
+  const title = type === "prompt" ? "Prompt" : "Negative Prompt";
   const addAttachment = (filename: string, type: PromptAttachmentType) => {
     updatePrompt(buildPrompt(value, filename, type));
   };
-
-  useLayoutEffect(() => {
-    if (ref.current) {
-      autoResize(ref.current);
-    }
-  }, [value]);
-
-  useEffect(() => {
-    if (!ref.current) return;
-
-    const observer = new ResizeObserver((entries) => {
-      const entry = entries[0];
-      if (entry === undefined) return;
-      if (ref.current) {
-        autoResize(ref.current);
-      }
-    });
-
-    observer.observe(ref.current);
-    return () => observer.disconnect();
-  }, []);
 
   return (
     <div ref={boxRef} className="space-y-2 px-4">
@@ -120,19 +90,15 @@ function Prompt({ type }: { type: PromptType }) {
         </div>
       </div>
       <div className="relative">
-        <Textarea
+        <AutoSuggestTextarea
           id={`${type}Text`}
-          ref={ref}
+          onValueChange={updatePrompt}
           value={value}
-          onChange={(e) => {
-            updatePrompt(e.target.value);
-          }}
-          onBlur={(e) => {
+          onBlur={() => {
             forceSave();
-            autoResize(e.target);
           }}
           className={cn(
-            "scrollbar-none resize-none pb-12 font-mono text-[12px]!",
+            "scrollbar-none field-sizing-content min-h-24 resize-none pb-12 font-mono text-[12px]!",
             type === "prompt"
               ? "focus-visible:ring-blue-500/50"
               : "focus-visible:ring-pink-500/50",

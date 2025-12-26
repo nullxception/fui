@@ -19,6 +19,7 @@ export const UPSCALER_DIR = path.join(MODELS_DIR, "upscaler");
 export const TEXT_ENCODER_DIR = path.join(MODELS_DIR, "textencoder");
 export const LLM_DIR = path.join(MODELS_DIR, "llm");
 export const TAE_DIR = path.join(MODELS_DIR, "tae");
+export const SUGGESTION_DIR = path.join(MODELS_DIR, "suggestions");
 export const PUBLIC_DIR = path.join(ROOT_DIR, "public");
 export const OUTPUT_DIR = path.join(ROOT_DIR, "output");
 export const THUMBS_DIR =

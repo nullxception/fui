@@ -15,6 +15,12 @@ import { diffusionStart, listDiffusionModels } from "./api/diffusion";
 import { getImagesInfo, listImages, removeImages } from "./api/gallery";
 import { jobProcess } from "./api/jobs";
 import system from "./api/system";
+import {
+  getSuggestion,
+  getTagsStatus,
+  removeTags,
+  uploadTags,
+} from "./api/tagSuggestion";
 import { getRecentJob, stopJob } from "./services/jobs";
 import { diffusionParamsSchema } from "./types/diffusionparams";
 import { jobsTypeSchema } from "./types/jobs";
@@ -110,6 +116,16 @@ export const router = t.router({
   jobs: t.procedure
     .input(z.string())
     .subscription((opts) => jobProcess(opts.input, opts.signal)),
+  tags: t.router({
+    suggest: t.procedure
+      .input(z.object({ query: z.string(), limit: z.number().default(10) }))
+      .query((opts) => getSuggestion(opts.input.query, opts.input.limit)),
+    upload: t.procedure
+      .input(z.instanceof(FormData).optional())
+      .mutation((opts) => uploadTags(opts.input)),
+    status: t.procedure.query(() => getTagsStatus()),
+    remove: t.procedure.mutation(() => removeTags()),
+  }),
 });
 
 export type AppRouter = typeof router;

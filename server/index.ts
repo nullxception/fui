@@ -1,6 +1,7 @@
 import client from "@/index.html";
 import { serveApp, serveStatic } from "./api/assets";
 import { readConfig } from "./api/config";
+import { importTags } from "./api/tagSuggestion";
 import db from "./db";
 import { ensureDirectories } from "./dirs";
 import { handleRPC } from "./rpc";
@@ -9,6 +10,7 @@ import { cleanupFailedJobs, stopJobs } from "./services/jobs";
 await ensureDirectories();
 cleanupFailedJobs();
 await readConfig(); // initialize config.yaml if not exists
+importTags();
 
 function cleanup() {
   console.log("Terminating all active jobs...");

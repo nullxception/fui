@@ -42,6 +42,7 @@ sd-server
 lib*.so
 ggml.txt
 *.cpp.txt
+tags.csv
 
 # Database
 *.sqlite
