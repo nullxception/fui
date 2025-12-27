@@ -4,7 +4,13 @@ import { cn } from "@/lib/utils";
 import { useQuery } from "@tanstack/react-query";
 import { AnimatePresence, motion, type HTMLMotionProps } from "motion/react";
 import { Portal } from "radix-ui";
-import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import {
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+  type RefObject,
+} from "react";
 import type { SuggestionTag } from "server/types/tags";
 import getCaretCoordinates from "textarea-caret";
 
@@ -13,14 +19,18 @@ type AutoSuggestTextareaProps = React.ComponentProps<"textarea"> & {
   containerClassName?: string;
 };
 
-function TagSuggestionMenu({
-  tags,
-  onSelected: onSelected,
-  ...props
-}: HTMLMotionProps<"div"> & {
+type TagSuggestionMenuProps = HTMLMotionProps<"div"> & {
+  ref?: RefObject<HTMLDivElement | null>;
   tags: SuggestionTag[];
   onSelected: (tag: SuggestionTag) => void;
-}) {
+};
+
+function TagSuggestionMenu({
+  ref,
+  tags,
+  onSelected,
+  ...props
+}: TagSuggestionMenuProps) {
   const [selected, setSelected] = useState(0);
 
   useEffect(() => {
@@ -41,8 +51,19 @@ function TagSuggestionMenu({
       window.removeEventListener("keydown", handleKeyDown, { capture: true });
   }, [onSelected, selected, tags]);
 
+  useEffect(() => {
+    if (!ref?.current) return;
+    const tag = ref.current.children[selected];
+    if (!tag) return;
+    tag.scrollIntoView({
+      block: "nearest",
+      behavior: "instant",
+    });
+  }, [ref, selected]);
+
   return (
     <motion.div
+      ref={ref}
       {...props}
       layout
       layoutId="autoSuggestion"
